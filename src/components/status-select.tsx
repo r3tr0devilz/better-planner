@@ -18,7 +18,7 @@ export function StatusSelect({
       defaultValue={value}
       disabled={pending}
       onChange={(e) => startTransition(() => onChange(e.target.value))}
-      className="border border-paper-line bg-paper px-2 py-1 font-mono text-xs uppercase text-ink outline-none disabled:opacity-60"
+      className="field max-w-full shrink-0 py-1 font-mono text-xs uppercase disabled:opacity-60"
     >
       {options.map((s) => (
         <option key={s} value={s}>

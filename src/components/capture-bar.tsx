@@ -110,7 +110,7 @@ export function CaptureBar() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 bg-stamp-red px-4 py-2.5 font-medium text-paper-card shadow-lg shadow-stamp-red/20 transition-transform hover:scale-[1.03] active:scale-95"
+        className="flex shrink-0 items-center gap-2 bg-stamp-red px-4 py-2.5 font-medium text-paper-card shadow-lg shadow-stamp-red/20 transition-transform duration-150 ease-out hover:scale-[1.03] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-fountain focus-visible:ring-offset-paper"
         aria-label="Capture a task or note"
       >
         <Plus size={18} />
@@ -120,18 +120,22 @@ export function CaptureBar() {
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center bg-ink/40 px-4 pt-24"
+          className="modal-backdrop fixed inset-0 z-50 flex items-start justify-center bg-ink/40 px-4 pt-24"
           onClick={close}
         >
           <div
-            className="card w-full max-w-lg p-5"
+            className="modal-panel card w-full max-w-lg p-5"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
               <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold text-ink">
                 Capture
               </h2>
-              <button onClick={close} aria-label="Close" className="text-ink-faint hover:text-ink">
+              <button
+                onClick={close}
+                aria-label="Close"
+                className="text-ink-faint transition-colors duration-150 hover:text-ink"
+              >
                 <X size={18} />
               </button>
             </div>
@@ -142,7 +146,7 @@ export function CaptureBar() {
               onChange={(e) => setText(e.target.value)}
               placeholder="Schedule a task, jot a note, log a quote…"
               rows={3}
-              className="mt-3 w-full resize-none border border-paper-line bg-paper px-3 py-2 text-ink outline-none focus-visible:ring-2 focus-visible:ring-fountain"
+              className="field mt-3"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit("text");
               }}
@@ -161,9 +165,7 @@ export function CaptureBar() {
               {speechSupported ? (
                 <button
                   onClick={toggleListening}
-                  className={`flex items-center gap-1.5 border px-3 py-1.5 text-sm ${
-                    listening ? "border-stamp-red bg-stamp-red text-paper-card" : "border-paper-line bg-paper text-ink"
-                  }`}
+                  className={listening ? "btn py-1.5" : "btn-outline py-1.5"}
                 >
                   {listening ? <Square size={14} /> : <Mic size={14} />}
                   {listening ? "Stop" : "Voice"}
@@ -175,7 +177,7 @@ export function CaptureBar() {
               <button
                 onClick={() => submit(listening ? "voice" : "text")}
                 disabled={status === "saving" || !text.trim()}
-                className="bg-stamp-red px-4 py-2 text-sm font-medium text-paper-card disabled:opacity-40"
+                className="btn py-2"
               >
                 {status === "saving" ? "Saving…" : "Add"}
               </button>

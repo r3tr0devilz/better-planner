@@ -31,51 +31,32 @@ export default async function RoutinesPage() {
     <div className="mx-auto max-w-2xl">
       <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-ink">Routines</h1>
 
-      <form action={createRoutine} className="card mt-6 flex flex-col gap-3 p-4 sm:flex-row sm:items-end">
-        <label className="flex flex-1 flex-col gap-1 text-xs text-ink-faint">
+      <form action={createRoutine} className="field-row card mt-6 p-4">
+        <label className="field-wide">
           New routine
-          <input
-            name="name"
-            required
-            placeholder="Take vitamins, check email…"
-            className="border border-paper-line bg-paper px-3 py-2 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-fountain"
-          />
+          <input name="name" required placeholder="Take vitamins, check email…" className="field" />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-ink-faint">
+        <label>
           Time of day
-          <select
-            name="time_of_day"
-            defaultValue="anytime"
-            className="border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none"
-          >
+          <select name="time_of_day" defaultValue="anytime" className="field">
             <option value="morning">Morning</option>
             <option value="afternoon">Afternoon</option>
             <option value="evening">Evening</option>
             <option value="anytime">Anytime</option>
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-ink-faint">
+        <label>
           Mode
-          <select
-            name="mode"
-            defaultValue="ongoing"
-            className="border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none"
-          >
+          <select name="mode" defaultValue="ongoing" className="field">
             <option value="ongoing">Ongoing streak</option>
             <option value="fixed_days">Fixed number of days</option>
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-ink-faint">
+        <label className="field-narrow">
           Days (if fixed)
-          <input
-            type="number"
-            name="total_days"
-            min={1}
-            placeholder="30"
-            className="w-20 border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none"
-          />
+          <input type="number" name="total_days" min={1} placeholder="30" className="field" />
         </label>
-        <button type="submit" className="bg-stamp-red px-4 py-2 text-sm font-medium text-paper-card">
+        <button type="submit" className="btn">
           Add
         </button>
       </form>

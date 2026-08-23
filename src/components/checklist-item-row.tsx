@@ -19,9 +19,11 @@ export function ChecklistItemRow({
         checked={item.done}
         disabled={pending}
         onChange={(e) => startTransition(() => onToggle(item.id, e.target.checked))}
-        className="h-3.5 w-3.5 accent-moss"
+        className="h-3.5 w-3.5 shrink-0 accent-moss"
       />
-      <span className={item.done ? "text-ink-faint line-through" : "text-ink"}>{item.text}</span>
+      <span className={`min-w-0 [overflow-wrap:anywhere] transition-colors duration-150 ${item.done ? "text-ink-faint line-through" : "text-ink"}`}>
+        {item.text}
+      </span>
     </label>
   );
 }

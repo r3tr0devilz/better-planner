@@ -32,14 +32,14 @@ export function RoutineRow({
       />
 
       <div className="min-w-0 flex-1">
-        <p className={`truncate text-sm ${doneToday ? "text-ink-faint line-through" : "text-ink"}`}>
+        <p className={`truncate text-sm transition-colors duration-150 ${doneToday ? "text-ink-faint line-through" : "text-ink"}`}>
           {routine.name}
         </p>
         <div className="mt-1.5 flex gap-0.5" aria-hidden>
           {history.map((v, i) => (
             <span
               key={i}
-              className={`h-2.5 w-1.5 rounded-sm ${
+              className={`h-2.5 w-1.5 rounded-sm transition-colors duration-150 ${
                 v === true ? "bg-moss" : "bg-paper-line-soft"
               }`}
             />

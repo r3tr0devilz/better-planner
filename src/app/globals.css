@@ -71,6 +71,13 @@ body::before {
 [data-thread="4"] { --dot: var(--color-plum); }
 [data-thread="5"] { --dot: var(--color-teal); }
 
+/* Component classes live in Tailwind's `components` layer, one step below
+   `utilities` — so a stray `py-1` or `text-xs` alongside `.field`/`.btn` in a
+   className actually wins, instead of losing to these unlayered rules (every
+   plain CSS rule outranks any `@layer`-wrapped rule, regardless of source
+   order — that's the layer, not the cascade, doing the sorting). */
+@layer components {
+
 .stamp-dot {
   display: inline-block;
   width: 11px;
@@ -109,6 +116,137 @@ body::before {
 .ledger-row {
   border-bottom: 1px solid var(--color-paper-line-soft);
 }
+
+/* ── form primitives ──────────────────────────────────────────────────────
+   Every text input / select / textarea in the app goes through .field, and
+   every row of them through .field-row — that's what keeps a native <select>
+   (which refuses to shrink below its widest option's width) from forcing a
+   card wider than its column. flex-wrap + min-width: 0 is the actual fix;
+   the shared class just makes sure every form gets it, not just the ones
+   someone remembered to hand-tune. */
+.field-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+.field-row > label {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 140px;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--color-ink-faint);
+}
+.field-row > label.field-wide {
+  flex-basis: 220px;
+}
+.field-row > label.field-narrow {
+  flex-basis: 90px;
+}
+
+.field {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--color-paper-line);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  transition: box-shadow 150ms ease-out, border-color 150ms ease-out;
+}
+.field::placeholder {
+  color: var(--color-ink-faint);
+}
+.field:focus-visible {
+  border-color: var(--color-fountain);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-fountain) 35%, transparent);
+}
+textarea.field {
+  resize: none;
+}
+
+/* ── buttons: every pressable element gets the same feedback ──────────── */
+.btn,
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 120ms ease-out, opacity 150ms ease-out, background-color 150ms ease-out;
+}
+.btn:disabled,
+.btn-outline:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.btn:active:not(:disabled),
+.btn-outline:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.btn:focus-visible,
+.btn-outline:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-fountain);
+}
+
+.btn {
+  background: var(--color-stamp-red);
+  color: var(--color-paper-card);
+  padding: 0.5rem 1rem;
+}
+.btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btn-outline {
+  border: 1px solid var(--color-paper-line);
+  background: transparent;
+  color: var(--color-ink);
+  padding: 0.5rem 1rem;
+}
+.btn-outline:hover:not(:disabled) {
+  background: var(--color-paper);
+}
+
+/* row/card links that reveal themselves on hover need the transition made
+   explicit, otherwise the color swap is an instant, cheap-feeling cut */
+.hoverable {
+  transition: background-color 150ms ease-out;
+}
+
+/* Modals are occasional (not keyboard-repeated hundreds of times a day), so
+   they earn a real transition — but keep it under 250ms and ease-out, this
+   isn't a marketing moment. transform-origin stays centered (unlike a
+   popover) since a modal isn't anchored to a trigger. */
+.modal-backdrop {
+  opacity: 1;
+  transition: opacity 180ms ease-out;
+  @starting-style {
+    opacity: 0;
+  }
+}
+.modal-panel {
+  opacity: 1;
+  transform: scale(1);
+  transform-origin: center;
+  transition: opacity 180ms ease-out, transform 180ms ease-out;
+  @starting-style {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+} /* @layer components */
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

@@ -18,9 +18,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="flex items-center justify-between">
-        <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-ink">{project.name}</h1>
-        <span className="border border-paper-line px-3 py-1 font-mono text-xs text-ink-faint">
+      <div className="flex items-start justify-between gap-3">
+        <h1 className="min-w-0 font-[family-name:var(--font-display)] text-3xl font-semibold text-ink [overflow-wrap:anywhere]">{project.name}</h1>
+        <span className="shrink-0 border border-paper-line px-3 py-1 font-mono text-xs text-ink-faint">
           {project.engagement === "retainer" ? "Retainer" : project.kind === "area" ? "Area" : "Project"}
         </span>
       </div>
@@ -34,13 +34,8 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           ))}
           {milestones.length === 0 && <p className="text-sm text-ink-faint">No milestones yet.</p>}
           <form action={createMilestone.bind(null, project.id)} className="flex gap-2">
-            <input
-              name="name"
-              required
-              placeholder="New milestone"
-              className="flex-1 border border-paper-line bg-paper px-3 py-1.5 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-fountain"
-            />
-            <button type="submit" className="bg-stamp-red px-3 py-1.5 text-sm font-medium text-paper-card">
+            <input name="name" required placeholder="New milestone" className="field min-w-0 flex-1" />
+            <button type="submit" className="btn">
               Add
             </button>
           </form>
@@ -64,33 +59,23 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                 action={addChecklistItem.bind(null, project.id, checklist.id)}
                 className="mt-2 flex gap-2"
               >
-                <input
-                  name="text"
-                  required
-                  placeholder="Add item"
-                  className="flex-1 border border-paper-line bg-paper px-2 py-1 text-xs text-ink outline-none"
-                />
-                <button type="submit" className="border border-paper-line px-2 py-1 text-xs text-ink">
+                <input name="text" required placeholder="Add item" className="field min-w-0 flex-1 py-1 text-xs" />
+                <button type="submit" className="btn-outline py-1 text-xs">
                   Add
                 </button>
               </form>
             </div>
           ))}
 
-          <form action={createChecklist.bind(null, project.id)} className="card flex flex-col gap-2 p-4 sm:flex-row sm:items-end">
-            <label className="flex flex-1 flex-col gap-1 text-xs text-ink-faint">
+          <form action={createChecklist.bind(null, project.id)} className="field-row card p-4">
+            <label className="field-wide">
               New checklist
-              <input
-                name="name"
-                required
-                placeholder="Launch checklist"
-                className="border border-paper-line bg-paper px-3 py-2 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-fountain"
-              />
+              <input name="name" required placeholder="Launch checklist" className="field" />
             </label>
             {templates.length > 0 && (
-              <label className="flex flex-col gap-1 text-xs text-ink-faint">
+              <label>
                 From template
-                <select name="template_id" className="border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none">
+                <select name="template_id" className="field">
                   <option value="">Blank</option>
                   {templates.map((t) => (
                     <option key={t.id} value={t.id}>
@@ -100,7 +85,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                 </select>
               </label>
             )}
-            <button type="submit" className="bg-stamp-red px-4 py-2 text-sm font-medium text-paper-card">
+            <button type="submit" className="btn">
               Add
             </button>
           </form>
@@ -110,26 +95,16 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       <section className="mt-8">
         <h2 className="text-sm font-medium text-ink-faint">Activity</h2>
         <div className="card mt-3 p-4">
-          <form action={logActivity.bind(null, project.id)} className="flex flex-wrap items-end gap-2">
-            <label className="flex flex-col gap-1 text-xs text-ink-faint">
+          <form action={logActivity.bind(null, project.id)} className="field-row">
+            <label className="field-narrow">
               Minutes
-              <input
-                type="number"
-                name="minutes"
-                required
-                min={1}
-                className="w-20 border border-paper-line bg-paper px-2 py-1.5 text-sm text-ink outline-none"
-              />
+              <input type="number" name="minutes" required min={1} className="field" />
             </label>
-            <label className="flex flex-1 flex-col gap-1 text-xs text-ink-faint">
+            <label className="field-wide">
               Note
-              <input
-                name="note"
-                placeholder="What did you work on?"
-                className="border border-paper-line bg-paper px-3 py-1.5 text-sm text-ink outline-none"
-              />
+              <input name="note" placeholder="What did you work on?" className="field" />
             </label>
-            <button type="submit" className="bg-stamp-red px-3 py-1.5 text-sm font-medium text-paper-card">
+            <button type="submit" className="btn">
               Log
             </button>
           </form>
@@ -137,9 +112,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           {activityLogs.length > 0 && (
             <ul className="ledger mt-4">
               {activityLogs.map((log) => (
-                <li key={log.id} className="ledger-row flex justify-between px-1 py-2 text-xs text-ink-faint">
-                  <span>{log.note || "—"}</span>
-                  <span className="font-mono">
+                <li key={log.id} className="ledger-row flex justify-between gap-3 px-1 py-2 text-xs text-ink-faint">
+                  <span className="min-w-0 truncate">{log.note || "—"}</span>
+                  <span className="shrink-0 font-mono">
                     {log.minutes}m · {new Date(log.logged_at).toLocaleDateString()}
                   </span>
                 </li>

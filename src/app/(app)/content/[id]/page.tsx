@@ -27,9 +27,11 @@ export default async function ContentDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="flex items-center justify-between">
-        <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-ink">{item.title}</h1>
-        <StatusSelect value={item.status} options={STATUSES} onChange={updateContentStatus.bind(null, item.id)} />
+      <div className="flex items-start justify-between gap-3">
+        <h1 className="min-w-0 font-[family-name:var(--font-display)] text-3xl font-semibold text-ink [overflow-wrap:anywhere]">{item.title}</h1>
+        <div className="shrink-0">
+          <StatusSelect value={item.status} options={STATUSES} onChange={updateContentStatus.bind(null, item.id)} />
+        </div>
       </div>
       <p className="mt-1 font-mono text-xs uppercase tracking-wide text-ink-faint">{item.content_type}</p>
 
@@ -38,21 +40,11 @@ export default async function ContentDetailPage({ params }: { params: Promise<{ 
         <form action={updateContentDetails.bind(null, item.id)} className="card mt-3 flex flex-col gap-3 p-4">
           <label className="flex flex-col gap-1 text-xs text-ink-faint">
             URL
-            <input
-              name="url"
-              defaultValue={item.url ?? ""}
-              placeholder="https://…"
-              className="border border-paper-line bg-paper px-3 py-2 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-fountain"
-            />
+            <input name="url" defaultValue={item.url ?? ""} placeholder="https://…" className="field" />
           </label>
           <label className="flex flex-col gap-1 text-xs text-ink-faint">
             Publish date
-            <input
-              type="date"
-              name="publish_date"
-              defaultValue={item.publish_date ?? ""}
-              className="border border-paper-line bg-paper px-3 py-2 text-sm text-ink outline-none"
-            />
+            <input type="date" name="publish_date" defaultValue={item.publish_date ?? ""} className="field" />
           </label>
           <label className="flex flex-col gap-1 text-xs text-ink-faint">
             Outline
@@ -61,10 +53,10 @@ export default async function ContentDetailPage({ params }: { params: Promise<{ 
               defaultValue={item.outline_markdown ?? ""}
               rows={6}
               placeholder="Outline, script notes, talking points… (markdown)"
-              className="resize-none border border-paper-line bg-paper px-3 py-2 font-mono text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-fountain"
+              className="field font-mono"
             />
           </label>
-          <button type="submit" className="self-start bg-stamp-red px-4 py-2 text-sm font-medium text-paper-card">
+          <button type="submit" className="btn self-start">
             Save
           </button>
         </form>
@@ -75,7 +67,7 @@ export default async function ContentDetailPage({ params }: { params: Promise<{ 
         <div className="mt-3 flex flex-col gap-3">
           {checklists.map((checklist) => (
             <div key={checklist.id} className="card p-4">
-              <p className="text-sm font-medium text-ink">{checklist.name}</p>
+              <p className="truncate text-sm font-medium text-ink">{checklist.name}</p>
               <div className="mt-2 flex flex-col gap-1.5">
                 {checklistItems
                   .filter((i) => i.checklist_id === checklist.id)
@@ -84,33 +76,23 @@ export default async function ContentDetailPage({ params }: { params: Promise<{ 
                   ))}
               </div>
               <form action={addContentChecklistItem.bind(null, item.id, checklist.id)} className="mt-2 flex gap-2">
-                <input
-                  name="text"
-                  required
-                  placeholder="Add item"
-                  className="flex-1 border border-paper-line bg-paper px-2 py-1 text-xs text-ink outline-none"
-                />
-                <button type="submit" className="border border-paper-line px-2 py-1 text-xs text-ink">
+                <input name="text" required placeholder="Add item" className="field min-w-0 flex-1 py-1 text-xs" />
+                <button type="submit" className="btn-outline py-1 text-xs">
                   Add
                 </button>
               </form>
             </div>
           ))}
 
-          <form action={createContentChecklist.bind(null, item.id)} className="card flex flex-col gap-2 p-4 sm:flex-row sm:items-end">
-            <label className="flex flex-1 flex-col gap-1 text-xs text-ink-faint">
+          <form action={createContentChecklist.bind(null, item.id)} className="field-row card p-4">
+            <label className="field-wide">
               New checklist
-              <input
-                name="name"
-                required
-                placeholder="Outline → publish → promote"
-                className="border border-paper-line bg-paper px-3 py-2 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-fountain"
-              />
+              <input name="name" required placeholder="Outline → publish → promote" className="field" />
             </label>
             {templates.length > 0 && (
-              <label className="flex flex-col gap-1 text-xs text-ink-faint">
+              <label>
                 From template
-                <select name="template_id" className="border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none">
+                <select name="template_id" className="field">
                   <option value="">Blank</option>
                   {templates.map((t) => (
                     <option key={t.id} value={t.id}>
@@ -120,7 +102,7 @@ export default async function ContentDetailPage({ params }: { params: Promise<{ 
                 </select>
               </label>
             )}
-            <button type="submit" className="bg-stamp-red px-4 py-2 text-sm font-medium text-paper-card">
+            <button type="submit" className="btn">
               Add
             </button>
           </form>

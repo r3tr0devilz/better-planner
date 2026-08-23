@@ -12,22 +12,14 @@ export default async function TasksPage() {
     <div className="mx-auto max-w-2xl">
       <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-ink">Tasks</h1>
 
-      <form action={createTask} className="card mt-6 flex flex-col gap-3 p-4 sm:flex-row sm:items-end">
-        <label className="flex flex-1 flex-col gap-1 text-xs text-ink-faint">
+      <form action={createTask} className="field-row card mt-6 p-4">
+        <label className="field-wide">
           New task
-          <input
-            name="title"
-            required
-            placeholder="What needs doing?"
-            className="border border-paper-line bg-paper px-3 py-2 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-fountain"
-          />
+          <input name="title" required placeholder="What needs doing?" className="field" />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-ink-faint">
+        <label>
           Domain
-          <select
-            name="domain_id"
-            className="border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none"
-          >
+          <select name="domain_id" className="field">
             <option value="">None</option>
             {domains.map((d) => (
               <option key={d.id} value={d.id}>
@@ -36,27 +28,19 @@ export default async function TasksPage() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-ink-faint">
+        <label>
           Due
-          <input
-            type="datetime-local"
-            name="due_at"
-            className="border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none"
-          />
+          <input type="datetime-local" name="due_at" className="field" />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-ink-faint">
+        <label>
           Priority
-          <select
-            name="priority"
-            defaultValue="medium"
-            className="border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none"
-          >
+          <select name="priority" defaultValue="medium" className="field">
             <option value="low">Low</option>
             <option value="medium">Medium</option>
             <option value="high">High</option>
           </select>
         </label>
-        <button type="submit" className="bg-stamp-red px-4 py-2 text-sm font-medium text-paper-card">
+        <button type="submit" className="btn">
           Add
         </button>
       </form>

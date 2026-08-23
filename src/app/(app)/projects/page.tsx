@@ -19,15 +19,16 @@ export default async function ProjectsPage() {
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <form action={createDomain} className="card flex flex-col gap-2 p-4">
           <span className="text-xs text-ink-faint">New domain</span>
-          <div className="flex gap-2">
-            <input
-              name="name"
-              required
-              placeholder="Home, Hill Media Group…"
-              className="flex-1 border border-paper-line bg-paper px-3 py-2 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-fountain"
-            />
-            <input type="color" name="color" defaultValue="#33486e" className="h-9 w-9 border border-paper-line bg-transparent" />
-            <button type="submit" className="bg-stamp-red px-3 py-2 text-sm font-medium text-paper-card">
+          <div className="field-row">
+            <label className="field-wide">
+              Name
+              <input name="name" required placeholder="Home, Hill Media Group…" className="field" />
+            </label>
+            <label className="field-narrow">
+              Color
+              <input type="color" name="color" defaultValue="#33486e" className="h-9 w-full border border-paper-line bg-transparent p-0" />
+            </label>
+            <button type="submit" className="btn">
               Add
             </button>
           </div>
@@ -35,30 +36,34 @@ export default async function ProjectsPage() {
 
         <form action={createProject} className="card flex flex-col gap-2 p-4">
           <span className="text-xs text-ink-faint">New project or area</span>
-          <input
-            name="name"
-            required
-            placeholder="Client website, Family…"
-            className="border border-paper-line bg-paper px-3 py-2 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-fountain"
-          />
-          <div className="flex gap-2">
-            <select name="domain_id" className="flex-1 border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none">
-              <option value="">No domain</option>
-              {domains.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-            <select name="kind" className="border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none">
-              <option value="project">Project</option>
-              <option value="area">Area</option>
-            </select>
-            <select name="engagement" className="border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none">
-              <option value="project">One-time</option>
-              <option value="retainer">Retainer</option>
-            </select>
-            <button type="submit" className="bg-stamp-red px-3 py-2 text-sm font-medium text-paper-card">
+          <input name="name" required placeholder="Client website, Family…" className="field" />
+          <div className="field-row">
+            <label className="field-wide">
+              Domain
+              <select name="domain_id" className="field">
+                <option value="">No domain</option>
+                {domains.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Kind
+              <select name="kind" className="field">
+                <option value="project">Project</option>
+                <option value="area">Area</option>
+              </select>
+            </label>
+            <label>
+              Engagement
+              <select name="engagement" className="field">
+                <option value="project">One-time</option>
+                <option value="retainer">Retainer</option>
+              </select>
+            </label>
+            <button type="submit" className="btn">
               Add
             </button>
           </div>
@@ -104,27 +109,22 @@ export default async function ProjectsPage() {
           Reusable checklists (e.g. &ldquo;New website&rdquo;) you can drop into any project.
         </p>
         <form action={createChecklistTemplate} className="card mt-3 flex flex-col gap-2 p-4">
-          <input
-            name="name"
-            required
-            placeholder="Template name"
-            className="border border-paper-line bg-paper px-3 py-2 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-fountain"
-          />
+          <input name="name" required placeholder="Template name" className="field" />
           <textarea
             name="items"
             required
             rows={3}
             placeholder={"One item per line\nSet up hosting\nInstall WordPress"}
-            className="resize-none border border-paper-line bg-paper px-3 py-2 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-fountain"
+            className="field"
           />
-          <button type="submit" className="self-start bg-stamp-red px-3 py-2 text-sm font-medium text-paper-card">
+          <button type="submit" className="btn self-start">
             Save template
           </button>
         </form>
         {templates.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2">
             {templates.map((t) => (
-              <li key={t.id} className="border border-paper-line px-3 py-1 font-mono text-xs text-ink-faint">
+              <li key={t.id} className="max-w-full truncate border border-paper-line px-3 py-1 font-mono text-xs text-ink-faint">
                 {t.name}
               </li>
             ))}
@@ -145,12 +145,12 @@ function ProjectCard({
   return (
     <Link
       href={`/projects/${project.id}`}
-      className="card flex flex-col gap-1 px-4 py-3 transition-transform hover:scale-[1.01]"
+      className="card flex flex-col gap-1 px-4 py-3 transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99]"
     >
       <div className="flex items-center gap-2">
         {threadIndex >= 0 && <span className="stamp-dot" data-thread={threadIndex} aria-hidden />}
-        <p className="flex-1 text-sm text-ink">{project.name}</p>
-        <span className="border border-paper-line px-2 py-0.5 font-mono text-[11px] text-ink-faint">
+        <p className="min-w-0 flex-1 truncate text-sm text-ink">{project.name}</p>
+        <span className="shrink-0 border border-paper-line px-2 py-0.5 font-mono text-[11px] text-ink-faint">
           {project.engagement === "retainer" ? "Retainer" : project.kind === "area" ? "Area" : "Project"}
         </span>
       </div>

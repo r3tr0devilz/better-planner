@@ -42,10 +42,10 @@ export function TaskRow({ task, threadIndex }: { task: Task; threadIndex: number
       <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_COLOR[task.priority]}`} aria-hidden />
 
       <div className="min-w-0 flex-1">
-        <p className={`truncate text-sm ${done ? "text-ink-faint line-through" : "text-ink"}`}>
+        <p className={`truncate text-sm transition-colors duration-150 ${done ? "text-ink-faint line-through" : "text-ink"}`}>
           {task.title}
         </p>
-        {due && <p className="font-mono text-xs text-ink-faint">{due}</p>}
+        {due && <p className="truncate font-mono text-xs text-ink-faint">{due}</p>}
       </div>
 
       <button
@@ -53,7 +53,7 @@ export function TaskRow({ task, threadIndex }: { task: Task; threadIndex: number
         disabled={pending}
         aria-label={task.is_top_three ? "Remove from top three" : "Add to top three"}
         aria-pressed={task.is_top_three}
-        className={task.is_top_three ? "text-stamp-red" : "text-ink-faint hover:text-ink"}
+        className={`shrink-0 transition-transform duration-150 active:scale-90 ${task.is_top_three ? "text-stamp-red" : "text-ink-faint hover:text-ink"}`}
       >
         <Star size={16} fill={task.is_top_three ? "currentColor" : "none"} />
       </button>

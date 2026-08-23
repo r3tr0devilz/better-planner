@@ -107,9 +107,9 @@ export default async function TodayPage() {
                   <Link
                     key={project.id}
                     href={`/projects/${project.id}`}
-                    className="card block px-4 py-3 text-sm text-ink hover:bg-paper"
+                    className="hoverable card block px-4 py-3 text-sm text-ink hover:bg-paper"
                   >
-                    {project.name}
+                    <span className="[overflow-wrap:anywhere]">{project.name}</span>
                     <span className="ml-2 text-xs italic text-stamp-red">no activity in 7+ days</span>
                   </Link>
                 ))}

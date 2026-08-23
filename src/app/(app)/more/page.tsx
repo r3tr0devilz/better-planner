@@ -7,7 +7,7 @@ export default function MorePage() {
       <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-ink">More</h1>
       <div className="mt-6 flex flex-col gap-2">
         {SECONDARY_NAV_ITEMS.map(({ href, label, icon: Icon }) => (
-          <Link key={href} href={href} className="card flex items-center gap-3 px-4 py-3 text-sm text-ink hover:bg-paper">
+          <Link key={href} href={href} className="hoverable card flex items-center gap-3 px-4 py-3 text-sm text-ink hover:bg-paper">
             <Icon size={18} />
             {label}
           </Link>

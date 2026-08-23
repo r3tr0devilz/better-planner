@@ -13,9 +13,9 @@ export default async function SettingsPage() {
 
       <section className="card mt-6 p-4">
         <h2 className="text-sm font-medium text-ink-faint">Account</h2>
-        <p className="mt-2 text-sm text-ink">{user?.email}</p>
+        <p className="mt-2 truncate text-sm text-ink">{user?.email}</p>
         <form action={signOut} className="mt-4">
-          <button type="submit" className="border border-paper-line px-4 py-2 text-sm text-ink hover:bg-paper">
+          <button type="submit" className="btn-outline">
             Sign out
           </button>
         </form>

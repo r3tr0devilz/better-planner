@@ -53,7 +53,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Link
               key={href}
               href={href}
-              className={`flex flex-col items-center gap-0.5 px-2 py-1 text-[11px] ${
+              className={`flex flex-col items-center gap-0.5 px-2 py-1 text-[11px] transition-colors duration-150 ${
                 active ? "text-stamp-red" : "text-ink-faint"
               }`}
             >
@@ -64,7 +64,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         })}
         <Link
           href="/more"
-          className={`flex flex-col items-center gap-0.5 px-2 py-1 text-[11px] ${
+          className={`flex flex-col items-center gap-0.5 px-2 py-1 text-[11px] transition-colors duration-150 ${
             SECONDARY_NAV_ITEMS.some(({ href }) => pathname.startsWith(href)) || pathname === "/more"
               ? "text-stamp-red"
               : "text-ink-faint"
