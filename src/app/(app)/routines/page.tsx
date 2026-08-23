@@ -29,24 +29,24 @@ export default async function RoutinesPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl italic text-mist">Routines</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-ink">Routines</h1>
 
-      <form action={createRoutine} className="glass mt-6 flex flex-col gap-3 rounded-xl p-4 sm:flex-row sm:items-end">
-        <label className="flex flex-1 flex-col gap-1 text-xs text-mist-dim">
+      <form action={createRoutine} className="card mt-6 flex flex-col gap-3 p-4 sm:flex-row sm:items-end">
+        <label className="flex flex-1 flex-col gap-1 text-xs text-ink-faint">
           New routine
           <input
             name="name"
             required
             placeholder="Take vitamins, check email…"
-            className="rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-mist outline-none focus-visible:ring-2 focus-visible:ring-dusk"
+            className="border border-paper-line bg-paper px-3 py-2 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-fountain"
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-mist-dim">
+        <label className="flex flex-col gap-1 text-xs text-ink-faint">
           Time of day
           <select
             name="time_of_day"
             defaultValue="anytime"
-            className="rounded-lg border border-white/10 bg-black/20 px-2 py-2 text-sm text-mist outline-none"
+            className="border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none"
           >
             <option value="morning">Morning</option>
             <option value="afternoon">Afternoon</option>
@@ -54,28 +54,28 @@ export default async function RoutinesPage() {
             <option value="anytime">Anytime</option>
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-mist-dim">
+        <label className="flex flex-col gap-1 text-xs text-ink-faint">
           Mode
           <select
             name="mode"
             defaultValue="ongoing"
-            className="rounded-lg border border-white/10 bg-black/20 px-2 py-2 text-sm text-mist outline-none"
+            className="border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none"
           >
             <option value="ongoing">Ongoing streak</option>
             <option value="fixed_days">Fixed number of days</option>
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-mist-dim">
+        <label className="flex flex-col gap-1 text-xs text-ink-faint">
           Days (if fixed)
           <input
             type="number"
             name="total_days"
             min={1}
             placeholder="30"
-            className="w-20 rounded-lg border border-white/10 bg-black/20 px-2 py-2 text-sm text-mist outline-none"
+            className="w-20 border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none"
           />
         </label>
-        <button type="submit" className="rounded-lg bg-dawn px-4 py-2 text-sm font-medium text-ink">
+        <button type="submit" className="bg-stamp-red px-4 py-2 text-sm font-medium text-paper-card">
           Add
         </button>
       </form>
@@ -85,8 +85,8 @@ export default async function RoutinesPage() {
         if (items.length === 0) return null;
         return (
           <section key={key} className="mt-8">
-            <h2 className="text-sm font-medium text-mist-dim">{label}</h2>
-            <div className="mt-3 flex flex-col gap-2">
+            <h2 className="text-sm font-medium text-ink-faint">{label}</h2>
+            <div className="ledger mt-3">
               {items.map((routine) => (
                 <RoutineRow
                   key={routine.id}
@@ -105,7 +105,7 @@ export default async function RoutinesPage() {
       })}
 
       {routines.length === 0 && (
-        <p className="mt-8 text-sm text-mist-dim">No routines yet — add one above.</p>
+        <p className="mt-8 text-sm text-ink-faint">No routines yet — add one above.</p>
       )}
     </div>
   );

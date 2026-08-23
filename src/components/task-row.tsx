@@ -6,9 +6,9 @@ import { toggleTaskDone, toggleTopThree } from "@/app/(app)/tasks/actions";
 import type { Task } from "@/lib/supabase/types";
 
 const PRIORITY_COLOR: Record<Task["priority"], string> = {
-  high: "bg-coral",
-  medium: "bg-gold",
-  low: "bg-mist-dim",
+  high: "bg-stamp-red",
+  medium: "bg-mustard",
+  low: "bg-ink-faint",
 };
 
 function formatDue(dueAt: string | null): string | null {
@@ -27,26 +27,25 @@ export function TaskRow({ task, threadIndex }: { task: Task; threadIndex: number
   const done = task.status === "done";
 
   return (
-    <div
-      data-thread={threadIndex >= 0 ? threadIndex : undefined}
-      className="thread-edge glass flex items-center gap-3 rounded-xl px-4 py-3"
-    >
+    <div className="ledger-row flex items-center gap-3 px-1 py-3">
       <input
         type="checkbox"
         checked={done}
         disabled={pending}
         onChange={(e) => startTransition(() => toggleTaskDone(task.id, e.target.checked))}
-        className="h-4 w-4 shrink-0 accent-sage"
+        className="h-4 w-4 shrink-0 accent-moss"
         aria-label={`Mark "${task.title}" ${done ? "open" : "done"}`}
       />
+
+      {threadIndex >= 0 && <span className="stamp-dot" data-thread={threadIndex} aria-hidden />}
 
       <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_COLOR[task.priority]}`} aria-hidden />
 
       <div className="min-w-0 flex-1">
-        <p className={`truncate text-sm ${done ? "text-mist-dim line-through" : "text-mist"}`}>
+        <p className={`truncate text-sm ${done ? "text-ink-faint line-through" : "text-ink"}`}>
           {task.title}
         </p>
-        {due && <p className="text-xs text-mist-dim">{due}</p>}
+        {due && <p className="font-mono text-xs text-ink-faint">{due}</p>}
       </div>
 
       <button
@@ -54,7 +53,7 @@ export function TaskRow({ task, threadIndex }: { task: Task; threadIndex: number
         disabled={pending}
         aria-label={task.is_top_three ? "Remove from top three" : "Add to top three"}
         aria-pressed={task.is_top_three}
-        className={task.is_top_three ? "text-dawn" : "text-mist-dim hover:text-mist"}
+        className={task.is_top_three ? "text-stamp-red" : "text-ink-faint hover:text-ink"}
       >
         <Star size={16} fill={task.is_top_three ? "currentColor" : "none"} />
       </button>

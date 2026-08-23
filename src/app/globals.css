@@ -1,42 +1,41 @@
 @import "tailwindcss";
 
 :root {
-  /* base surface */
-  --color-ink: #0f151b;
-  --color-ink-soft: #1a232c;
-  --color-mist: #eef2f6;
-  --color-mist-dim: #aab6c2;
+  /* paper surface */
+  --color-paper: #ece2cf;
+  --color-paper-card: #f8f1e3;
+  --color-paper-line: #d6c6a4;
+  --color-paper-line-soft: #e2d3b3;
+  --color-ink: #241f2b;
+  --color-ink-faint: #79705e;
 
   /* accents */
-  --color-dawn: #ff8a5c;
-  --color-dusk: #8c9eff;
-  --color-sage: #7fb88f;
-  --color-gold: #e8c468;
-  --color-coral: #ff6b7a;
-  --color-teal: #5cc8c2;
+  --color-stamp-red: #ab3a2c;
+  --color-fountain: #33486e;
+  --color-moss: #4c7a55;
+  --color-mustard: #b1832c;
+  --color-plum: #6b3564;
+  --color-teal: #2e7a78;
 
-  /* glass */
-  --glass-fill: rgba(238, 242, 246, 0.06);
-  --glass-fill-strong: rgba(238, 242, 246, 0.1);
-  --glass-border: rgba(238, 242, 246, 0.14);
-
-  --background: var(--color-ink);
-  --foreground: var(--color-mist);
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
+  --color-paper: var(--color-paper);
+  --color-paper-card: var(--color-paper-card);
+  --color-paper-line: var(--color-paper-line);
+  --color-paper-line-soft: var(--color-paper-line-soft);
   --color-ink: var(--color-ink);
-  --color-ink-soft: var(--color-ink-soft);
-  --color-mist: var(--color-mist);
-  --color-mist-dim: var(--color-mist-dim);
-  --color-dawn: var(--color-dawn);
-  --color-dusk: var(--color-dusk);
-  --color-sage: var(--color-sage);
-  --color-gold: var(--color-gold);
-  --color-coral: var(--color-coral);
+  --color-ink-faint: var(--color-ink-faint);
+  --color-stamp-red: var(--color-stamp-red);
+  --color-fountain: var(--color-fountain);
+  --color-moss: var(--color-moss);
+  --color-mustard: var(--color-mustard);
+  --color-plum: var(--color-plum);
   --color-teal: var(--color-teal);
 
   --font-display: var(--font-display);
@@ -45,41 +44,70 @@
 }
 
 body {
-  background:
-    radial-gradient(ellipse 120% 60% at 15% -10%, rgba(140, 158, 255, 0.16), transparent 60%),
-    radial-gradient(ellipse 100% 50% at 90% 0%, rgba(255, 138, 92, 0.12), transparent 55%),
-    var(--background);
-  background-attachment: fixed;
+  background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-body), Georgia, serif;
+  position: relative;
 }
 
-/* Signature: every domain gets a color thread carried through its
-   tasks, projects, and content as a left-edge bar. Assigned via
-   data-thread on the row/card, cycling through the accent set. */
-[data-thread="0"] { --thread: var(--color-dawn); }
-[data-thread="1"] { --thread: var(--color-dusk); }
-[data-thread="2"] { --thread: var(--color-sage); }
-[data-thread="3"] { --thread: var(--color-gold); }
-[data-thread="4"] { --thread: var(--color-coral); }
-[data-thread="5"] { --thread: var(--color-teal); }
-
-.thread-edge {
-  border-left: 3px solid var(--thread, var(--color-mist-dim));
+/* paper grain — the thing that says "paper" instead of "cream UI" */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.32;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.15  0 0 0 0 0.13  0 0 0 0 0.1  0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-.glass {
-  background: var(--glass-fill);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+/* Signature: every domain gets an ink-stamp dot carried through its
+   tasks, projects, and content, cycling through the accent set. */
+[data-thread="0"] { --dot: var(--color-stamp-red); }
+[data-thread="1"] { --dot: var(--color-fountain); }
+[data-thread="2"] { --dot: var(--color-moss); }
+[data-thread="3"] { --dot: var(--color-mustard); }
+[data-thread="4"] { --dot: var(--color-plum); }
+[data-thread="5"] { --dot: var(--color-teal); }
+
+.stamp-dot {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: radial-gradient(circle at 35% 30%, var(--dot, var(--color-ink-faint)), color-mix(in srgb, var(--dot, var(--color-ink-faint)) 75%, black));
+  box-shadow: 0 1px 1px rgba(36, 31, 43, 0.25);
 }
 
-.glass-strong {
-  background: var(--glass-fill-strong);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
+.card {
+  position: relative;
+  background: var(--color-paper-card);
+  border: 1px solid var(--color-paper-line);
+  box-shadow: 0 1px 2px rgba(36, 31, 43, 0.05), 0 10px 22px -14px rgba(36, 31, 43, 0.35);
+}
+
+/* washi-tape flag: the top-three "sticky note" treatment */
+.tape {
+  position: absolute;
+  top: -0.55rem;
+  left: 1rem;
+  width: 2.6rem;
+  height: 1rem;
+  background: color-mix(in srgb, var(--dot, var(--color-mustard)) 55%, var(--color-paper) 45%);
+  opacity: 0.75;
+  transform: rotate(-3deg);
+  box-shadow: 0 1px 1px rgba(36, 31, 43, 0.15);
+}
+.tilt-l { transform: rotate(-0.6deg); }
+.tilt-r { transform: rotate(0.5deg); }
+
+.ledger {
+  border-top: 1px solid var(--color-paper-line-soft);
+}
+.ledger-row {
+  border-bottom: 1px solid var(--color-paper-line-soft);
 }
 
 @media (prefers-reduced-motion: reduce) {

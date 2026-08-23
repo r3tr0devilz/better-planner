@@ -10,9 +10,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
-      <aside className="glass sticky top-0 z-40 hidden h-screen w-56 shrink-0 flex-col justify-between p-5 md:flex">
+      <aside className="card sticky top-0 z-40 hidden h-screen w-56 shrink-0 flex-col justify-between border-y-0 border-l-0 p-5 md:flex">
         <div>
-          <Link href="/today" className="font-[family-name:var(--font-display)] text-xl italic text-mist">
+          <Link href="/today" className="font-[family-name:var(--font-display)] text-xl font-semibold text-ink">
             Better Planner
           </Link>
           <nav className="mt-8 flex flex-col gap-1">
@@ -22,8 +22,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={href}
                   href={href}
-                  className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
-                    active ? "bg-white/10 text-mist" : "text-mist-dim hover:text-mist"
+                  className={`flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${
+                    active ? "bg-paper text-ink" : "text-ink-faint hover:text-ink"
                   }`}
                 >
                   <Icon size={16} />
@@ -36,8 +36,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <CaptureBar />
       </aside>
 
-      <header className="glass sticky top-0 z-40 flex items-center justify-between px-4 py-3 md:hidden">
-        <Link href="/today" className="font-[family-name:var(--font-display)] text-lg italic text-mist">
+      <header className="card sticky top-0 z-40 flex items-center justify-between border-x-0 border-t-0 px-4 py-3 md:hidden">
+        <Link href="/today" className="font-[family-name:var(--font-display)] text-lg font-semibold text-ink">
           Better Planner
         </Link>
         <CaptureBar />
@@ -45,7 +45,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <main className="flex-1 px-4 py-6 pb-24 md:px-8 md:py-8 md:pb-8">{children}</main>
 
-      <nav className="glass fixed inset-x-0 bottom-0 z-40 flex items-center justify-around py-2 md:hidden">
+      <nav className="card fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-x-0 border-b-0 py-2 md:hidden">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href);
           return (
@@ -53,7 +53,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               key={href}
               href={href}
               className={`flex flex-col items-center gap-0.5 px-2 py-1 text-[11px] ${
-                active ? "text-dawn" : "text-mist-dim"
+                active ? "text-stamp-red" : "text-ink-faint"
               }`}
             >
               <Icon size={20} />

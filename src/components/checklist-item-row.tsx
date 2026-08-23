@@ -14,9 +14,9 @@ export function ChecklistItemRow({ projectId, item }: { projectId: string; item:
         checked={item.done}
         disabled={pending}
         onChange={(e) => startTransition(() => toggleChecklistItem(projectId, item.id, e.target.checked))}
-        className="h-3.5 w-3.5 accent-sage"
+        className="h-3.5 w-3.5 accent-moss"
       />
-      <span className={item.done ? "text-mist-dim line-through" : "text-mist"}>{item.text}</span>
+      <span className={item.done ? "text-ink-faint line-through" : "text-ink"}>{item.text}</span>
     </label>
   );
 }

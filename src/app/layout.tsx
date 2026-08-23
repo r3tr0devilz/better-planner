@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Work_Sans, JetBrains_Mono } from "next/font/google";
+import { Fraunces, Source_Serif_4, JetBrains_Mono } from "next/font/google";
 import { SwRegister } from "@/components/sw-register";
 import "./globals.css";
 
 const fraunces = Fraunces({
   variable: "--font-display",
   subsets: ["latin"],
-  style: ["normal", "italic"],
+  weight: ["500", "600"],
 });
 
-const workSans = Work_Sans({
+const sourceSerif = Source_Serif_4({
   variable: "--font-body",
   subsets: ["latin"],
 });
@@ -26,13 +26,13 @@ export const metadata: Metadata = {
   icons: { icon: "/icon.svg" },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "Better Planner",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#12181f",
+  themeColor: "#ece2cf",
   width: "device-width",
   initialScale: 1,
 };
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${workSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${sourceSerif.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <SwRegister />

@@ -21,26 +21,26 @@ export function RoutineRow({
   const [pending, startTransition] = useTransition();
 
   return (
-    <div className="glass flex items-center gap-3 rounded-xl px-4 py-3">
+    <div className="ledger-row flex items-center gap-3 px-1 py-3">
       <input
         type="checkbox"
         checked={doneToday}
         disabled={pending}
         onChange={(e) => startTransition(() => setCompletion(routine.id, today, e.target.checked))}
-        className="h-4 w-4 shrink-0 accent-sage"
+        className="h-4 w-4 shrink-0 accent-moss"
         aria-label={`Mark "${routine.name}" ${doneToday ? "not done" : "done"} today`}
       />
 
       <div className="min-w-0 flex-1">
-        <p className={`truncate text-sm ${doneToday ? "text-mist-dim line-through" : "text-mist"}`}>
+        <p className={`truncate text-sm ${doneToday ? "text-ink-faint line-through" : "text-ink"}`}>
           {routine.name}
         </p>
         <div className="mt-1.5 flex gap-0.5" aria-hidden>
           {history.map((v, i) => (
             <span
               key={i}
-              className={`h-3 w-1.5 rounded-sm ${
-                v === true ? "bg-sage" : v === false ? "bg-white/10" : "bg-white/5"
+              className={`h-2.5 w-1.5 rounded-sm ${
+                v === true ? "bg-moss" : "bg-paper-line-soft"
               }`}
             />
           ))}
@@ -48,7 +48,7 @@ export function RoutineRow({
       </div>
 
       {streak > 0 && (
-        <span className="shrink-0 rounded-full bg-dawn/15 px-2 py-0.5 text-xs font-medium text-dawn">
+        <span className="shrink-0 border border-stamp-red px-2 py-0.5 font-mono text-xs text-stamp-red">
           {streak}d streak
         </span>
       )}

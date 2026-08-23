@@ -10,23 +10,23 @@ export default async function TasksPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl italic text-mist">Tasks</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-ink">Tasks</h1>
 
-      <form action={createTask} className="glass mt-6 flex flex-col gap-3 rounded-xl p-4 sm:flex-row sm:items-end">
-        <label className="flex flex-1 flex-col gap-1 text-xs text-mist-dim">
+      <form action={createTask} className="card mt-6 flex flex-col gap-3 p-4 sm:flex-row sm:items-end">
+        <label className="flex flex-1 flex-col gap-1 text-xs text-ink-faint">
           New task
           <input
             name="title"
             required
             placeholder="What needs doing?"
-            className="rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-mist outline-none focus-visible:ring-2 focus-visible:ring-dusk"
+            className="border border-paper-line bg-paper px-3 py-2 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-fountain"
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-mist-dim">
+        <label className="flex flex-col gap-1 text-xs text-ink-faint">
           Domain
           <select
             name="domain_id"
-            className="rounded-lg border border-white/10 bg-black/20 px-2 py-2 text-sm text-mist outline-none"
+            className="border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none"
           >
             <option value="">None</option>
             {domains.map((d) => (
@@ -36,35 +36,35 @@ export default async function TasksPage() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-mist-dim">
+        <label className="flex flex-col gap-1 text-xs text-ink-faint">
           Due
           <input
             type="datetime-local"
             name="due_at"
-            className="rounded-lg border border-white/10 bg-black/20 px-2 py-2 text-sm text-mist outline-none"
+            className="border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none"
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-mist-dim">
+        <label className="flex flex-col gap-1 text-xs text-ink-faint">
           Priority
           <select
             name="priority"
             defaultValue="medium"
-            className="rounded-lg border border-white/10 bg-black/20 px-2 py-2 text-sm text-mist outline-none"
+            className="border border-paper-line bg-paper px-2 py-2 text-sm text-ink outline-none"
           >
             <option value="low">Low</option>
             <option value="medium">Medium</option>
             <option value="high">High</option>
           </select>
         </label>
-        <button type="submit" className="rounded-lg bg-dawn px-4 py-2 text-sm font-medium text-ink">
+        <button type="submit" className="bg-stamp-red px-4 py-2 text-sm font-medium text-paper-card">
           Add
         </button>
       </form>
 
       <section className="mt-8">
-        <h2 className="text-sm font-medium text-mist-dim">Open ({open.length})</h2>
-        <div className="mt-3 flex flex-col gap-2">
-          {open.length === 0 && <p className="text-sm text-mist-dim">Nothing open. Add something above.</p>}
+        <h2 className="text-sm font-medium text-ink-faint">Open ({open.length})</h2>
+        <div className="ledger mt-3">
+          {open.length === 0 && <p className="py-3 text-sm text-ink-faint">Nothing open. Add something above.</p>}
           {open.map((task) => (
             <TaskRow key={task.id} task={task} threadIndex={threadIndexFor(task.domain_id, domains)} />
           ))}
@@ -73,8 +73,8 @@ export default async function TasksPage() {
 
       {done.length > 0 && (
         <section className="mt-8">
-          <h2 className="text-sm font-medium text-mist-dim">Done ({done.length})</h2>
-          <div className="mt-3 flex flex-col gap-2">
+          <h2 className="text-sm font-medium text-ink-faint">Done ({done.length})</h2>
+          <div className="ledger mt-3">
             {done.map((task) => (
               <TaskRow key={task.id} task={task} threadIndex={threadIndexFor(task.domain_id, domains)} />
             ))}

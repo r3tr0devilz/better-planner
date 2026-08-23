@@ -110,28 +110,28 @@ export function CaptureBar() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 rounded-full bg-dawn px-4 py-2.5 font-medium text-ink shadow-lg shadow-dawn/20 transition-transform hover:scale-[1.03] active:scale-95"
+        className="flex items-center gap-2 bg-stamp-red px-4 py-2.5 font-medium text-paper-card shadow-lg shadow-stamp-red/20 transition-transform hover:scale-[1.03] active:scale-95"
         aria-label="Capture a task or note"
       >
         <Plus size={18} />
         <span className="hidden sm:inline">Capture</span>
-        <kbd className="hidden rounded bg-black/15 px-1.5 py-0.5 text-xs sm:inline">⌘J</kbd>
+        <kbd className="hidden border border-paper-card/30 px-1.5 py-0.5 font-mono text-xs sm:inline">⌘J</kbd>
       </button>
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 px-4 pt-24 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-start justify-center bg-ink/40 px-4 pt-24"
           onClick={close}
         >
           <div
-            className="glass-strong w-full max-w-lg rounded-2xl p-5"
+            className="card w-full max-w-lg p-5"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h2 className="font-[family-name:var(--font-display)] text-lg italic text-mist">
+              <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold text-ink">
                 Capture
               </h2>
-              <button onClick={close} aria-label="Close" className="text-mist-dim hover:text-mist">
+              <button onClick={close} aria-label="Close" className="text-ink-faint hover:text-ink">
                 <X size={18} />
               </button>
             </div>
@@ -142,27 +142,27 @@ export function CaptureBar() {
               onChange={(e) => setText(e.target.value)}
               placeholder="Schedule a task, jot a note, log a quote…"
               rows={3}
-              className="mt-3 w-full resize-none rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-mist outline-none focus-visible:ring-2 focus-visible:ring-dusk"
+              className="mt-3 w-full resize-none border border-paper-line bg-paper px-3 py-2 text-ink outline-none focus-visible:ring-2 focus-visible:ring-fountain"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit("text");
               }}
             />
 
             {status === "error" && (
-              <p role="alert" className="mt-2 text-sm text-coral">
+              <p role="alert" className="mt-2 text-sm text-stamp-red">
                 Couldn&apos;t save that — try again.
               </p>
             )}
             {status === "done" && resultLabel && (
-              <p className="mt-2 text-sm text-sage">Added: {resultLabel}</p>
+              <p className="mt-2 text-sm text-moss">Added: {resultLabel}</p>
             )}
 
             <div className="mt-3 flex items-center justify-between">
               {speechSupported ? (
                 <button
                   onClick={toggleListening}
-                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm ${
-                    listening ? "bg-coral text-ink" : "bg-white/10 text-mist"
+                  className={`flex items-center gap-1.5 border px-3 py-1.5 text-sm ${
+                    listening ? "border-stamp-red bg-stamp-red text-paper-card" : "border-paper-line bg-paper text-ink"
                   }`}
                 >
                   {listening ? <Square size={14} /> : <Mic size={14} />}
@@ -175,7 +175,7 @@ export function CaptureBar() {
               <button
                 onClick={() => submit(listening ? "voice" : "text")}
                 disabled={status === "saving" || !text.trim()}
-                className="rounded-lg bg-dawn px-4 py-2 text-sm font-medium text-ink disabled:opacity-40"
+                className="bg-stamp-red px-4 py-2 text-sm font-medium text-paper-card disabled:opacity-40"
               >
                 {status === "saving" ? "Saving…" : "Add"}
               </button>

@@ -9,27 +9,27 @@ export default async function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-lg">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl italic text-mist">Settings</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-ink">Settings</h1>
 
-      <section className="glass mt-6 rounded-xl p-4">
-        <h2 className="text-sm font-medium text-mist-dim">Account</h2>
-        <p className="mt-2 text-sm text-mist">{user?.email}</p>
+      <section className="card mt-6 p-4">
+        <h2 className="text-sm font-medium text-ink-faint">Account</h2>
+        <p className="mt-2 text-sm text-ink">{user?.email}</p>
         <form action={signOut} className="mt-4">
-          <button type="submit" className="rounded-lg bg-white/10 px-4 py-2 text-sm text-mist hover:bg-white/15">
+          <button type="submit" className="border border-paper-line px-4 py-2 text-sm text-ink hover:bg-paper">
             Sign out
           </button>
         </form>
       </section>
 
-      <section className="glass mt-4 rounded-xl p-4">
-        <h2 className="text-sm font-medium text-mist-dim">Integrations</h2>
+      <section className="card mt-4 p-4">
+        <h2 className="text-sm font-medium text-ink-faint">Integrations</h2>
         <div className="mt-3 flex items-center justify-between text-sm">
-          <span className="text-mist">Google Calendar</span>
-          <span className="text-xs text-mist-dim">Not connected — coming soon</span>
+          <span className="text-ink">Google Calendar</span>
+          <span className="text-xs text-ink-faint">Not connected — coming soon</span>
         </div>
         <div className="mt-2 flex items-center justify-between text-sm">
-          <span className="text-mist">Push notifications</span>
-          <span className="text-xs text-mist-dim">Not connected — coming soon</span>
+          <span className="text-ink">Push notifications</span>
+          <span className="text-xs text-ink-faint">Not connected — coming soon</span>
         </div>
       </section>
     </div>

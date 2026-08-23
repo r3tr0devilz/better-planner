@@ -16,12 +16,12 @@ export function MilestoneRow({ projectId, milestone }: { projectId: string; mile
     <div className="flex items-center gap-3">
       <div className="flex-1">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-mist">{milestone.name}</span>
-          <span className="text-mist-dim">{milestone.percent_complete}%</span>
+          <span className="text-ink">{milestone.name}</span>
+          <span className="font-mono text-ink-faint">{milestone.percent_complete}%</span>
         </div>
-        <div className="mt-1 h-1.5 rounded-full bg-white/10">
+        <div className="mt-1 h-1.5 border border-paper-line bg-paper">
           <div
-            className="h-1.5 rounded-full bg-dusk transition-all"
+            className="h-full bg-fountain transition-all"
             style={{ width: `${milestone.percent_complete}%` }}
           />
         </div>
@@ -31,7 +31,7 @@ export function MilestoneRow({ projectId, milestone }: { projectId: string; mile
           onClick={() => step(-10)}
           disabled={pending}
           aria-label="Decrease progress"
-          className="rounded-full bg-white/5 p-1 text-mist-dim hover:text-mist"
+          className="border border-paper-line p-1 text-ink-faint hover:text-ink"
         >
           <Minus size={12} />
         </button>
@@ -39,7 +39,7 @@ export function MilestoneRow({ projectId, milestone }: { projectId: string; mile
           onClick={() => step(10)}
           disabled={pending}
           aria-label="Increase progress"
-          className="rounded-full bg-white/5 p-1 text-mist-dim hover:text-mist"
+          className="border border-paper-line p-1 text-ink-faint hover:text-ink"
         >
           <Plus size={12} />
         </button>

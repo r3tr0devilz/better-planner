@@ -14,6 +14,8 @@ function greeting(): string {
   return "Good evening";
 }
 
+const TILT = ["tilt-l", "", "tilt-r"];
+
 export default async function TodayPage() {
   const [topThree, tasks, domains, routines, completions, slipping, notifications] = await Promise.all([
     getTopThree(),
@@ -30,24 +32,22 @@ export default async function TodayPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <h1 className="font-[family-name:var(--font-display)] text-4xl italic text-mist">{greeting()}</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-4xl font-semibold text-ink">{greeting()}</h1>
 
       <section className="mt-6">
-        <h2 className="text-sm font-medium text-mist-dim">Top three today</h2>
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
-          {topThree.map((task) => (
-            <div
-              key={task.id}
-              data-thread={
-                threadIndexFor(task.domain_id, domains) >= 0 ? threadIndexFor(task.domain_id, domains) : undefined
-              }
-              className="thread-edge glass-strong rounded-2xl p-4"
-            >
-              <TaskRow task={task} threadIndex={-1} />
-            </div>
-          ))}
+        <h2 className="text-sm font-medium text-ink-faint">Top three today</h2>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          {topThree.map((task, i) => {
+            const threadIndex = threadIndexFor(task.domain_id, domains);
+            return (
+              <div key={task.id} className={`card p-4 pt-5 ${TILT[i % 3]}`}>
+                {threadIndex >= 0 && <span className="tape" data-thread={threadIndex} aria-hidden />}
+                <TaskRow task={task} threadIndex={-1} />
+              </div>
+            );
+          })}
           {topThree.length === 0 && (
-            <p className="glass col-span-full rounded-xl p-4 text-sm text-mist-dim">
+            <p className="card col-span-full p-4 text-sm text-ink-faint">
               Star a task on the Tasks page to pin your top three here.
             </p>
           )}
@@ -57,23 +57,23 @@ export default async function TodayPage() {
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
         <div className="flex flex-col gap-8">
           <section>
-            <h2 className="text-sm font-medium text-mist-dim">Open tasks ({open.length})</h2>
-            <div className="mt-3 flex flex-col gap-2">
+            <h2 className="text-sm font-medium text-ink-faint">Open tasks ({open.length})</h2>
+            <div className="ledger mt-3">
               {open.slice(0, 8).map((task) => (
                 <TaskRow key={task.id} task={task} threadIndex={threadIndexFor(task.domain_id, domains)} />
               ))}
-              {open.length === 0 && <p className="text-sm text-mist-dim">Nothing open — nice.</p>}
+              {open.length === 0 && <p className="py-3 text-sm text-ink-faint">Nothing open — nice.</p>}
             </div>
             {open.length > 8 && (
-              <Link href="/tasks" className="mt-2 inline-block text-xs text-dusk hover:underline">
+              <Link href="/tasks" className="mt-2 inline-block text-xs text-fountain hover:underline">
                 View all {open.length} →
               </Link>
             )}
           </section>
 
           <section>
-            <h2 className="text-sm font-medium text-mist-dim">Routine checklist</h2>
-            <div className="mt-3 flex flex-col gap-2">
+            <h2 className="text-sm font-medium text-ink-faint">Routine checklist</h2>
+            <div className="ledger mt-3">
               {routines.map((routine) => (
                 <RoutineRow
                   key={routine.id}
@@ -86,31 +86,31 @@ export default async function TodayPage() {
                   history={[]}
                 />
               ))}
-              {routines.length === 0 && <p className="text-sm text-mist-dim">No routines set up yet.</p>}
+              {routines.length === 0 && <p className="py-3 text-sm text-ink-faint">No routines set up yet.</p>}
             </div>
           </section>
         </div>
 
         <div className="flex flex-col gap-8">
-          <section className="glass rounded-xl p-4">
-            <h2 className="text-sm font-medium text-mist-dim">Calendar</h2>
-            <p className="mt-2 text-xs text-mist-dim">
+          <section className="card p-4">
+            <h2 className="text-sm font-medium text-ink-faint">Calendar</h2>
+            <p className="mt-2 text-xs text-ink-faint">
               Google Calendar sync isn&apos;t connected yet — set it up from Settings.
             </p>
           </section>
 
           {slipping.length > 0 && (
             <section>
-              <h2 className="text-sm font-medium text-mist-dim">Needs a look</h2>
+              <h2 className="text-sm font-medium text-ink-faint">Needs a look</h2>
               <div className="mt-3 flex flex-col gap-2">
                 {slipping.map((project) => (
                   <Link
                     key={project.id}
                     href={`/projects/${project.id}`}
-                    className="glass block rounded-xl px-4 py-3 text-sm text-mist hover:bg-white/[0.07]"
+                    className="card block px-4 py-3 text-sm text-ink hover:bg-paper"
                   >
                     {project.name}
-                    <span className="ml-2 text-xs text-coral">no activity in 7+ days</span>
+                    <span className="ml-2 text-xs italic text-stamp-red">no activity in 7+ days</span>
                   </Link>
                 ))}
               </div>
@@ -118,15 +118,15 @@ export default async function TodayPage() {
           )}
 
           <section>
-            <h2 className="text-sm font-medium text-mist-dim">Recent activity</h2>
+            <h2 className="text-sm font-medium text-ink-faint">Recent activity</h2>
             <div className="mt-3 flex flex-col gap-2">
               {notifications.map((n) => (
-                <div key={n.id} className="glass rounded-xl px-4 py-2.5 text-xs text-mist-dim">
+                <div key={n.id} className="card px-4 py-2.5 text-xs text-ink-faint">
                   {n.message}
                 </div>
               ))}
               {notifications.length === 0 && (
-                <p className="text-sm text-mist-dim">Nothing captured yet — try ⌘J.</p>
+                <p className="text-sm text-ink-faint">Nothing captured yet — try ⌘J.</p>
               )}
             </div>
           </section>

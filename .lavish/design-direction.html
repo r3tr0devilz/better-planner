@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Better Planner — design direction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #ece2cf;
+    --paper-card: #f8f1e3;
+    --paper-line: #d6c6a4;
+    --paper-line-soft: #e2d3b3;
+    --ink: #241f2b;
+    --ink-faint: #79705e;
+    --stamp-red: #ab3a2c;
+    --fountain: #33486e;
+    --moss: #4c7a55;
+    --mustard: #b1832c;
+    --plum: #6b3564;
+    --teal: #2e7a78;
+    --font-display: "Fraunces", Georgia, serif;
+    --font-body: "Source Serif 4", Georgia, serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    position: relative;
+  }
+
+  /* paper grain — the thing that actually says "paper" instead of "cream UI" */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.32;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.15  0 0 0 0 0.13  0 0 0 0 0.1  0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse 90% 60% at 50% 0%, rgba(36,31,43,0.05), transparent 70%);
+  }
+
+  main {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 5rem 1.5rem 7rem;
+    position: relative;
+  }
+
+  section { margin-top: 5rem; }
+  section:first-of-type { margin-top: 0; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .eyebrow::before { content: "§"; color: var(--stamp-red); font-family: var(--font-display); }
+
+  h1, h2 { font-family: var(--font-display); font-weight: 600; margin: 0; color: var(--ink); }
+
+  .hero h1 {
+    font-size: clamp(2.5rem, 5.6vw, 4.2rem);
+    line-height: 1.08;
+    margin-top: 0.9rem;
+    letter-spacing: -0.01em;
+  }
+  .hero p {
+    max-width: 42em;
+    margin: 1.5rem 0 0;
+    color: var(--ink-faint);
+    font-size: 1.12rem;
+    line-height: 1.65;
+  }
+  .hero .meta { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .stamp {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.03em;
+    padding: 0.3rem 0.65rem;
+    border: 1px solid var(--paper-line);
+    color: var(--ink-faint);
+    background: var(--paper-card);
+    transform: rotate(-0.6deg);
+  }
+  .stamp:nth-child(2n) { transform: rotate(0.5deg); }
+
+  h2.section-title { font-size: 1.7rem; }
+  .section-lede { max-width: 46em; color: var(--ink-faint); line-height: 1.65; margin: 0.85rem 0 0; font-size: 1rem; }
+
+  /* ---- card + row primitives ---- */
+  .card {
+    background: var(--paper-card);
+    border: 1px solid var(--paper-line);
+    box-shadow: 0 1px 2px rgba(36,31,43,0.05), 0 10px 22px -14px rgba(36,31,43,0.35);
+  }
+  .ledger { border-top: 1px solid var(--paper-line-soft); }
+  .stamp-dot {
+    width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0;
+    background: radial-gradient(circle at 35% 30%, var(--dot, var(--ink-faint)), color-mix(in srgb, var(--dot, var(--ink-faint)) 75%, black));
+    box-shadow: 0 1px 1px rgba(36,31,43,0.25);
+  }
+  .d0 { --dot: var(--stamp-red); }
+  .d1 { --dot: var(--fountain); }
+  .d2 { --dot: var(--moss); }
+  .d3 { --dot: var(--mustard); }
+  .d4 { --dot: var(--plum); }
+  .d5 { --dot: var(--teal); }
+
+  /* ---- palette ---- */
+  .palette-grid { margin-top: 1.75rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.9rem; }
+  .swatch { border: 1px solid var(--paper-line); background: var(--paper-card); box-shadow: 0 1px 2px rgba(36,31,43,0.05), 0 8px 16px -12px rgba(36,31,43,0.3); }
+  .swatch .fill { height: 5.2rem; border-bottom: 1px solid var(--paper-line); }
+  .swatch .label { padding: 0.65rem 0.8rem 0.85rem; }
+  .swatch .name { font-size: 0.8rem; font-weight: 500; }
+  .swatch .hex, .swatch .role { font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink-faint); margin-top: 0.15rem; }
+
+  /* ---- type specimens ---- */
+  .type-row { display: grid; grid-template-columns: 9rem 1fr; gap: 1.5rem; align-items: baseline; padding: 1.4rem 0; border-top: 1px solid var(--paper-line); }
+  .type-row:last-child { border-bottom: 1px solid var(--paper-line); }
+  .type-row .role { font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.06em; }
+  .type-row .role span { display: block; color: var(--ink); font-family: var(--font-body); text-transform: none; letter-spacing: 0; font-size: 0.85rem; margin-top: 0.3rem; }
+  .specimen-display { font-family: var(--font-display); font-size: 2rem; font-weight: 600; }
+  .specimen-body { font-family: var(--font-body); font-size: 1.08rem; color: var(--ink-faint); max-width: 34em; line-height: 1.6; }
+  .specimen-mono { font-family: var(--font-mono); font-size: 0.92rem; color: var(--stamp-red); }
+
+  /* ---- signature: ink stamp marks ---- */
+  .mark-demo { margin-top: 1.75rem; display: grid; }
+  .mark-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.9rem 1.1rem; border-bottom: 1px solid var(--paper-line-soft); }
+  .mark-row:first-child { border-top: 1px solid var(--paper-line-soft); }
+  .mark-row .domain { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint); width: 9rem; flex-shrink: 0; }
+  .mark-row .item { font-size: 0.95rem; }
+
+  /* ---- mockup: today dashboard ---- */
+  .device-frame { margin-top: 2rem; border: 1px solid var(--paper-line); padding: 1.9rem; background: var(--paper-card); box-shadow: 0 2px 4px rgba(36,31,43,0.06), 0 16px 34px -18px rgba(36,31,43,0.4); }
+  .mock-greeting { font-family: var(--font-display); font-size: 1.85rem; font-weight: 600; }
+  .mock-label { font-family: var(--font-mono); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin: 1.7rem 0 0.7rem; }
+
+  .top-three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.9rem; }
+  .top-three .card { padding: 0.9rem 1rem 1rem; position: relative; }
+  .top-three .card:nth-child(1) { transform: rotate(-0.6deg); }
+  .top-three .card:nth-child(3) { transform: rotate(0.5deg); }
+  .tape {
+    position: absolute; top: -0.55rem; left: 1rem; width: 2.6rem; height: 1rem;
+    background: color-mix(in srgb, var(--dot, var(--mustard)) 55%, var(--paper) 45%);
+    opacity: 0.75; transform: rotate(-3deg);
+    box-shadow: 0 1px 1px rgba(36,31,43,0.15);
+  }
+  .top-three .card .check { display: flex; align-items: center; gap: 0.55rem; margin-top: 0.2rem; }
+  .checkbox { width: 14px; height: 14px; border: 1.4px solid var(--ink-faint); flex-shrink: 0; }
+  .checkbox.done { background: var(--moss); border-color: var(--moss); }
+  .task-title { font-size: 0.9rem; }
+  .task-title.done { color: var(--ink-faint); text-decoration: line-through; }
+  .due { font-size: 0.72rem; color: var(--ink-faint); margin-top: 0.2rem; font-family: var(--font-mono); }
+
+  .dashboard-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1.5rem; margin-top: 1.4rem; }
+  .task-row-mock { display: flex; align-items: center; gap: 0.65rem; padding: 0.7rem 0.2rem; border-bottom: 1px solid var(--paper-line-soft); }
+  .star { margin-left: auto; color: var(--paper-line); font-size: 0.9rem; }
+  .star.active { color: var(--stamp-red); }
+
+  .routine-row-mock { display: flex; align-items: center; gap: 0.65rem; padding: 0.7rem 0.2rem; border-bottom: 1px solid var(--paper-line-soft); }
+  .streak-history { display: flex; gap: 2px; margin-top: 0.35rem; }
+  .streak-history span { width: 5px; height: 10px; background: var(--paper-line-soft); }
+  .streak-history span.done { background: var(--moss); }
+  .streak-badge { margin-left: auto; font-family: var(--font-mono); font-size: 0.66rem; color: var(--stamp-red); border: 1px solid var(--stamp-red); padding: 0.1rem 0.45rem; }
+
+  .side-card { border: 1px solid var(--paper-line); background: var(--paper); padding: 1rem 1.1rem; margin-bottom: 1rem; }
+  .side-card .t { font-size: 0.76rem; font-weight: 600; font-family: var(--font-display); }
+  .side-card .d { font-size: 0.78rem; color: var(--ink-faint); margin-top: 0.4rem; line-height: 1.55; }
+  .flag { color: var(--stamp-red); font-style: italic; }
+
+  /* ---- decisions ---- */
+  .decisions { margin-top: 1.75rem; border-top: 1px solid var(--paper-line); }
+  .decision { padding: 1.5rem 0; border-bottom: 1px solid var(--paper-line); display: grid; grid-template-columns: 1.3fr 2fr; gap: 1.5rem; }
+  .decision .q { font-family: var(--font-display); font-size: 1rem; font-weight: 600; }
+  .decision .a { font-size: 0.92rem; color: var(--ink-faint); line-height: 1.65; }
+
+  footer {
+    margin-top: 6rem; padding-top: 1.6rem; border-top: 1px solid var(--paper-line);
+    font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-faint);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+  }
+
+  @media (max-width: 720px) {
+    .top-three { grid-template-columns: 1fr; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .decision { grid-template-columns: 1fr; }
+    .type-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <section class="hero">
+    <div class="eyebrow">Better Planner — design direction, revised</div>
+    <h1>Kept as a page,<br />not a screen.</h1>
+    <p>
+      Traded the dashboard glass for the thing the video actually trusts most —
+      pen and paper. Index cards for the day's top three, a ruled ledger for
+      the task list, ink-stamped dots for each domain instead of a neon bar.
+      Warm parchment with real grain, not a flat cream fill.
+    </p>
+    <div class="meta">
+      <span class="stamp">Fraunces · headings</span>
+      <span class="stamp">Source Serif 4 · body</span>
+      <span class="stamp">JetBrains Mono · data</span>
+      <span class="stamp">grain-textured paper</span>
+      <span class="stamp">Next.js + Supabase</span>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">01 — Palette</div>
+    <h2 class="section-title">Parchment, ink, and two accent inks</h2>
+    <p class="section-lede">
+      One paper tone for the page, one lighter tone for cards sitting on it —
+      like a card pulled from a folder. Stamp-red and fountain-blue split the
+      accent duty instead of a single terracotta doing everything; moss reads
+      as a pen check-mark, not a system-green.
+    </p>
+    <div class="palette-grid">
+      <div class="swatch"><div class="fill" style="background:#ece2cf"></div><div class="label"><div class="name">Paper</div><div class="role">page ground</div><div class="hex">#ECE2CF</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#f8f1e3"></div><div class="label"><div class="name">Paper Card</div><div class="role">index-card fill</div><div class="hex">#F8F1E3</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#241f2b"></div><div class="label"><div class="name">Ink</div><div class="role">primary text</div><div class="hex">#241F2B</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#79705e"></div><div class="label"><div class="name">Ink Faint</div><div class="role">secondary text</div><div class="hex">#79705E</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#ab3a2c"></div><div class="label"><div class="name">Stamp Red</div><div class="role">primary accent</div><div class="hex">#AB3A2C</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#33486e"></div><div class="label"><div class="name">Fountain</div><div class="role">secondary accent</div><div class="hex">#33486E</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#4c7a55"></div><div class="label"><div class="name">Moss</div><div class="role">done / success</div><div class="hex">#4C7A55</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#b1832c"></div><div class="label"><div class="name">Mustard</div><div class="role">mark, medium priority</div><div class="hex">#B1832C</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#6b3564"></div><div class="label"><div class="name">Plum</div><div class="role">mark, fifth domain</div><div class="hex">#6B3564</div></div></div>
+      <div class="swatch"><div class="fill" style="background:#2e7a78"></div><div class="label"><div class="name">Teal</div><div class="role">mark, sixth domain</div><div class="hex">#2E7A78</div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">02 — Typography</div>
+    <h2 class="section-title">Set like a printed page</h2>
+    <p class="section-lede">
+      Fraunces stays — its slight wonk already reads as handwritten warmth —
+      but now sits upright instead of italic-only, sized like a masthead.
+      Body copy moves off a UI grotesk onto Source Serif 4, so descriptions
+      read like prose, not app chrome. Mono is reserved for anything stamped:
+      dates, streaks, hours.
+    </p>
+    <div>
+      <div class="type-row"><div class="role">Display<span>Fraunces, 600</span></div><div class="specimen-display">Good morning</div></div>
+      <div class="type-row"><div class="role">Body<span>Source Serif 4</span></div><div class="specimen-body">Change out water filter and refrigerator — assigned to Home, due tomorrow at 2:00 PM.</div></div>
+      <div class="type-row"><div class="role">Data<span>JetBrains Mono</span></div><div class="specimen-mono">12d streak · 3.5h logged · ⌘J to capture</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">03 — Signature</div>
+    <h2 class="section-title">Ink-stamp domain marks</h2>
+    <p class="section-lede">
+      A small stamped dot per domain, filed like a library card catalog —
+      the same idea as before (color ties every row back to its domain) in
+      paper's own material instead of a glass bar.
+    </p>
+    <div class="mark-demo">
+      <div class="mark-row"><span class="stamp-dot d0"></span><span class="domain">Home</span><span class="item">Change water filter — tomorrow, 2:00 PM</span></div>
+      <div class="mark-row"><span class="stamp-dot d1"></span><span class="domain">Hill Media Group</span><span class="item">Client website — DNS checklist</span></div>
+      <div class="mark-row"><span class="stamp-dot d2"></span><span class="domain">YouTube — Field Notes</span><span class="item">Edit b-roll for Memorial Day video</span></div>
+      <div class="mark-row"><span class="stamp-dot d4"></span><span class="domain">Family</span><span class="item">Log Memorial Day journal entry</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">04 — Today, in the flesh</div>
+    <h2 class="section-title">The dashboard, re-papered</h2>
+    <p class="section-lede">
+      Same layout, same data as the Phase 1 build — top three as sticky-note
+      cards, the open-tasks list on ruled ledger lines, routines as a streak
+      ledger, and side notes filed like index cards.
+    </p>
+
+    <div class="device-frame">
+      <div class="mock-greeting">Good afternoon</div>
+
+      <div class="mock-label">Top three today</div>
+      <div class="top-three">
+        <div class="card"><span class="tape d0"></span>
+          <div class="check"><span class="checkbox"></span><div><div class="task-title">Change water filter</div><div class="due">TOMORROW 2:00 PM</div></div></div>
+        </div>
+        <div class="card"><span class="tape d1"></span>
+          <div class="check"><span class="checkbox done"></span><div><div class="task-title done">Send client invoice</div></div></div>
+        </div>
+        <div class="card"><span class="tape d2"></span>
+          <div class="check"><span class="checkbox"></span><div><div class="task-title">Outline next video</div><div class="due">TODAY 6:00 PM</div></div></div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div>
+          <div class="mock-label">Open tasks (6)</div>
+          <div class="ledger">
+            <div class="task-row-mock"><span class="checkbox"></span><span class="stamp-dot d0"></span><span class="task-title">Check the oil on the car</span><span class="star active">✦</span></div>
+            <div class="task-row-mock"><span class="checkbox"></span><span class="stamp-dot d3"></span><span class="task-title">Renew domain for site</span><span class="star">✧</span></div>
+            <div class="task-row-mock"><span class="checkbox"></span><span class="stamp-dot d4"></span><span class="task-title">Pick a birthday gift</span><span class="star">✧</span></div>
+          </div>
+
+          <div class="mock-label">Routine checklist</div>
+          <div class="ledger">
+            <div class="routine-row-mock">
+              <span class="checkbox done"></span>
+              <div style="flex:1"><div class="task-title done">Take vitamins</div>
+                <div class="streak-history"><span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span></div>
+              </div>
+              <span class="streak-badge">7d streak</span>
+            </div>
+            <div class="routine-row-mock">
+              <span class="checkbox"></span>
+              <div style="flex:1"><div class="task-title">Evening journal</div>
+                <div class="streak-history"><span class="done"></span><span></span><span class="done"></span><span class="done"></span><span></span><span class="done"></span><span></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="side-card"><div class="t">Calendar</div><div class="d">Google Calendar sync isn't connected yet — set it up from Settings.</div></div>
+          <div class="side-card"><div class="t"><span class="stamp-dot d1" style="display:inline-block;vertical-align:middle;margin-right:0.4rem"></span>Needs a look</div><div class="d">Client website <span class="flag">— no activity in 7+ days</span></div></div>
+          <div class="side-card"><div class="t">Recent activity</div><div class="d">Task created: Check the oil on the car<br/>Captured: &ldquo;spent Memorial Day at the lake — photos to add&rdquo;</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">05 — Why these calls</div>
+    <h2 class="section-title">Decisions, not defaults</h2>
+    <div class="decisions">
+      <div class="decision"><div class="q">Why paper over glass?</div><div class="a">You said so directly — and it fits: the video's creator writes a real daily journal by hand and calls pen-and-paper "one of the best ways to commit things to memory." Paper isn't a skin here, it's the material the source system already trusts most.</div></div>
+      <div class="decision"><div class="q">Why keep Fraunces instead of a fresh typeface?</div><div class="a">Its wonk already read as handwritten warmth in the glass version — the paper revamp only needed to change how it's set (upright masthead sizes, not italic-only), not replace it. Body copy is what actually moved, onto Source Serif 4, so paragraphs read like print.</div></div>
+      <div class="decision"><div class="q">Why two accent inks instead of one terracotta?</div><div class="a">A single warm accent on cream is the most common AI default going. Splitting stamp-red (urgent, primary) and fountain-blue (secondary, calmer) reads like an actual desk — red pen for corrections, blue ink for everything else — and avoids that one-note look.</div></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>better-planner · phase 1 · design direction v2</span>
+    <span>github.com/r3tr0devilz/better-planner</span>
+  </footer>
+
+</main>
+</body>
+</html>
