@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getProjectDetail, getChecklistTemplates } from "@/lib/data/projects";
 import { MilestoneRow } from "@/components/milestone-row";
 import { ChecklistItemRow } from "@/components/checklist-item-row";
-import { createMilestone, createChecklist, addChecklistItem, logActivity } from "../actions";
+import { createMilestone, createChecklist, addChecklistItem, toggleChecklistItem, logActivity } from "../actions";
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -57,7 +57,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                 {checklistItems
                   .filter((i) => i.checklist_id === checklist.id)
                   .map((item) => (
-                    <ChecklistItemRow key={item.id} projectId={project.id} item={item} />
+                    <ChecklistItemRow key={item.id} item={item} onToggle={toggleChecklistItem.bind(null, project.id)} />
                   ))}
               </div>
               <form

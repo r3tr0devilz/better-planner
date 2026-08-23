@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_ITEMS } from "./nav-items";
+import { MoreHorizontal } from "lucide-react";
+import { NAV_ITEMS, PRIMARY_NAV_ITEMS, SECONDARY_NAV_ITEMS } from "./nav-items";
 import { CaptureBar } from "./capture-bar";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -46,7 +47,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="flex-1 px-4 py-6 pb-24 md:px-8 md:py-8 md:pb-8">{children}</main>
 
       <nav className="card fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-x-0 border-b-0 py-2 md:hidden">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {PRIMARY_NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href);
           return (
             <Link
@@ -61,6 +62,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </Link>
           );
         })}
+        <Link
+          href="/more"
+          className={`flex flex-col items-center gap-0.5 px-2 py-1 text-[11px] ${
+            SECONDARY_NAV_ITEMS.some(({ href }) => pathname.startsWith(href)) || pathname === "/more"
+              ? "text-stamp-red"
+              : "text-ink-faint"
+          }`}
+        >
+          <MoreHorizontal size={20} />
+          More
+        </Link>
       </nav>
     </div>
   );

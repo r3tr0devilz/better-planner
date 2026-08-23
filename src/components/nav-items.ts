@@ -1,9 +1,18 @@
-import { Sun, CheckSquare, Repeat, FolderKanban, Settings } from "lucide-react";
+import { Sun, CheckSquare, Repeat, FolderKanban, Clapperboard, Users, BookOpen, Package, Settings } from "lucide-react";
 
-export const NAV_ITEMS = [
+export const PRIMARY_NAV_ITEMS = [
   { href: "/today", label: "Today", icon: Sun },
   { href: "/tasks", label: "Tasks", icon: CheckSquare },
   { href: "/routines", label: "Routines", icon: Repeat },
   { href: "/projects", label: "Projects", icon: FolderKanban },
+] as const;
+
+export const SECONDARY_NAV_ITEMS = [
+  { href: "/content", label: "Content", icon: Clapperboard },
+  { href: "/people", label: "People", icon: Users },
+  { href: "/library", label: "Library", icon: BookOpen },
+  { href: "/inventory", label: "Inventory", icon: Package },
   { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
+
+export const NAV_ITEMS = [...PRIMARY_NAV_ITEMS, ...SECONDARY_NAV_ITEMS] as const;

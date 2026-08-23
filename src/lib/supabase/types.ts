@@ -130,6 +130,91 @@ export type NotificationRow = Timestamped & {
   read: boolean;
 };
 
+export type ContentItem = Timestamped & {
+  id: string;
+  user_id: string;
+  domain_id: string | null;
+  title: string;
+  content_type: "video" | "article" | "podcast" | "newsletter";
+  status: "idea" | "outlining" | "editing" | "waiting" | "published";
+  url: string | null;
+  publish_date: string | null;
+  outline_markdown: string | null;
+};
+
+export type Person = Timestamped & {
+  id: string;
+  user_id: string;
+  name: string;
+  birthday: string | null;
+  anniversary: string | null;
+};
+
+export type PersonFact = Timestamped & {
+  id: string;
+  user_id: string;
+  person_id: string;
+  fact: string;
+};
+
+export type PersonInteraction = {
+  id: string;
+  user_id: string;
+  person_id: string;
+  occurred_at: string;
+  note: string | null;
+};
+
+export type Book = Timestamped & {
+  id: string;
+  user_id: string;
+  title: string;
+  author: string | null;
+  cover_url: string | null;
+  status: "want" | "reading" | "finished" | "abandoned";
+  format: string | null;
+  started_at: string | null;
+  finished_at: string | null;
+  rating: number | null;
+  isbn: string | null;
+};
+
+export type LibraryNote = Timestamped & {
+  id: string;
+  user_id: string;
+  kind: "note" | "quote" | "journal";
+  source: string | null;
+  body: string;
+  tags: string[];
+  image_url: string | null;
+  flagged_for_review: boolean;
+  book_id: string | null;
+};
+
+export type Highlight = Timestamped & {
+  id: string;
+  user_id: string;
+  book_id: string;
+  quote: string;
+};
+
+export type HighlightThought = Timestamped & {
+  id: string;
+  user_id: string;
+  highlight_id: string;
+  thought: string;
+};
+
+export type InventoryItem = {
+  id: string;
+  user_id: string;
+  name: string;
+  photo_url: string | null;
+  location: string | null;
+  added_at: string;
+  removed_at: string | null;
+};
+
 type TableDef<Row, Insert> = {
   Row: Row;
   Insert: Insert;
@@ -153,6 +238,15 @@ export type Database = {
       routine_completions: TableDef<RoutineCompletion, Omit<RoutineCompletion, "id" | "user_id"> & { user_id?: string }>;
       capture_inbox: TableDef<CaptureInbox, Omit<CaptureInbox, "id" | "user_id" | "created_at"> & { user_id?: string }>;
       notifications: TableDef<NotificationRow, Omit<NotificationRow, "id" | "user_id" | "created_at"> & { user_id?: string }>;
+      content_items: TableDef<ContentItem, Omit<ContentItem, "id" | "user_id" | "created_at"> & { user_id?: string }>;
+      people: TableDef<Person, Omit<Person, "id" | "user_id" | "created_at"> & { user_id?: string }>;
+      people_facts: TableDef<PersonFact, Omit<PersonFact, "id" | "user_id" | "created_at"> & { user_id?: string }>;
+      people_interactions: TableDef<PersonInteraction, Omit<PersonInteraction, "id" | "user_id" | "occurred_at"> & { user_id?: string; occurred_at?: string }>;
+      books: TableDef<Book, Omit<Book, "id" | "user_id" | "created_at"> & { user_id?: string }>;
+      library_notes: TableDef<LibraryNote, Omit<LibraryNote, "id" | "user_id" | "created_at"> & { user_id?: string }>;
+      highlights: TableDef<Highlight, Omit<Highlight, "id" | "user_id" | "created_at"> & { user_id?: string }>;
+      highlight_thoughts: TableDef<HighlightThought, Omit<HighlightThought, "id" | "user_id" | "created_at"> & { user_id?: string }>;
+      inventory_items: TableDef<InventoryItem, Omit<InventoryItem, "id" | "user_id" | "added_at"> & { user_id?: string; added_at?: string }>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
