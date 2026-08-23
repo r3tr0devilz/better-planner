@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+:root {
+  /* base surface */
+  --color-ink: #0f151b;
+  --color-ink-soft: #1a232c;
+  --color-mist: #eef2f6;
+  --color-mist-dim: #aab6c2;
+
+  /* accents */
+  --color-dawn: #ff8a5c;
+  --color-dusk: #8c9eff;
+  --color-sage: #7fb88f;
+  --color-gold: #e8c468;
+  --color-coral: #ff6b7a;
+  --color-teal: #5cc8c2;
+
+  /* glass */
+  --glass-fill: rgba(238, 242, 246, 0.06);
+  --glass-fill-strong: rgba(238, 242, 246, 0.1);
+  --glass-border: rgba(238, 242, 246, 0.14);
+
+  --background: var(--color-ink);
+  --foreground: var(--color-mist);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-mist: var(--color-mist);
+  --color-mist-dim: var(--color-mist-dim);
+  --color-dawn: var(--color-dawn);
+  --color-dusk: var(--color-dusk);
+  --color-sage: var(--color-sage);
+  --color-gold: var(--color-gold);
+  --color-coral: var(--color-coral);
+  --color-teal: var(--color-teal);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+body {
+  background:
+    radial-gradient(ellipse 120% 60% at 15% -10%, rgba(140, 158, 255, 0.16), transparent 60%),
+    radial-gradient(ellipse 100% 50% at 90% 0%, rgba(255, 138, 92, 0.12), transparent 55%),
+    var(--background);
+  background-attachment: fixed;
+  color: var(--foreground);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Signature: every domain gets a color thread carried through its
+   tasks, projects, and content as a left-edge bar. Assigned via
+   data-thread on the row/card, cycling through the accent set. */
+[data-thread="0"] { --thread: var(--color-dawn); }
+[data-thread="1"] { --thread: var(--color-dusk); }
+[data-thread="2"] { --thread: var(--color-sage); }
+[data-thread="3"] { --thread: var(--color-gold); }
+[data-thread="4"] { --thread: var(--color-coral); }
+[data-thread="5"] { --thread: var(--color-teal); }
+
+.thread-edge {
+  border-left: 3px solid var(--thread, var(--color-mist-dim));
+}
+
+.glass {
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.glass-strong {
+  background: var(--glass-fill-strong);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

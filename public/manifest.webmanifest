@@ -1,0 +1,13 @@
+{
+  "name": "Better Planner",
+  "short_name": "Better Planner",
+  "description": "One place for tasks, routines, projects, and everything else you're keeping track of.",
+  "start_url": "/today",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f151b",
+  "theme_color": "#0f151b",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
