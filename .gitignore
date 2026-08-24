@@ -41,6 +41,9 @@ yarn-error.log*
 supabase/.branches
 supabase/.temp
 
+# agent session-local state (not project content)
+.claude/scheduled_tasks.lock
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

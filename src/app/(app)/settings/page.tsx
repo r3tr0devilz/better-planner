@@ -7,6 +7,9 @@ export default async function SettingsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const usingOllama = process.env.CAPTURE_LLM_PROVIDER === "ollama";
+  const captureModel = usingOllama ? (process.env.OLLAMA_MODEL ?? "llama3.2:3b") : "claude-opus-5";
+
   return (
     <div className="mx-auto max-w-lg">
       <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-ink">Settings</h1>
@@ -19,6 +22,22 @@ export default async function SettingsPage() {
             Sign out
           </button>
         </form>
+      </section>
+
+      <section className="card mt-4 p-4">
+        <h2 className="text-sm font-medium text-ink-faint">Capture AI</h2>
+        <div className="mt-3 flex items-center justify-between text-sm">
+          <span className="text-ink">Provider</span>
+          <span className="font-mono text-xs text-ink-faint">{usingOllama ? "Ollama (local)" : "Anthropic"}</span>
+        </div>
+        <div className="mt-2 flex items-center justify-between text-sm">
+          <span className="text-ink">Model</span>
+          <span className="font-mono text-xs text-ink-faint">{captureModel}</span>
+        </div>
+        <p className="mt-3 text-xs text-ink-faint">
+          Set by <code className="font-mono">CAPTURE_LLM_PROVIDER</code> in your environment — this page just reports it,
+          it can&apos;t be changed here.
+        </p>
       </section>
 
       <section className="card mt-4 p-4">
