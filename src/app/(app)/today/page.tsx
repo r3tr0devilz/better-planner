@@ -126,7 +126,7 @@ export default async function TodayPage() {
                 </div>
               ))}
               {notifications.length === 0 && (
-                <p className="text-sm text-ink-faint">Nothing captured yet — try ⌘J.</p>
+                <p className="text-sm text-ink-faint">Nothing captured yet — try the Capture button.</p>
               )}
             </div>
           </section>

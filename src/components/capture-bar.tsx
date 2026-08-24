@@ -1,8 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { Mic, Plus, Square, X } from "lucide-react";
+
+function subscribeNoop() {
+  return () => {};
+}
+function getIsMac() {
+  return /Mac|iPhone|iPad/.test(navigator.userAgent);
+}
+function getIsMacServerSnapshot() {
+  return false;
+}
 
 type SpeechRecognitionLike = {
   continuous: boolean;
@@ -30,6 +40,7 @@ export function CaptureBar() {
   const [listening, setListening] = useState(false);
   const [status, setStatus] = useState<"idle" | "saving" | "done" | "error">("idle");
   const [resultLabel, setResultLabel] = useState<string | null>(null);
+  const isMac = useSyncExternalStore(subscribeNoop, getIsMac, getIsMacServerSnapshot);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const speechSupported = typeof window !== "undefined" && getSpeechRecognition() !== null;
 
@@ -115,7 +126,12 @@ export function CaptureBar() {
       >
         <Plus size={18} />
         <span className="hidden sm:inline">Capture</span>
-        <kbd className="hidden border border-paper-card/30 px-1.5 py-0.5 font-mono text-xs sm:inline">⌘J</kbd>
+        <kbd
+          className="hidden border border-paper-card/30 px-1.5 py-0.5 font-mono text-xs sm:inline"
+          title={isMac ? "Cmd+J" : "Ctrl+J"}
+        >
+          {isMac ? "⌘J" : "⊞J"}
+        </kbd>
       </button>
 
       {open && (
