@@ -40,7 +40,7 @@ export function RoutineRow({
             <span
               key={i}
               className={`h-2.5 w-1.5 rounded-sm transition-colors duration-150 ${
-                v === true ? "bg-moss" : "bg-paper-line-soft"
+                v === true ? "bg-moss" : "bg-line"
               }`}
             />
           ))}
@@ -48,7 +48,7 @@ export function RoutineRow({
       </div>
 
       {streak > 0 && (
-        <span className="shrink-0 border border-stamp-red px-2 py-0.5 font-mono text-xs text-stamp-red">
+        <span className="shrink-0 border border-cobalt px-2 py-0.5 font-mono text-xs text-cobalt">
           {streak}d streak
         </span>
       )}

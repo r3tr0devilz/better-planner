@@ -15,7 +15,7 @@ export default async function LibraryPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-ink">Library</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-3xl font-black uppercase tracking-tight text-ink">Library</h1>
 
       <form action={createNote} className="card mt-6 flex flex-col gap-3 p-4">
         <div className="field-row">
@@ -59,7 +59,7 @@ export default async function LibraryPage() {
                     <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-[11px] text-ink-faint">
                       {note.source && <span className="max-w-[12rem] truncate">{note.source}</span>}
                       {note.tags.map((t) => (
-                        <span key={t} className="max-w-[10rem] truncate border border-paper-line px-1.5 py-0.5">
+                        <span key={t} className="max-w-[10rem] truncate border border-line px-1.5 py-0.5">
                           {t}
                         </span>
                       ))}
@@ -92,7 +92,7 @@ export default async function LibraryPage() {
         {books.length > 0 && (
           <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {books.map((book) => (
-              <Link key={book.id} href={`/library/books/${book.id}`} className="hoverable card block min-w-0 p-4 hover:bg-paper">
+              <Link key={book.id} href={`/library/books/${book.id}`} className="hoverable card block min-w-0 p-4 hover:bg-stone">
                 <p className="truncate text-sm text-ink">{book.title}</p>
                 {book.author && <p className="truncate text-xs text-ink-faint">{book.author}</p>}
                 <p className="mt-1 font-mono text-[11px] uppercase tracking-wide text-ink-faint">{book.status}</p>

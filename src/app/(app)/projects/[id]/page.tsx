@@ -20,7 +20,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     <div className="mx-auto max-w-2xl">
       <div className="flex items-start justify-between gap-3">
         <h1 className="min-w-0 font-[family-name:var(--font-display)] text-3xl font-semibold text-ink [overflow-wrap:anywhere]">{project.name}</h1>
-        <span className="shrink-0 border border-paper-line px-3 py-1 font-mono text-xs text-ink-faint">
+        <span className="shrink-0 border border-line px-3 py-1 font-mono text-xs text-ink-faint">
           {project.engagement === "retainer" ? "Retainer" : project.kind === "area" ? "Area" : "Project"}
         </span>
       </div>

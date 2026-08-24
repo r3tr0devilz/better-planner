@@ -121,13 +121,13 @@ export function CaptureBar() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex shrink-0 items-center gap-2 bg-stamp-red px-4 py-2.5 font-medium text-paper-card shadow-lg shadow-stamp-red/20 transition-transform duration-150 ease-out hover:scale-[1.03] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-fountain focus-visible:ring-offset-paper"
+        className="flex shrink-0 items-center gap-2 border-2 border-ink bg-cobalt px-4 py-2.5 font-bold text-panel shadow-[3px_3px_0_var(--color-ink)] transition-transform duration-150 ease-out hover:opacity-92 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-cobalt focus-visible:ring-offset-stone"
         aria-label="Capture a task or note"
       >
         <Plus size={18} />
         <span className="hidden sm:inline">Capture</span>
         <kbd
-          className="hidden border border-paper-card/30 px-1.5 py-0.5 font-mono text-xs sm:inline"
+          className="hidden border border-panel/30 px-1.5 py-0.5 font-mono text-xs sm:inline"
           title={isMac ? "Cmd+J" : "Ctrl+J"}
         >
           {isMac ? "⌘J" : "⊞J"}
@@ -144,7 +144,7 @@ export function CaptureBar() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold text-ink">
+              <h2 className="font-[family-name:var(--font-display)] text-lg font-black uppercase tracking-tight text-ink">
                 Capture
               </h2>
               <button
@@ -169,7 +169,7 @@ export function CaptureBar() {
             />
 
             {status === "error" && (
-              <p role="alert" className="mt-2 text-sm text-stamp-red">
+              <p role="alert" className="mt-2 text-sm text-vermillion">
                 Couldn&apos;t save that — try again.
               </p>
             )}

@@ -17,7 +17,7 @@ export default async function ContentPage() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-ink">Content</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-3xl font-black uppercase tracking-tight text-ink">Content</h1>
 
       <form action={createContentItem} className="field-row card mt-6 p-4">
         <label className="field-wide">
@@ -59,7 +59,7 @@ export default async function ContentPage() {
               </h2>
               <div className="mt-3 flex flex-col gap-2">
                 {columnItems.map((item) => (
-                  <Link key={item.id} href={`/content/${item.id}`} className="hoverable card block p-3 hover:bg-paper">
+                  <Link key={item.id} href={`/content/${item.id}`} className="hoverable card block p-3 hover:bg-stone">
                     <p className="truncate text-sm text-ink">{item.title}</p>
                     <p className="mt-1 font-mono text-[11px] uppercase tracking-wide text-ink-faint">{item.content_type}</p>
                   </Link>

@@ -9,7 +9,7 @@ export default async function InventoryPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-ink">Inventory</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-3xl font-black uppercase tracking-tight text-ink">Inventory</h1>
 
       <form action={createItem} className="field-row card mt-6 p-4">
         <label className="field-wide">

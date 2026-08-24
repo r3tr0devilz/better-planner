@@ -19,9 +19,9 @@ export function MilestoneRow({ projectId, milestone }: { projectId: string; mile
           <span className="min-w-0 truncate text-ink">{milestone.name}</span>
           <span className="shrink-0 font-mono text-ink-faint">{milestone.percent_complete}%</span>
         </div>
-        <div className="mt-1 h-1.5 border border-paper-line bg-paper">
+        <div className="mt-1 h-1.5 border border-line bg-stone">
           <div
-            className="h-full bg-fountain transition-[width] duration-200 ease-out"
+            className="h-full bg-cobalt transition-[width] duration-200 ease-out"
             style={{ width: `${milestone.percent_complete}%` }}
           />
         </div>

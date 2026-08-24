@@ -6,7 +6,7 @@ import { toggleTaskDone, toggleTopThree } from "@/app/(app)/tasks/actions";
 import type { Task } from "@/lib/supabase/types";
 
 const PRIORITY_COLOR: Record<Task["priority"], string> = {
-  high: "bg-stamp-red",
+  high: "bg-vermillion",
   medium: "bg-mustard",
   low: "bg-ink-faint",
 };
@@ -37,7 +37,7 @@ export function TaskRow({ task, threadIndex }: { task: Task; threadIndex: number
         aria-label={`Mark "${task.title}" ${done ? "open" : "done"}`}
       />
 
-      {threadIndex >= 0 && <span className="stamp-dot" data-thread={threadIndex} aria-hidden />}
+      {threadIndex >= 0 && <span className="thread-mark" data-thread={threadIndex} aria-hidden />}
 
       <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_COLOR[task.priority]}`} aria-hidden />
 
@@ -53,7 +53,7 @@ export function TaskRow({ task, threadIndex }: { task: Task; threadIndex: number
         disabled={pending}
         aria-label={task.is_top_three ? "Remove from top three" : "Add to top three"}
         aria-pressed={task.is_top_three}
-        className={`shrink-0 transition-transform duration-150 active:scale-90 ${task.is_top_three ? "text-stamp-red" : "text-ink-faint hover:text-ink"}`}
+        className={`shrink-0 transition-transform duration-150 active:scale-90 ${task.is_top_three ? "text-cobalt" : "text-ink-faint hover:text-ink"}`}
       >
         <Star size={16} fill={task.is_top_three ? "currentColor" : "none"} />
       </button>

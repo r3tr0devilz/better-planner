@@ -14,7 +14,7 @@ export default async function ProjectsPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-ink">Projects</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-3xl font-black uppercase tracking-tight text-ink">Projects</h1>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <form action={createDomain} className="card flex flex-col gap-2 p-4">
@@ -26,7 +26,7 @@ export default async function ProjectsPage() {
             </label>
             <label className="field-narrow">
               Color
-              <input type="color" name="color" defaultValue="#33486e" className="h-9 w-full border border-paper-line bg-transparent p-0" />
+              <input type="color" name="color" defaultValue="#33486e" className="h-9 w-full border border-line bg-transparent p-0" />
             </label>
             <button type="submit" className="btn">
               Add
@@ -74,7 +74,7 @@ export default async function ProjectsPage() {
         const items = projects.filter((p) => p.domain_id === domain.id);
         if (items.length === 0) return null;
         return (
-          <section key={domain.id} className="mt-8">
+          <section key={domain.id} id={`domain-${domain.id}`} className="mt-8 scroll-mt-20">
             <h2 className="flex items-center gap-2 text-sm font-medium text-ink-faint">
               <span
                 className="h-2.5 w-2.5 rounded-full"
@@ -124,7 +124,7 @@ export default async function ProjectsPage() {
         {templates.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2">
             {templates.map((t) => (
-              <li key={t.id} className="max-w-full truncate border border-paper-line px-3 py-1 font-mono text-xs text-ink-faint">
+              <li key={t.id} className="max-w-full truncate border border-line px-3 py-1 font-mono text-xs text-ink-faint">
                 {t.name}
               </li>
             ))}
@@ -148,9 +148,9 @@ function ProjectCard({
       className="card flex flex-col gap-1 px-4 py-3 transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99]"
     >
       <div className="flex items-center gap-2">
-        {threadIndex >= 0 && <span className="stamp-dot" data-thread={threadIndex} aria-hidden />}
+        {threadIndex >= 0 && <span className="thread-mark" data-thread={threadIndex} aria-hidden />}
         <p className="min-w-0 flex-1 truncate text-sm text-ink">{project.name}</p>
-        <span className="shrink-0 border border-paper-line px-2 py-0.5 font-mono text-[11px] text-ink-faint">
+        <span className="shrink-0 border border-line px-2 py-0.5 font-mono text-[11px] text-ink-faint">
           {project.engagement === "retainer" ? "Retainer" : project.kind === "area" ? "Area" : "Project"}
         </span>
       </div>

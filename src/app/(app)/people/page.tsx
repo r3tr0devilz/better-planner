@@ -13,7 +13,7 @@ export default async function PeoplePage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-ink">People</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-3xl font-black uppercase tracking-tight text-ink">People</h1>
 
       <form action={createPerson} className="field-row card mt-6 p-4">
         <label className="field-wide">
@@ -34,7 +34,7 @@ export default async function PeoplePage() {
           <Link
             key={person.id}
             href={`/people/${person.id}`}
-            className="hoverable ledger-row flex items-center justify-between gap-3 px-1 py-3 text-sm hover:bg-paper"
+            className="hoverable ledger-row flex items-center justify-between gap-3 px-1 py-3 text-sm hover:bg-stone"
           >
             <span className="min-w-0 truncate text-ink">{person.name}</span>
             {person.birthday && <span className="shrink-0 font-mono text-xs text-ink-faint">{formatBirthday(person.birthday)}</span>}

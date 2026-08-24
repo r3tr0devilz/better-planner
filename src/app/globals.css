@@ -1,38 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  /* paper surface */
-  --color-paper: #ece2cf;
-  --color-paper-card: #f8f1e3;
-  --color-paper-line: #d6c6a4;
-  --color-paper-line-soft: #e2d3b3;
-  --color-ink: #241f2b;
-  --color-ink-faint: #79705e;
+  /* surface */
+  --color-stone: #e5e2db;
+  --color-panel: #fbf9f5;
+  --color-line: #b8b3a6;
+  --color-ink: #14130f;
+  --color-ink-faint: #6b6862;
 
-  /* accents */
-  --color-stamp-red: #ab3a2c;
-  --color-fountain: #33486e;
-  --color-moss: #4c7a55;
-  --color-mustard: #b1832c;
-  --color-plum: #6b3564;
-  --color-teal: #2e7a78;
+  /* one accent does the CTA/focus/active work; vermillion is reserved for
+     danger/overdue/high-priority so it never competes with cobalt for
+     attention */
+  --color-cobalt: #1e3ae0;
+  --color-vermillion: #e0431e;
+  --color-moss: #276b4d;
+  --color-mustard: #b8790f;
+  --color-plum: #7a3466;
+  --color-teal: #157a7a;
 
-  --background: var(--color-paper);
+  --background: var(--color-stone);
   --foreground: var(--color-ink);
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  --color-paper: var(--color-paper);
-  --color-paper-card: var(--color-paper-card);
-  --color-paper-line: var(--color-paper-line);
-  --color-paper-line-soft: var(--color-paper-line-soft);
+  --color-stone: var(--color-stone);
+  --color-panel: var(--color-panel);
+  --color-line: var(--color-line);
   --color-ink: var(--color-ink);
   --color-ink-faint: var(--color-ink-faint);
-  --color-stamp-red: var(--color-stamp-red);
-  --color-fountain: var(--color-fountain);
+  --color-cobalt: var(--color-cobalt);
+  --color-vermillion: var(--color-vermillion);
   --color-moss: var(--color-moss);
   --color-mustard: var(--color-mustard);
   --color-plum: var(--color-plum);
@@ -46,26 +48,14 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-body), Georgia, serif;
-  position: relative;
+  font-family: var(--font-body), Arial, sans-serif;
 }
 
-/* paper grain — the thing that says "paper" instead of "cream UI" */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.32;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.15  0 0 0 0 0.13  0 0 0 0 0.1  0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* Signature: every domain gets an ink-stamp dot carried through its
-   tasks, projects, and content, cycling through the accent set. */
-[data-thread="0"] { --dot: var(--color-stamp-red); }
-[data-thread="1"] { --dot: var(--color-fountain); }
+/* Signature: every domain gets a color, cycling through the accent set —
+   carried by the DomainTabs rail, the top-three card flag, and the
+   thread-mark on dense rows. */
+[data-thread="0"] { --dot: var(--color-cobalt); }
+[data-thread="1"] { --dot: var(--color-vermillion); }
 [data-thread="2"] { --dot: var(--color-moss); }
 [data-thread="3"] { --dot: var(--color-mustard); }
 [data-thread="4"] { --dot: var(--color-plum); }
@@ -78,44 +68,72 @@ body::before {
    order — that's the layer, not the cascade, doing the sorting). */
 @layer components {
 
-.stamp-dot {
+.thread-mark {
   display: inline-block;
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
   flex-shrink: 0;
-  background: radial-gradient(circle at 35% 30%, var(--dot, var(--color-ink-faint)), color-mix(in srgb, var(--dot, var(--color-ink-faint)) 75%, black));
-  box-shadow: 0 1px 1px rgba(36, 31, 43, 0.25);
+  background: var(--dot, var(--color-ink-faint));
+  border: 1px solid color-mix(in srgb, var(--dot, var(--color-ink-faint)) 70%, black);
 }
 
 .card {
   position: relative;
-  background: var(--color-paper-card);
-  border: 1px solid var(--color-paper-line);
-  box-shadow: 0 1px 2px rgba(36, 31, 43, 0.05), 0 10px 22px -14px rgba(36, 31, 43, 0.35);
+  background: var(--color-panel);
+  border: 2px solid var(--color-ink);
 }
 
-/* washi-tape flag: the top-three "sticky note" treatment */
-.tape {
+/* card-flag: a solid tab protruding from the top of a card, standing in for
+   the domain-thread signature wherever there's room for a label. */
+.card-flag {
   position: absolute;
-  top: -0.55rem;
+  top: -0.85rem;
   left: 1rem;
-  width: 2.6rem;
-  height: 1rem;
-  background: color-mix(in srgb, var(--dot, var(--color-mustard)) 55%, var(--color-paper) 45%);
-  opacity: 0.75;
-  transform: rotate(-3deg);
-  box-shadow: 0 1px 1px rgba(36, 31, 43, 0.15);
+  max-width: calc(100% - 2rem);
+  padding: 0.2rem 0.55rem;
+  background: var(--dot, var(--color-ink-faint));
+  color: var(--color-panel);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid var(--color-ink);
 }
-.tilt-l { transform: rotate(-0.6deg); }
-.tilt-r { transform: rotate(0.5deg); }
 
-.ledger {
-  border-top: 1px solid var(--color-paper-line-soft);
+.ledger { border-top: 3px solid var(--color-ink); }
+.ledger-row { border-bottom: 3px solid var(--color-ink); }
+
+/* DomainTabs rail: physical binder-tab navigation down the edge of the
+   content column (desktop only — see components/domain-tabs.tsx). */
+.tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  min-height: 6.5rem;
+  padding: 1rem 0.4rem;
+  color: var(--color-panel);
+  background: var(--dot, var(--color-ink-faint));
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid var(--color-ink);
+  border-left: none;
+  transition: transform 150ms var(--ease-out), filter 150ms ease-out;
 }
-.ledger-row {
-  border-bottom: 1px solid var(--color-paper-line-soft);
+@media (hover: hover) and (pointer: fine) {
+  .tab:hover { transform: rotate(180deg) scale(1.04); filter: brightness(1.12); }
 }
+.tab:active { transform: rotate(180deg) scale(0.96); }
 
 /* ── form primitives ──────────────────────────────────────────────────────
    Every text input / select / textarea in the app goes through .field, and
@@ -150,21 +168,20 @@ body::before {
   display: block;
   width: 100%;
   min-width: 0;
-  border: 1px solid var(--color-paper-line);
-  background: var(--color-paper);
+  border: 2px solid var(--color-ink);
+  background: var(--color-panel);
   color: var(--color-ink);
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   font-family: inherit;
   outline: none;
-  transition: box-shadow 150ms ease-out, border-color 150ms ease-out;
+  transition: box-shadow 150ms ease-out;
 }
 .field::placeholder {
   color: var(--color-ink-faint);
 }
 .field:focus-visible {
-  border-color: var(--color-fountain);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-fountain) 35%, transparent);
+  box-shadow: 3px 3px 0 var(--color-cobalt);
 }
 textarea.field {
   resize: none;
@@ -178,44 +195,48 @@ textarea.field {
   justify-content: center;
   gap: 0.5rem;
   flex-shrink: 0;
-  border: none;
+  border: 2px solid var(--color-ink);
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 700;
   font-family: inherit;
   cursor: pointer;
-  transition: transform 120ms ease-out, opacity 150ms ease-out, background-color 150ms ease-out;
+  transition: transform 120ms var(--ease-out), opacity 150ms ease-out, background-color 150ms ease-out, box-shadow 120ms var(--ease-out);
 }
 .btn:disabled,
 .btn-outline:disabled {
   cursor: not-allowed;
   opacity: 0.45;
 }
+.btn:not(:disabled),
+.btn-outline:not(:disabled) {
+  box-shadow: 3px 3px 0 var(--color-ink);
+}
 .btn:active:not(:disabled),
 .btn-outline:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--color-ink);
 }
 .btn:focus-visible,
 .btn-outline:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-fountain);
+  box-shadow: 3px 3px 0 var(--color-ink), 0 0 0 3px color-mix(in srgb, var(--color-cobalt) 45%, transparent);
 }
 
 .btn {
-  background: var(--color-stamp-red);
-  color: var(--color-paper-card);
+  background: var(--color-cobalt);
+  color: var(--color-panel);
   padding: 0.5rem 1rem;
 }
 .btn:hover:not(:disabled) {
-  opacity: 0.9;
+  opacity: 0.92;
 }
 
 .btn-outline {
-  border: 1px solid var(--color-paper-line);
-  background: transparent;
+  background: var(--color-panel);
   color: var(--color-ink);
   padding: 0.5rem 1rem;
 }
 .btn-outline:hover:not(:disabled) {
-  background: var(--color-paper);
+  background: var(--color-stone);
 }
 
 /* row/card links that reveal themselves on hover need the transition made
@@ -239,7 +260,7 @@ textarea.field {
   opacity: 1;
   transform: scale(1);
   transform-origin: center;
-  transition: opacity 180ms ease-out, transform 180ms ease-out;
+  transition: opacity 180ms ease-out, transform 180ms var(--ease-out);
   @starting-style {
     opacity: 0;
     transform: scale(0.96);

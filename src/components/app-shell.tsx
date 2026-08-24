@@ -13,7 +13,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen flex-col md:flex-row">
       <aside className="card sticky top-0 z-40 hidden h-screen w-56 shrink-0 flex-col justify-between border-y-0 border-l-0 p-5 md:flex">
         <div>
-          <Link href="/today" className="font-[family-name:var(--font-display)] text-xl font-semibold text-ink">
+          <Link href="/today" className="font-[family-name:var(--font-display)] text-xl font-black uppercase tracking-tight text-ink">
             Better Planner
           </Link>
           <nav className="mt-8 flex flex-col gap-1">
@@ -24,7 +24,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   key={href}
                   href={href}
                   className={`flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${
-                    active ? "bg-paper text-ink" : "text-ink-faint hover:text-ink"
+                    active ? "bg-stone text-ink" : "text-ink-faint hover:text-ink"
                   }`}
                 >
                   <Icon size={16} />
@@ -38,7 +38,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <header className="card sticky top-0 z-40 flex items-center justify-between border-x-0 border-t-0 px-4 py-3 md:hidden">
-        <Link href="/today" className="font-[family-name:var(--font-display)] text-lg font-semibold text-ink">
+        <Link href="/today" className="font-[family-name:var(--font-display)] text-lg font-black uppercase tracking-tight text-ink">
           Better Planner
         </Link>
         <CaptureBar />
@@ -54,7 +54,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               key={href}
               href={href}
               className={`flex flex-col items-center gap-0.5 px-2 py-1 text-[11px] transition-colors duration-150 ${
-                active ? "text-stamp-red" : "text-ink-faint"
+                active ? "text-cobalt" : "text-ink-faint"
               }`}
             >
               <Icon size={20} />
@@ -66,7 +66,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           href="/more"
           className={`flex flex-col items-center gap-0.5 px-2 py-1 text-[11px] transition-colors duration-150 ${
             SECONDARY_NAV_ITEMS.some(({ href }) => pathname.startsWith(href)) || pathname === "/more"
-              ? "text-stamp-red"
+              ? "text-cobalt"
               : "text-ink-faint"
           }`}
         >

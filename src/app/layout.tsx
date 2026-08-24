@@ -1,17 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Source_Serif_4, JetBrains_Mono } from "next/font/google";
+import { Archivo, JetBrains_Mono } from "next/font/google";
 import { SwRegister } from "@/components/sw-register";
 import "./globals.css";
 
-const fraunces = Fraunces({
+const archivo = Archivo({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["500", "600"],
+  weight: ["500", "700", "900"],
 });
 
-const sourceSerif = Source_Serif_4({
+const archivoBody = Archivo({
   variable: "--font-body",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#ece2cf",
+  themeColor: "#e5e2db",
   width: "device-width",
   initialScale: 1,
 };
@@ -41,7 +42,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${sourceSerif.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${archivo.variable} ${archivoBody.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <SwRegister />
