@@ -21,7 +21,7 @@ export function MilestoneRow({ projectId, milestone }: { projectId: string; mile
         </div>
         <div className="mt-1 h-1.5 border border-line bg-stone">
           <div
-            className="h-full bg-cobalt transition-[width] duration-200 ease-out"
+            className="h-full bg-oxblood transition-[width] duration-200 ease-out"
             style={{ width: `${milestone.percent_complete}%` }}
           />
         </div>

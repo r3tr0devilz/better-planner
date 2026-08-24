@@ -121,7 +121,7 @@ export function CaptureBar() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex shrink-0 items-center gap-2 border-2 border-ink bg-cobalt px-4 py-2.5 font-bold text-panel shadow-[3px_3px_0_var(--color-ink)] transition-transform duration-150 ease-out hover:opacity-92 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-cobalt focus-visible:ring-offset-stone"
+        className="btn shrink-0"
         aria-label="Capture a task or note"
       >
         <Plus size={18} />
@@ -144,7 +144,7 @@ export function CaptureBar() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h2 className="font-[family-name:var(--font-display)] text-lg font-black uppercase tracking-tight text-ink">
+              <h2 className="font-[family-name:var(--font-display)] text-lg font-bold uppercase tracking-tight text-ink">
                 Capture
               </h2>
               <button

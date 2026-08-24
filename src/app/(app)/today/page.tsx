@@ -33,11 +33,11 @@ export default async function TodayPage() {
   ).length;
 
   return (
-    <div className="mx-auto flex max-w-6xl gap-6">
-      <DomainTabs domains={domains} />
+    <div className="flex gap-6 md:-ml-8">
+      <DomainTabs domains={domains} tasks={tasks} />
 
-      <div className="min-w-0 flex-1">
-        <h1 className="font-[family-name:var(--font-display)] text-4xl font-black uppercase tracking-tight text-ink">
+      <div className="mx-auto w-full min-w-0 max-w-5xl flex-1">
+        <h1 className="font-[family-name:var(--font-display)] text-4xl font-bold uppercase tracking-tight text-ink">
           {greeting()}
         </h1>
 
@@ -71,7 +71,7 @@ export default async function TodayPage() {
                       {domain.name}
                     </span>
                   )}
-                  <TaskRow task={task} threadIndex={-1} />
+                  <TaskRow task={task} threadIndex={-1} domains={domains} />
                 </div>
               );
             })}
@@ -89,12 +89,12 @@ export default async function TodayPage() {
               <h2 className="text-sm font-medium text-ink-faint">Open tasks ({open.length})</h2>
               <div className="ledger mt-3">
                 {open.slice(0, 8).map((task) => (
-                  <TaskRow key={task.id} task={task} threadIndex={threadIndexFor(task.domain_id, domains)} />
+                  <TaskRow key={task.id} task={task} threadIndex={threadIndexFor(task.domain_id, domains)} domains={domains} />
                 ))}
                 {open.length === 0 && <p className="py-3 text-sm text-ink-faint">Nothing open — nice.</p>}
               </div>
               {open.length > 8 && (
-                <Link href="/tasks" className="mt-2 inline-block text-xs font-semibold text-cobalt hover:underline">
+                <Link href="/tasks" className="mt-2 inline-block text-xs font-semibold text-oxblood hover:underline">
                   View all {open.length} →
                 </Link>
               )}
@@ -126,6 +126,9 @@ export default async function TodayPage() {
               <p className="mt-2 text-xs text-ink-faint">
                 Google Calendar sync isn&apos;t connected yet — set it up from Settings.
               </p>
+              <Link href="/calendar" className="mt-2 inline-block text-xs font-semibold text-oxblood hover:underline">
+                View calendar →
+              </Link>
             </section>
 
             {slipping.length > 0 && (

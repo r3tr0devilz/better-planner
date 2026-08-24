@@ -29,6 +29,44 @@ export async function createTask(formData: FormData) {
 
   revalidatePath("/tasks");
   revalidatePath("/today");
+  revalidatePath("/calendar");
+}
+
+export async function updateTask(id: string, formData: FormData) {
+  const title = String(formData.get("title") ?? "").trim();
+  if (!title) return;
+
+  const notes = String(formData.get("notes") ?? "").trim() || null;
+  const domainId = String(formData.get("domain_id") ?? "") || null;
+  const dueAt = String(formData.get("due_at") ?? "") || null;
+  const priority = String(formData.get("priority") ?? "medium");
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("tasks")
+    .update({
+      title,
+      notes,
+      domain_id: domainId,
+      due_at: dueAt ? new Date(dueAt).toISOString() : null,
+      priority: priority as "low" | "medium" | "high",
+    })
+    .eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/tasks");
+  revalidatePath("/today");
+  revalidatePath("/calendar");
+}
+
+export async function rescheduleTask(id: string, dueAtIso: string | null) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("tasks").update({ due_at: dueAtIso }).eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/tasks");
+  revalidatePath("/today");
+  revalidatePath("/calendar");
 }
 
 export async function toggleTaskDone(id: string, done: boolean) {
@@ -41,6 +79,7 @@ export async function toggleTaskDone(id: string, done: boolean) {
 
   revalidatePath("/tasks");
   revalidatePath("/today");
+  revalidatePath("/calendar");
 }
 
 export async function toggleTopThree(id: string, isTopThree: boolean) {
@@ -50,4 +89,5 @@ export async function toggleTopThree(id: string, isTopThree: boolean) {
 
   revalidatePath("/tasks");
   revalidatePath("/today");
+  revalidatePath("/calendar");
 }

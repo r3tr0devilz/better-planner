@@ -9,7 +9,7 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center px-4">
       <div className="card w-full max-w-sm p-8">
-        <h1 className="font-[family-name:var(--font-display)] text-3xl font-black uppercase tracking-tight text-ink">
+        <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold uppercase tracking-tight text-ink">
           Better Planner
         </h1>
         <p className="mt-1 text-sm text-ink-faint">

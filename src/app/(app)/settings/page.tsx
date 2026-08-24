@@ -12,7 +12,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-lg">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-black uppercase tracking-tight text-ink">Settings</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold uppercase tracking-tight text-ink">Settings</h1>
 
       <section className="card mt-6 p-4">
         <h2 className="text-sm font-medium text-ink-faint">Account</h2>

@@ -48,7 +48,7 @@ export function RoutineRow({
       </div>
 
       {streak > 0 && (
-        <span className="shrink-0 border border-cobalt px-2 py-0.5 font-mono text-xs text-cobalt">
+        <span className="shrink-0 border border-oxblood px-2 py-0.5 font-mono text-xs text-oxblood">
           {streak}d streak
         </span>
       )}

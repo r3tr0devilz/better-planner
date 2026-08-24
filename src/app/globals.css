@@ -8,15 +8,21 @@
   --color-ink: #14130f;
   --color-ink-faint: #6b6862;
 
-  /* one accent does the CTA/focus/active work; vermillion is reserved for
-     danger/overdue/high-priority so it never competes with cobalt for
-     attention */
+  /* domain thread palette — six colors cycling per domain (tabs, card
+     flags, thread-marks). cobalt lives here as thread 0 only; it no
+     longer doubles as the interactive accent below. */
   --color-cobalt: #1e3ae0;
   --color-vermillion: #e0431e;
   --color-moss: #276b4d;
   --color-mustard: #b8790f;
   --color-plum: #7a3466;
   --color-teal: #157a7a;
+
+  /* oxblood: the one accent for CTA/focus/active state — a deep ledger-red
+     that reads as intentional against warm paper instead of default web
+     blue. vermillion stays reserved for danger/overdue/high-priority so
+     the two never compete. */
+  --color-oxblood: #7a2330;
 
   --background: var(--color-stone);
   --foreground: var(--color-ink);
@@ -39,6 +45,7 @@
   --color-mustard: var(--color-mustard);
   --color-plum: var(--color-plum);
   --color-teal: var(--color-teal);
+  --color-oxblood: var(--color-oxblood);
 
   --font-display: var(--font-display);
   --font-sans: var(--font-body);
@@ -81,7 +88,9 @@ body {
 .card {
   position: relative;
   background: var(--color-panel);
-  border: 2px solid var(--color-ink);
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(20, 19, 15, 0.06), 0 6px 20px rgba(20, 19, 15, 0.06);
 }
 
 /* card-flag: a solid tab protruding from the top of a card, standing in for
@@ -107,6 +116,56 @@ body {
 
 .ledger { border-top: 3px solid var(--color-ink); }
 .ledger-row { border-bottom: 3px solid var(--color-ink); }
+
+/* Calendar agenda cards: a colored domain-thread spine instead of a full
+   border, so a day with several tasks reads as a stack of tabs. */
+.day-card {
+  display: block;
+  border-left: 4px solid var(--dot, var(--color-ink-faint));
+  border-top: 1px solid var(--color-line);
+  border-right: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
+  border-radius: 0 8px 8px 0;
+  background: var(--color-panel);
+  padding: 0.6rem 0.85rem;
+}
+
+/* Mini month calendar in the Calendar page's rail. */
+.mini-cal-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--color-ink);
+  text-decoration: none;
+  position: relative;
+}
+.mini-cal-day[data-today="true"] {
+  background: var(--color-oxblood);
+  color: var(--color-panel);
+  font-weight: 700;
+}
+.mini-cal-day[data-has-tasks="true"]::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  translate: -50% 0;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-oxblood);
+}
+.mini-cal-day[data-today="true"][data-has-tasks="true"]::after {
+  background: var(--color-panel);
+}
+.mini-cal-day[data-selected="true"] {
+  outline: 1.5px solid var(--color-oxblood);
+  outline-offset: -1.5px;
+}
 
 /* DomainTabs rail: physical binder-tab navigation down the edge of the
    content column (desktop only — see components/domain-tabs.tsx). */
@@ -168,20 +227,22 @@ body {
   display: block;
   width: 100%;
   min-width: 0;
-  border: 2px solid var(--color-ink);
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
   background: var(--color-panel);
   color: var(--color-ink);
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   font-family: inherit;
   outline: none;
-  transition: box-shadow 150ms ease-out;
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
 }
 .field::placeholder {
   color: var(--color-ink-faint);
 }
 .field:focus-visible {
-  box-shadow: 3px 3px 0 var(--color-cobalt);
+  border-color: var(--color-oxblood);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-oxblood) 18%, transparent);
 }
 textarea.field {
   resize: none;
@@ -195,12 +256,13 @@ textarea.field {
   justify-content: center;
   gap: 0.5rem;
   flex-shrink: 0;
-  border: 2px solid var(--color-ink);
+  border: 1px solid var(--color-ink);
+  border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
-  transition: transform 120ms var(--ease-out), opacity 150ms ease-out, background-color 150ms ease-out, box-shadow 120ms var(--ease-out);
+  transition: transform 120ms var(--ease-out), opacity 150ms ease-out, background-color 150ms ease-out, box-shadow 150ms ease-out;
 }
 .btn:disabled,
 .btn-outline:disabled {
@@ -209,20 +271,20 @@ textarea.field {
 }
 .btn:not(:disabled),
 .btn-outline:not(:disabled) {
-  box-shadow: 3px 3px 0 var(--color-ink);
+  box-shadow: 0 1px 2px rgba(20, 19, 15, 0.14);
 }
 .btn:active:not(:disabled),
 .btn-outline:active:not(:disabled) {
-  transform: translate(3px, 3px);
-  box-shadow: 0 0 0 var(--color-ink);
+  transform: scale(0.97);
 }
 .btn:focus-visible,
 .btn-outline:focus-visible {
-  box-shadow: 3px 3px 0 var(--color-ink), 0 0 0 3px color-mix(in srgb, var(--color-cobalt) 45%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-oxblood) 40%, transparent);
 }
 
 .btn {
-  background: var(--color-cobalt);
+  background: var(--color-oxblood);
+  border-color: var(--color-oxblood);
   color: var(--color-panel);
   padding: 0.5rem 1rem;
 }

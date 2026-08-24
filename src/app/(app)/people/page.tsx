@@ -5,7 +5,7 @@ import { createPerson } from "./actions";
 function formatBirthday(birthday: string | null): string | null {
   if (!birthday) return null;
   const [, month, day] = birthday.split("-");
-  return new Date(2000, Number(month) - 1, Number(day)).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return new Date(2000, Number(month) - 1, Number(day)).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 export default async function PeoplePage() {
@@ -13,7 +13,7 @@ export default async function PeoplePage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-black uppercase tracking-tight text-ink">People</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold uppercase tracking-tight text-ink">People</h1>
 
       <form action={createPerson} className="field-row card mt-6 p-4">
         <label className="field-wide">

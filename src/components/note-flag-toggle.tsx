@@ -13,7 +13,7 @@ export function NoteFlagToggle({ id, flagged }: { id: string; flagged: boolean }
       disabled={pending}
       aria-label={flagged ? "Unflag for review" : "Flag for review"}
       aria-pressed={flagged}
-      className={`shrink-0 transition-transform duration-150 active:scale-90 ${flagged ? "text-cobalt" : "text-ink-faint hover:text-ink"}`}
+      className={`shrink-0 transition-transform duration-150 active:scale-90 ${flagged ? "text-oxblood" : "text-ink-faint hover:text-ink"}`}
     >
       <Bookmark size={14} fill={flagged ? "currentColor" : "none"} />
     </button>

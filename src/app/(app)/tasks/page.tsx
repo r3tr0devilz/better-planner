@@ -10,7 +10,7 @@ export default async function TasksPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-black uppercase tracking-tight text-ink">Tasks</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold uppercase tracking-tight text-ink">Tasks</h1>
 
       <form action={createTask} className="field-row card mt-6 p-4">
         <label className="field-wide">
@@ -50,7 +50,7 @@ export default async function TasksPage() {
         <div className="ledger mt-3">
           {open.length === 0 && <p className="py-3 text-sm text-ink-faint">Nothing open. Add something above.</p>}
           {open.map((task) => (
-            <TaskRow key={task.id} task={task} threadIndex={threadIndexFor(task.domain_id, domains)} />
+            <TaskRow key={task.id} task={task} threadIndex={threadIndexFor(task.domain_id, domains)} domains={domains} />
           ))}
         </div>
       </section>
@@ -60,7 +60,7 @@ export default async function TasksPage() {
           <h2 className="text-sm font-medium text-ink-faint">Done ({done.length})</h2>
           <div className="ledger mt-3">
             {done.map((task) => (
-              <TaskRow key={task.id} task={task} threadIndex={threadIndexFor(task.domain_id, domains)} />
+              <TaskRow key={task.id} task={task} threadIndex={threadIndexFor(task.domain_id, domains)} domains={domains} />
             ))}
           </div>
         </section>

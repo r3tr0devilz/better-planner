@@ -15,7 +15,7 @@ export default async function LibraryPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-black uppercase tracking-tight text-ink">Library</h1>
+      <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold uppercase tracking-tight text-ink">Library</h1>
 
       <form action={createNote} className="card mt-6 flex flex-col gap-3 p-4">
         <div className="field-row">

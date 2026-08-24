@@ -1,9 +1,12 @@
 "use client";
 
-import { useTransition } from "react";
-import { Star } from "lucide-react";
-import { toggleTaskDone, toggleTopThree } from "@/app/(app)/tasks/actions";
-import type { Task } from "@/lib/supabase/types";
+import { useCallback, useEffect, useState, useTransition } from "react";
+import { Sparkle, X } from "lucide-react";
+import { toggleTaskDone, toggleTopThree, updateTask } from "@/app/(app)/tasks/actions";
+import type { Domain, Task } from "@/lib/supabase/types";
+
+const SPARKLE_PATH =
+  "M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z";
 
 const PRIORITY_COLOR: Record<Task["priority"], string> = {
   high: "bg-vermillion",
@@ -16,15 +19,42 @@ function formatDue(dueAt: string | null): string | null {
   const date = new Date(dueAt);
   const today = new Date();
   const isToday = date.toDateString() === today.toDateString();
-  const time = date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  const time = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
   if (isToday) return `Today, ${time}`;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + `, ${time}`;
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + `, ${time}`;
 }
 
-export function TaskRow({ task, threadIndex }: { task: Task; threadIndex: number }) {
+function toDatetimeLocal(dueAt: string | null): string {
+  if (!dueAt) return "";
+  const d = new Date(dueAt);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+export function TaskRow({
+  task,
+  threadIndex,
+  domains = [],
+}: {
+  task: Task;
+  threadIndex: number;
+  domains?: Domain[];
+}) {
   const [pending, startTransition] = useTransition();
+  const [editing, setEditing] = useState(false);
   const due = formatDue(task.due_at);
   const done = task.status === "done";
+
+  const close = useCallback(() => setEditing(false), []);
+
+  useEffect(() => {
+    if (!editing) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") close();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [editing, close]);
 
   return (
     <div className="ledger-row flex items-center gap-3 px-1 py-3">
@@ -41,22 +71,102 @@ export function TaskRow({ task, threadIndex }: { task: Task; threadIndex: number
 
       <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_COLOR[task.priority]}`} aria-hidden />
 
-      <div className="min-w-0 flex-1">
+      <button
+        type="button"
+        onClick={() => setEditing(true)}
+        className="min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-left"
+      >
         <p className={`truncate text-sm transition-colors duration-150 ${done ? "text-ink-faint line-through" : "text-ink"}`}>
           {task.title}
         </p>
         {due && <p className="truncate font-mono text-xs text-ink-faint">{due}</p>}
-      </div>
+      </button>
 
       <button
         onClick={() => startTransition(() => toggleTopThree(task.id, !task.is_top_three))}
         disabled={pending}
         aria-label={task.is_top_three ? "Remove from top three" : "Add to top three"}
         aria-pressed={task.is_top_three}
-        className={`shrink-0 transition-transform duration-150 active:scale-90 ${task.is_top_three ? "text-cobalt" : "text-ink-faint hover:text-ink"}`}
+        className={`shrink-0 transition-transform duration-150 active:scale-90 ${task.is_top_three ? "" : "text-ink-faint hover:text-ink"}`}
       >
-        <Star size={16} fill={task.is_top_three ? "currentColor" : "none"} />
+        {task.is_top_three ? (
+          <svg width={19} height={19} viewBox="0 0 24 24" aria-hidden>
+            <path d={SPARKLE_PATH} className="fill-oxblood" />
+            <g transform="translate(12 12) scale(0.42) translate(-12 -12)">
+              <path d={SPARKLE_PATH} className="fill-mustard" />
+            </g>
+          </svg>
+        ) : (
+          <Sparkle size={19} fill="none" />
+        )}
       </button>
+
+      {editing && (
+        <div
+          className="modal-backdrop fixed inset-0 z-50 flex items-start justify-center bg-ink/40 px-4 pt-24"
+          onClick={close}
+        >
+          <div className="modal-panel card w-full max-w-lg p-5" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h2 className="font-[family-name:var(--font-display)] text-lg font-bold uppercase tracking-tight text-ink">
+                Edit task
+              </h2>
+              <button onClick={close} aria-label="Close" className="text-ink-faint transition-colors duration-150 hover:text-ink">
+                <X size={18} />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                startTransition(() => {
+                  updateTask(task.id, formData);
+                });
+                close();
+              }}
+              className="mt-4 flex flex-col gap-3"
+            >
+              <label className="flex flex-col gap-1.5 text-sm text-ink-faint">
+                Title
+                <input name="title" defaultValue={task.title} required className="field" />
+              </label>
+              <label className="flex flex-col gap-1.5 text-sm text-ink-faint">
+                Notes
+                <textarea name="notes" defaultValue={task.notes ?? ""} rows={3} className="field" />
+              </label>
+              <div className="field-row">
+                <label className="field-wide">
+                  Domain
+                  <select name="domain_id" defaultValue={task.domain_id ?? ""} className="field">
+                    <option value="">None</option>
+                    {domains.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Due
+                  <input type="datetime-local" name="due_at" defaultValue={toDatetimeLocal(task.due_at)} className="field" />
+                </label>
+                <label className="field-narrow">
+                  Priority
+                  <select name="priority" defaultValue={task.priority} className="field">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                </label>
+              </div>
+              <button type="submit" className="btn mt-1 self-end">
+                Save
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
