@@ -285,13 +285,17 @@ export function CalendarBoard({
   const selectedDayTasks = tasksByDay.get(selectedDateKey) ?? [];
   const sidebarTasks = view === "month" ? monthTasks : selectedDayTasks;
 
-  // Auto-scroll the day timeline near "now" when opening today's Day view.
+  // Auto-scroll the page near "now" when opening today's Day view — the
+  // timeline is part of normal page flow (no nested scroll container), so
+  // this scrolls the window itself rather than an inner pane.
   useEffect(() => {
     if (view !== "day" || selectedDateKey !== todayKey || !timelineRef.current) return;
     const now = new Date();
     const nowMinutes = now.getHours() * 60 + now.getMinutes() - offsetHour * 60;
-    const target = Math.max(0, (nowMinutes / 60) * ROW_HEIGHT - timelineRef.current.clientHeight / 3);
-    timelineRef.current.scrollTop = target;
+    const nowOffsetWithinTimeline = (nowMinutes / 60) * ROW_HEIGHT;
+    const timelineTop = timelineRef.current.getBoundingClientRect().top + window.scrollY;
+    const target = Math.max(0, timelineTop + nowOffsetWithinTimeline - window.innerHeight / 3);
+    window.scrollTo({ top: target });
   }, [view, selectedDateKey, todayKey, offsetHour]);
 
   function handleDragStart(event: DragStartEvent) {
@@ -453,27 +457,41 @@ export function CalendarBoard({
             ))
           ) : (
             <>
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <Link href={dayHref(addDays(selectedDate, -1), fullDay)} className="btn-outline px-3 py-1.5 text-sm">
                   ← Prev
                 </Link>
-                <div className="flex flex-col items-center">
-                  <div className="font-[family-name:var(--font-display)] text-xl font-bold text-ink">
-                    {selectedDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-                  </div>
-                  <Link
-                    href={dayHref(selectedDate, !fullDay)}
-                    className="mt-0.5 font-mono text-[0.65rem] text-ink-faint underline hover:text-ink"
-                  >
-                    {fullDay ? "Show 6 AM – 12 AM" : "Show full day"}
-                  </Link>
+                <div className="font-[family-name:var(--font-display)] text-xl font-bold text-ink">
+                  {selectedDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
                 </div>
                 <Link href={dayHref(addDays(selectedDate, 1), fullDay)} className="btn-outline px-3 py-1.5 text-sm">
                   Next →
                 </Link>
               </div>
 
-              <div ref={timelineRef} className="mt-4 max-h-[70vh] overflow-y-auto rounded-lg border border-line">
+              <div className="relative mx-auto mt-2 flex w-fit gap-1 rounded-lg border border-line bg-stone p-1">
+                <div
+                  className="absolute inset-y-1 w-[calc(50%-0.375rem)] rounded-md bg-panel transition-transform duration-[180ms]"
+                  style={{
+                    transform: fullDay ? "translateX(calc(100% + 0.5rem))" : "translateX(0)",
+                    transitionTimingFunction: EASE_OUT,
+                  }}
+                />
+                <Link
+                  href={dayHref(selectedDate, false)}
+                  className={`relative z-10 rounded-md px-3 py-1 text-center font-mono text-[0.65rem] transition-colors ${!fullDay ? "text-ink" : "text-ink-faint hover:text-ink"}`}
+                >
+                  6 AM – 12 AM
+                </Link>
+                <Link
+                  href={dayHref(selectedDate, true)}
+                  className={`relative z-10 rounded-md px-3 py-1 text-center font-mono text-[0.65rem] transition-colors ${fullDay ? "text-ink" : "text-ink-faint hover:text-ink"}`}
+                >
+                  Full Day
+                </Link>
+              </div>
+
+              <div ref={timelineRef} className="mt-4">
                 <div className="relative" style={{ height: visibleHours * ROW_HEIGHT }}>
                   {hours.map((h) => (
                     <DayHourRow key={h} hour={h} dateKey={selectedDateKey} offsetHour={offsetHour} />
