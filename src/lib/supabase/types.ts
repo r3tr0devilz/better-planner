@@ -90,6 +90,7 @@ export type Task = Timestamped & {
   status: "open" | "done";
   is_top_three: boolean;
   recurring_rule: string | null;
+  duration_minutes: number | null;
 };
 
 export type Routine = Timestamped & {

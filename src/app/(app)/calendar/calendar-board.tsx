@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition, type PointerEvent as ReactPointerEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -15,7 +15,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { rescheduleTask } from "@/app/(app)/tasks/actions";
+import { rescheduleTask, updateTaskDuration } from "@/app/(app)/tasks/actions";
 import { TaskRow } from "@/components/task-row";
 import { threadIndexFor } from "@/lib/domain-threads";
 import type { Domain, Task } from "@/lib/supabase/types";
@@ -119,6 +119,69 @@ function DayHourRow({ hour, dateKey: key }: { hour: number; dateKey: string }) {
   );
 }
 
+function ResizableDayCard({
+  task,
+  threadIndex,
+  onResize,
+}: {
+  task: Task;
+  threadIndex: number;
+  onResize: (taskId: string, durationMinutes: number) => void;
+}) {
+  const baseDuration = task.duration_minutes ?? 30;
+  const [liveDuration, setLiveDuration] = useState<number | null>(null);
+  const liveDurationRef = useRef<number | null>(null);
+
+  if (!task.due_at) return null;
+  const d = new Date(task.due_at);
+  const top = ((d.getHours() * 60 + d.getMinutes()) / 60) * ROW_HEIGHT;
+  const duration = liveDuration ?? baseDuration;
+  const height = Math.max((duration / 60) * ROW_HEIGHT, 16);
+
+  function handlePointerDown(e: ReactPointerEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    const startY = e.clientY;
+
+    function onMove(ev: PointerEvent) {
+      const deltaMinutes = ((ev.clientY - startY) / ROW_HEIGHT) * 60;
+      const snapped = Math.max(15, Math.round((baseDuration + deltaMinutes) / 15) * 15);
+      liveDurationRef.current = snapped;
+      setLiveDuration(snapped);
+    }
+    function onUp() {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      if (liveDurationRef.current !== null) onResize(task.id, liveDurationRef.current);
+      liveDurationRef.current = null;
+      setLiveDuration(null);
+    }
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  }
+
+  return (
+    <div
+      className="day-card pointer-events-auto absolute inset-x-1 overflow-hidden"
+      data-thread={threadIndex >= 0 ? threadIndex : undefined}
+      style={{ top, height }}
+    >
+      <div className="flex items-center gap-2">
+        <span className="shrink-0 font-mono text-[0.65rem] text-ink-faint">{formatTime(task.due_at)}</span>
+        <span className={`truncate text-xs ${task.status === "done" ? "text-ink-faint line-through" : "text-ink"}`}>
+          {task.title}
+        </span>
+      </div>
+      <div
+        onPointerDown={handlePointerDown}
+        className="absolute inset-x-0 bottom-0 flex h-2.5 touch-none items-center justify-center cursor-ns-resize"
+      >
+        <span className="h-0.5 w-6 rounded-full bg-ink-faint/50" />
+      </div>
+    </div>
+  );
+}
+
 export function CalendarBoard({
   view,
   year,
@@ -212,6 +275,13 @@ export function CalendarBoard({
     setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, due_at: newDueAt } : t)));
     startTransition(() => {
       rescheduleTask(task.id, newDueAt).then(() => router.refresh());
+    });
+  }
+
+  function handleResize(taskId: string, durationMinutes: number) {
+    setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, duration_minutes: durationMinutes } : t)));
+    startTransition(() => {
+      updateTaskDuration(taskId, durationMinutes).then(() => router.refresh());
     });
   }
 
@@ -330,27 +400,14 @@ export function CalendarBoard({
                 ))}
 
                 <div className="pointer-events-none absolute inset-y-0 left-16 right-0">
-                  {selectedDayTasks.map((task) => {
-                    if (!task.due_at) return null;
-                    const d = new Date(task.due_at);
-                    const top = ((d.getHours() * 60 + d.getMinutes()) / 60) * ROW_HEIGHT;
-                    const threadIndex = threadIndexFor(task.domain_id, domains);
-                    return (
-                      <div
-                        key={task.id}
-                        className="day-card pointer-events-auto absolute inset-x-1 overflow-hidden"
-                        data-thread={threadIndex >= 0 ? threadIndex : undefined}
-                        style={{ top, height: ROW_HEIGHT - 8 }}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="shrink-0 font-mono text-[0.65rem] text-ink-faint">{formatTime(task.due_at)}</span>
-                          <span className={`truncate text-xs ${task.status === "done" ? "text-ink-faint line-through" : "text-ink"}`}>
-                            {task.title}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {selectedDayTasks.map((task) => (
+                    <ResizableDayCard
+                      key={task.id}
+                      task={task}
+                      threadIndex={threadIndexFor(task.domain_id, domains)}
+                      onResize={handleResize}
+                    />
+                  ))}
                   <NowLine dateKey={selectedDateKey} />
                 </div>
               </div>

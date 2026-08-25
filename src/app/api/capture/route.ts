@@ -50,6 +50,7 @@ export async function POST(request: Request) {
       status: "open",
       is_top_three: false,
       recurring_rule: null,
+      duration_minutes: null,
     });
     if (taskErr) throw taskErr;
     label = `Task created: ${parsed.title}`;

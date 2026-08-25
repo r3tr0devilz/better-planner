@@ -24,6 +24,7 @@ export async function createTask(formData: FormData) {
     status: "open",
     is_top_three: false,
     recurring_rule: null,
+    duration_minutes: null,
   });
   if (error) throw error;
 
@@ -62,6 +63,16 @@ export async function updateTask(id: string, formData: FormData) {
 export async function rescheduleTask(id: string, dueAtIso: string | null) {
   const supabase = await createClient();
   const { error } = await supabase.from("tasks").update({ due_at: dueAtIso }).eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/tasks");
+  revalidatePath("/today");
+  revalidatePath("/calendar");
+}
+
+export async function updateTaskDuration(id: string, durationMinutes: number | null) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("tasks").update({ duration_minutes: durationMinutes }).eq("id", id);
   if (error) throw error;
 
   revalidatePath("/tasks");
