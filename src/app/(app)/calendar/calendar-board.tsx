@@ -472,7 +472,7 @@ export function CalendarBoard({
                 </div>
               </div>
 
-              <div className="relative mx-auto mt-2 flex w-fit gap-1 rounded-lg border border-line bg-stone p-1">
+              <div className="relative mx-auto mt-2 flex w-full max-w-xs gap-1 rounded-lg border border-line bg-stone p-1">
                 <div
                   className="absolute inset-y-1 w-[calc(50%-0.375rem)] rounded-md bg-panel transition-transform duration-[180ms]"
                   style={{
@@ -482,13 +482,13 @@ export function CalendarBoard({
                 />
                 <Link
                   href={dayHref(selectedDate, false)}
-                  className={`relative z-10 rounded-md px-3 py-1 text-center font-mono text-[0.65rem] transition-colors ${!fullDay ? "text-ink" : "text-ink-faint hover:text-ink"}`}
+                  className={`relative z-10 flex-1 rounded-md px-3 py-1.5 text-center font-mono text-[0.65rem] transition-colors ${!fullDay ? "text-ink" : "text-ink-faint hover:text-ink"}`}
                 >
                   6 AM – 12 AM
                 </Link>
                 <Link
                   href={dayHref(selectedDate, true)}
-                  className={`relative z-10 rounded-md px-3 py-1 text-center font-mono text-[0.65rem] transition-colors ${fullDay ? "text-ink" : "text-ink-faint hover:text-ink"}`}
+                  className={`relative z-10 flex-1 rounded-md px-3 py-1.5 text-center font-mono text-[0.65rem] transition-colors ${fullDay ? "text-ink" : "text-ink-faint hover:text-ink"}`}
                 >
                   Full Day
                 </Link>
