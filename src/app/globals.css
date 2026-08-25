@@ -6,7 +6,7 @@
   --color-panel: #fbf9f5;
   --color-line: #b8b3a6;
   --color-ink: #14130f;
-  --color-ink-faint: #6b6862;
+  --color-ink-faint: #625f59;
 
   /* domain thread palette — six colors cycling per domain (tabs, card
      flags, thread-marks). cobalt lives here as thread 0 only; it no
