@@ -41,8 +41,8 @@ export function monthHref(view: "month" | "day", year: number, month: number) {
   return `/calendar?view=${view}&month=${year}-${String(month + 1).padStart(2, "0")}`;
 }
 
-export function dayHref(date: Date) {
-  return `/calendar?view=day&date=${dayKey(date)}`;
+export function dayHref(date: Date, fullDay?: boolean) {
+  return `/calendar?view=day&date=${dayKey(date)}${fullDay ? "&full=1" : ""}`;
 }
 
 export function formatTime(dueAt: string) {

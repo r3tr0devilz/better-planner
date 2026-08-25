@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition, type PointerEvent as ReactPointerEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { GripVertical } from "lucide-react";
 import {
   DndContext,
   DragOverlay,
@@ -13,6 +14,7 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragOverEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { rescheduleTask, updateTaskDuration } from "@/app/(app)/tasks/actions";
@@ -24,7 +26,6 @@ import { ROW_HEIGHT } from "./constants";
 import {
   WEEKDAYS,
   WEEKDAY_LONG,
-  HOURS,
   monthLabel,
   buildWeeks,
   isSameDate,
@@ -38,17 +39,28 @@ import {
 } from "./lib";
 
 const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
+const QUARTER_HEIGHT = ROW_HEIGHT / 4;
 
 function DraggableTask({ task, threadIndex, domains }: { task: Task; threadIndex: number; domains: Domain[] }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: task.id, data: { task } });
   return (
     <div
       ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      className={`transition-[opacity,transform] duration-150 ease-out ${isDragging ? "scale-[0.97] opacity-40" : ""}`}
+      className={`flex items-center gap-1 transition-[opacity,transform] duration-[140ms] ${isDragging ? "scale-[0.98] opacity-35" : ""}`}
+      style={{ transitionTimingFunction: EASE_OUT }}
     >
-      <TaskRow task={task} threadIndex={threadIndex} domains={domains} />
+      <span
+        {...listeners}
+        {...attributes}
+        title="Drag to schedule"
+        aria-label="Drag to schedule"
+        className="cursor-grab touch-none self-stretch px-1 py-3 text-ink-faint/60 transition-colors hover:text-ink-faint active:cursor-grabbing"
+      >
+        <GripVertical size={14} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <TaskRow task={task} threadIndex={threadIndex} domains={domains} />
+      </div>
     </div>
   );
 }
@@ -66,15 +78,16 @@ function MonthAgendaRow({
 }) {
   const key = dayKey(date);
   const { setNodeRef, isOver } = useDroppable({ id: `day:${key}` });
+  const empty = tasks.length === 0;
 
   return (
     <div
       ref={setNodeRef}
       id={`day-${key}`}
-      className={`flex gap-4 rounded-md border-b border-line px-2 py-5 transition-colors duration-150 first:pt-0 scroll-mt-20 ${isOver ? "bg-oxblood/10" : ""}`}
+      className={`flex gap-4 rounded-md border-b border-line px-2 transition-colors duration-150 first:pt-0 scroll-mt-20 ${empty ? "py-2.5" : "py-5"} ${isOver ? "bg-oxblood/10" : ""}`}
     >
       <div className="w-16 shrink-0 text-center">
-        <div className="font-[family-name:var(--font-display)] text-4xl font-black leading-none text-ink">
+        <div className={`font-[family-name:var(--font-display)] font-black leading-none text-ink ${empty ? "text-xl opacity-60" : "text-4xl"}`}>
           {String(date.getDate()).padStart(2, "0")}
         </div>
         <div className={`mt-1 font-mono text-[0.65rem] uppercase tracking-wide ${isToday ? "font-bold text-oxblood" : "text-ink-faint"}`}>
@@ -82,8 +95,7 @@ function MonthAgendaRow({
         </div>
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        {tasks.length === 0 && <p className="py-2 text-sm text-ink-faint">Nothing scheduled.</p>}
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
         {tasks.map((task) => {
           const threadIndex = threadIndexFor(task.domain_id, domains);
           return (
@@ -103,18 +115,29 @@ function MonthAgendaRow({
   );
 }
 
-function DayHourRow({ hour, dateKey: key }: { hour: number; dateKey: string }) {
-  const { setNodeRef, isOver } = useDroppable({ id: `hour:${key}:${hour}` });
+function DayQuarterSlot({ hour, quarter, dateKey: key }: { hour: number; quarter: number; dateKey: string }) {
+  const { setNodeRef, isOver } = useDroppable({ id: `quarter:${key}:${hour}:${quarter}` });
   return (
     <div
       ref={setNodeRef}
-      className={`absolute inset-x-0 transition-colors duration-150 ${isOver ? "bg-oxblood/10" : ""}`}
-      style={{ top: hour * ROW_HEIGHT, height: ROW_HEIGHT }}
-    >
-      <span className="absolute left-0 top-0 w-14 -translate-y-2 pr-2 text-right font-mono text-[0.65rem] text-ink-faint">
+      className={`absolute inset-x-0 border-l-2 transition-colors duration-[120ms] ${isOver ? "border-oxblood bg-oxblood/10" : "border-transparent"}`}
+      style={{ top: quarter * QUARTER_HEIGHT, height: QUARTER_HEIGHT }}
+    />
+  );
+}
+
+function DayHourRow({ hour, dateKey: key, offsetHour }: { hour: number; dateKey: string; offsetHour: number }) {
+  return (
+    <div className="absolute inset-x-0" style={{ top: (hour - offsetHour) * ROW_HEIGHT, height: ROW_HEIGHT }}>
+      <span className="pointer-events-none absolute left-0 top-0 w-14 -translate-y-2 pr-2 text-right font-mono text-[0.65rem] text-ink-faint">
         {formatHour(hour)}
       </span>
-      <div className="absolute bottom-0 border-t border-line" style={{ left: 61, right: 0 }} />
+      <div className="pointer-events-none absolute bottom-0 border-t border-line" style={{ left: 61, right: 0 }} />
+      <div className="absolute inset-y-0" style={{ left: 61, right: 0 }}>
+        {[0, 1, 2, 3].map((q) => (
+          <DayQuarterSlot key={q} hour={hour} quarter={q} dateKey={key} />
+        ))}
+      </div>
     </div>
   );
 }
@@ -122,19 +145,22 @@ function DayHourRow({ hour, dateKey: key }: { hour: number; dateKey: string }) {
 function ResizableDayCard({
   task,
   threadIndex,
+  offsetHour,
   onResize,
 }: {
   task: Task;
   threadIndex: number;
+  offsetHour: number;
   onResize: (taskId: string, durationMinutes: number) => void;
 }) {
   const baseDuration = task.duration_minutes ?? 30;
   const [liveDuration, setLiveDuration] = useState<number | null>(null);
+  const [dragging, setDragging] = useState(false);
   const liveDurationRef = useRef<number | null>(null);
 
   if (!task.due_at) return null;
   const d = new Date(task.due_at);
-  const top = ((d.getHours() * 60 + d.getMinutes()) / 60) * ROW_HEIGHT;
+  const top = ((d.getHours() * 60 + d.getMinutes() - offsetHour * 60) / 60) * ROW_HEIGHT;
   const duration = liveDuration ?? baseDuration;
   const height = Math.max((duration / 60) * ROW_HEIGHT, 16);
 
@@ -142,19 +168,24 @@ function ResizableDayCard({
     e.preventDefault();
     e.stopPropagation();
     const startY = e.clientY;
+    setDragging(true);
 
     function onMove(ev: PointerEvent) {
       const deltaMinutes = ((ev.clientY - startY) / ROW_HEIGHT) * 60;
-      const snapped = Math.max(15, Math.round((baseDuration + deltaMinutes) / 15) * 15);
-      liveDurationRef.current = snapped;
-      setLiveDuration(snapped);
+      const raw = Math.max(15, baseDuration + deltaMinutes);
+      liveDurationRef.current = raw;
+      setLiveDuration(raw);
     }
     function onUp() {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
-      if (liveDurationRef.current !== null) onResize(task.id, liveDurationRef.current);
+      setDragging(false);
+      const snapped = Math.max(15, Math.round((liveDurationRef.current ?? baseDuration) / 15) * 15);
       liveDurationRef.current = null;
-      setLiveDuration(null);
+      setLiveDuration(snapped);
+      onResize(task.id, snapped);
+      // Let the resolved prop value take back over once the parent re-renders with it.
+      setTimeout(() => setLiveDuration(null), 0);
     }
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
@@ -164,22 +195,32 @@ function ResizableDayCard({
     <div
       className="day-card pointer-events-auto absolute inset-x-1 overflow-hidden"
       data-thread={threadIndex >= 0 ? threadIndex : undefined}
-      style={{ top, height }}
+      style={{
+        top,
+        height,
+        transition: dragging ? "none" : `height 180ms ${EASE_OUT}`,
+      }}
     >
       <div className="flex items-center gap-2">
         <span className="shrink-0 font-mono text-[0.65rem] text-ink-faint">{formatTime(task.due_at)}</span>
         <span className={`truncate text-xs ${task.status === "done" ? "text-ink-faint line-through" : "text-ink"}`}>
           {task.title}
         </span>
+        {dragging && <span className="ml-auto shrink-0 font-mono text-[0.6rem] text-oxblood">{Math.round(duration)}m</span>}
       </div>
       <div
         onPointerDown={handlePointerDown}
-        className="absolute inset-x-0 bottom-0 flex h-2.5 touch-none items-center justify-center cursor-ns-resize"
+        className="absolute inset-x-0 bottom-0 flex h-2.5 touch-none cursor-ns-resize items-center justify-center"
       >
         <span className="h-0.5 w-6 rounded-full bg-ink-faint/50" />
       </div>
     </div>
   );
+}
+
+function parseQuarterId(id: string) {
+  const [, dateKeyPart, hourPart, quarterPart] = id.split(":");
+  return { dateKey: dateKeyPart, hour: Number(hourPart), quarter: Number(quarterPart) };
 }
 
 export function CalendarBoard({
@@ -188,6 +229,7 @@ export function CalendarBoard({
   monthIndex,
   selectedDateKey,
   todayKey,
+  fullDay,
   tasks: initialTasks,
   domains,
 }: {
@@ -196,6 +238,7 @@ export function CalendarBoard({
   monthIndex: number;
   selectedDateKey: string;
   todayKey: string;
+  fullDay: boolean;
   tasks: Task[];
   domains: Domain[];
 }) {
@@ -203,9 +246,14 @@ export function CalendarBoard({
   const [, startTransition] = useTransition();
   const [tasks, setTasks] = useState(initialTasks);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [hoveredOverId, setHoveredOverId] = useState<string | null>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
 
   const today = parseDayKey(todayKey);
   const selectedDate = parseDayKey(selectedDateKey);
+  const offsetHour = fullDay ? 0 : 6;
+  const visibleHours = fullDay ? 24 : 18;
+  const hours = useMemo(() => Array.from({ length: visibleHours }, (_, i) => i + offsetHour), [visibleHours, offsetHour]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -237,13 +285,27 @@ export function CalendarBoard({
   const selectedDayTasks = tasksByDay.get(selectedDateKey) ?? [];
   const sidebarTasks = view === "month" ? monthTasks : selectedDayTasks;
 
+  // Auto-scroll the day timeline near "now" when opening today's Day view.
+  useEffect(() => {
+    if (view !== "day" || selectedDateKey !== todayKey || !timelineRef.current) return;
+    const now = new Date();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes() - offsetHour * 60;
+    const target = Math.max(0, (nowMinutes / 60) * ROW_HEIGHT - timelineRef.current.clientHeight / 3);
+    timelineRef.current.scrollTop = target;
+  }, [view, selectedDateKey, todayKey, offsetHour]);
+
   function handleDragStart(event: DragStartEvent) {
     setActiveTask((event.active.data.current?.task as Task) ?? null);
+  }
+
+  function handleDragOver(event: DragOverEvent) {
+    setHoveredOverId(event.over ? String(event.over.id) : null);
   }
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     setActiveTask(null);
+    setHoveredOverId(null);
     if (!over) return;
 
     const task = active.data.current?.task as Task | undefined;
@@ -262,10 +324,10 @@ export function CalendarBoard({
         prev ? prev.getHours() : 9,
         prev ? prev.getMinutes() : 0,
       ).toISOString();
-    } else if (overId.startsWith("hour:")) {
-      const [, dateKeyPart, hourPart] = overId.split(":");
-      const target = parseDayKey(dateKeyPart);
-      newDueAt = new Date(target.getFullYear(), target.getMonth(), target.getDate(), Number(hourPart), 0).toISOString();
+    } else if (overId.startsWith("quarter:")) {
+      const { dateKey: dk, hour, quarter } = parseQuarterId(overId);
+      const target = parseDayKey(dk);
+      newDueAt = new Date(target.getFullYear(), target.getMonth(), target.getDate(), hour, quarter * 15).toISOString();
     } else {
       return;
     }
@@ -287,8 +349,10 @@ export function CalendarBoard({
 
   const activeThreadIndex = activeTask ? threadIndexFor(activeTask.domain_id, domains) : -1;
 
+  const previewSlot = activeTask && hoveredOverId?.startsWith("quarter:") ? parseQuarterId(hoveredOverId) : null;
+
   return (
-    <DndContext id="calendar-dnd" sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext id="calendar-dnd" sensors={sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
       <div className="mx-auto flex max-w-6xl flex-col gap-6 lg:flex-row lg:items-start">
         <aside className="w-full shrink-0 lg:w-64">
           <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold uppercase tracking-tight text-ink">
@@ -302,16 +366,23 @@ export function CalendarBoard({
             .
           </p>
 
-          <div className="mt-4 flex gap-1 rounded-lg border border-line bg-stone p-1">
+          <div className="relative mt-4 flex gap-1 rounded-lg border border-line bg-stone p-1">
+            <div
+              className="absolute inset-y-1 w-[calc(50%-0.375rem)] rounded-md bg-panel transition-transform duration-[180ms]"
+              style={{
+                transform: view === "day" ? "translateX(calc(100% + 0.5rem))" : "translateX(0)",
+                transitionTimingFunction: EASE_OUT,
+              }}
+            />
             <Link
               href={monthHref("month", year, monthIndex)}
-              className={`flex-1 rounded-md px-2 py-1 text-center text-xs font-medium transition-colors ${view === "month" ? "bg-panel text-ink" : "text-ink-faint hover:text-ink"}`}
+              className={`relative z-10 flex-1 rounded-md px-2 py-1 text-center text-xs font-medium transition-colors ${view === "month" ? "text-ink" : "text-ink-faint hover:text-ink"}`}
             >
               Month
             </Link>
             <Link
-              href={dayHref(selectedDate)}
-              className={`flex-1 rounded-md px-2 py-1 text-center text-xs font-medium transition-colors ${view === "day" ? "bg-panel text-ink" : "text-ink-faint hover:text-ink"}`}
+              href={dayHref(selectedDate, fullDay)}
+              className={`relative z-10 flex-1 rounded-md px-2 py-1 text-center text-xs font-medium transition-colors ${view === "day" ? "text-ink" : "text-ink-faint hover:text-ink"}`}
             >
               Day
             </Link>
@@ -339,7 +410,7 @@ export function CalendarBoard({
                   date ? (
                     <Link
                       key={`${wi}-${di}`}
-                      href={view === "day" ? dayHref(date) : `#day-${dayKey(date)}`}
+                      href={view === "day" ? dayHref(date, fullDay) : `#day-${dayKey(date)}`}
                       className="mini-cal-day"
                       data-today={isSameDate(date, today)}
                       data-selected={view === "day" && isSameDate(date, selectedDate)}
@@ -382,33 +453,53 @@ export function CalendarBoard({
             ))
           ) : (
             <>
-              <div className="flex items-center justify-between">
-                <Link href={dayHref(addDays(selectedDate, -1))} className="btn-outline px-3 py-1.5 text-sm">
+              <div className="flex items-center justify-between gap-2">
+                <Link href={dayHref(addDays(selectedDate, -1), fullDay)} className="btn-outline px-3 py-1.5 text-sm">
                   ← Prev
                 </Link>
-                <div className="font-[family-name:var(--font-display)] text-xl font-bold text-ink">
-                  {selectedDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+                <div className="flex flex-col items-center">
+                  <div className="font-[family-name:var(--font-display)] text-xl font-bold text-ink">
+                    {selectedDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+                  </div>
+                  <Link
+                    href={dayHref(selectedDate, !fullDay)}
+                    className="mt-0.5 font-mono text-[0.65rem] text-ink-faint underline hover:text-ink"
+                  >
+                    {fullDay ? "Show 6 AM – 12 AM" : "Show full day"}
+                  </Link>
                 </div>
-                <Link href={dayHref(addDays(selectedDate, 1))} className="btn-outline px-3 py-1.5 text-sm">
+                <Link href={dayHref(addDays(selectedDate, 1), fullDay)} className="btn-outline px-3 py-1.5 text-sm">
                   Next →
                 </Link>
               </div>
 
-              <div className="relative mt-4" style={{ height: 24 * ROW_HEIGHT }}>
-                {HOURS.map((h) => (
-                  <DayHourRow key={h} hour={h} dateKey={selectedDateKey} />
-                ))}
-
-                <div className="pointer-events-none absolute inset-y-0 left-16 right-0">
-                  {selectedDayTasks.map((task) => (
-                    <ResizableDayCard
-                      key={task.id}
-                      task={task}
-                      threadIndex={threadIndexFor(task.domain_id, domains)}
-                      onResize={handleResize}
-                    />
+              <div ref={timelineRef} className="mt-4 max-h-[70vh] overflow-y-auto rounded-lg border border-line">
+                <div className="relative" style={{ height: visibleHours * ROW_HEIGHT }}>
+                  {hours.map((h) => (
+                    <DayHourRow key={h} hour={h} dateKey={selectedDateKey} offsetHour={offsetHour} />
                   ))}
-                  <NowLine dateKey={selectedDateKey} />
+
+                  <div className="pointer-events-none absolute inset-y-0 left-16 right-0">
+                    {selectedDayTasks.map((task) => (
+                      <ResizableDayCard
+                        key={task.id}
+                        task={task}
+                        threadIndex={threadIndexFor(task.domain_id, domains)}
+                        offsetHour={offsetHour}
+                        onResize={handleResize}
+                      />
+                    ))}
+                    {previewSlot && previewSlot.dateKey === selectedDateKey && (
+                      <div
+                        className="pointer-events-none absolute inset-x-1 rounded-[0_8px_8px_0] border-2 border-dashed border-oxblood/60 bg-oxblood/5"
+                        style={{
+                          top: (((previewSlot.hour - offsetHour) * 60 + previewSlot.quarter * 15) / 60) * ROW_HEIGHT,
+                          height: Math.max(((activeTask?.duration_minutes ?? 30) / 60) * ROW_HEIGHT, 16),
+                        }}
+                      />
+                    )}
+                    <NowLine dateKey={selectedDateKey} offsetHour={offsetHour} />
+                  </div>
                 </div>
               </div>
             </>
