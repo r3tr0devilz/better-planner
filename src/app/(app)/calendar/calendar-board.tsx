@@ -40,6 +40,7 @@ import {
 
 const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
 const QUARTER_HEIGHT = ROW_HEIGHT / 4;
+const MIN_BLOCK_HEIGHT = 34;
 
 function DraggableTask({ task, threadIndex, domains }: { task: Task; threadIndex: number; domains: Domain[] }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: task.id, data: { task } });
@@ -162,7 +163,7 @@ function ResizableDayCard({
   const d = new Date(task.due_at);
   const top = ((d.getHours() * 60 + d.getMinutes() - offsetHour * 60) / 60) * ROW_HEIGHT;
   const duration = liveDuration ?? baseDuration;
-  const height = Math.max((duration / 60) * ROW_HEIGHT, 16);
+  const height = Math.max((duration / 60) * ROW_HEIGHT, MIN_BLOCK_HEIGHT);
 
   function handlePointerDown(e: ReactPointerEvent<HTMLDivElement>) {
     e.preventDefault();
@@ -457,16 +458,18 @@ export function CalendarBoard({
             ))
           ) : (
             <>
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <Link href={dayHref(addDays(selectedDate, -1), fullDay)} className="btn-outline px-3 py-1.5 text-sm">
-                  ← Prev
-                </Link>
+              <div className="flex flex-col items-center gap-2">
                 <div className="font-[family-name:var(--font-display)] text-xl font-bold text-ink">
                   {selectedDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
                 </div>
-                <Link href={dayHref(addDays(selectedDate, 1), fullDay)} className="btn-outline px-3 py-1.5 text-sm">
-                  Next →
-                </Link>
+                <div className="flex w-full items-center justify-between gap-2">
+                  <Link href={dayHref(addDays(selectedDate, -1), fullDay)} className="btn-outline px-3 py-1.5 text-sm">
+                    ← Prev
+                  </Link>
+                  <Link href={dayHref(addDays(selectedDate, 1), fullDay)} className="btn-outline px-3 py-1.5 text-sm">
+                    Next →
+                  </Link>
+                </div>
               </div>
 
               <div className="relative mx-auto mt-2 flex w-fit gap-1 rounded-lg border border-line bg-stone p-1">
@@ -509,10 +512,10 @@ export function CalendarBoard({
                     ))}
                     {previewSlot && previewSlot.dateKey === selectedDateKey && (
                       <div
-                        className="pointer-events-none absolute inset-x-1 rounded-[0_8px_8px_0] border-2 border-dashed border-oxblood/60 bg-oxblood/5"
+                        className="pointer-events-none absolute inset-x-1 rounded-[0_8px_8px_0] border-l-2 border-oxblood bg-oxblood/10"
                         style={{
                           top: (((previewSlot.hour - offsetHour) * 60 + previewSlot.quarter * 15) / 60) * ROW_HEIGHT,
-                          height: Math.max(((activeTask?.duration_minutes ?? 30) / 60) * ROW_HEIGHT, 16),
+                          height: Math.max(((activeTask?.duration_minutes ?? 30) / 60) * ROW_HEIGHT, MIN_BLOCK_HEIGHT),
                         }}
                       />
                     )}
