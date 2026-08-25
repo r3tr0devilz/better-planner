@@ -1,5 +1,6 @@
 import { getInventoryItems } from "@/lib/data/inventory";
 import { InventoryRow } from "@/components/inventory-row";
+import { PageHeader } from "@/components/page-header";
 import { createItem } from "./actions";
 
 export default async function InventoryPage() {
@@ -9,7 +10,7 @@ export default async function InventoryPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold uppercase tracking-tight text-ink">Inventory</h1>
+      <PageHeader title="Inventory" context={`${active.length} active item${active.length === 1 ? "" : "s"}`} />
 
       <form action={createItem} className="field-row card mt-6 p-4">
         <label className="field-wide">

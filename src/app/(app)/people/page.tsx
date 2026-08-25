@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getPeople } from "@/lib/data/people";
+import { PageHeader } from "@/components/page-header";
 import { createPerson } from "./actions";
 
 function formatBirthday(birthday: string | null): string | null {
@@ -13,7 +14,7 @@ export default async function PeoplePage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold uppercase tracking-tight text-ink">People</h1>
+      <PageHeader title="People" context={`${people.length} people`} />
 
       <form action={createPerson} className="field-row card mt-6 p-4">
         <label className="field-wide">

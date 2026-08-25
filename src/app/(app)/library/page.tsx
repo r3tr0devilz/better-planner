@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getLibraryNotes, getBooks } from "@/lib/data/library";
 import { NoteFlagToggle } from "@/components/note-flag-toggle";
+import { PageHeader } from "@/components/page-header";
 import { createNote, createBook } from "./actions";
 import type { LibraryNote } from "@/lib/supabase/types";
 
@@ -15,7 +16,7 @@ export default async function LibraryPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold uppercase tracking-tight text-ink">Library</h1>
+      <PageHeader title="Library" context={`${notes.length} notes, ${books.length} books`} />
 
       <form action={createNote} className="card mt-6 flex flex-col gap-3 p-4">
         <div className="field-row">

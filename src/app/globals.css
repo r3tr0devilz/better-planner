@@ -115,7 +115,8 @@ body {
 }
 
 .ledger { border-top: 3px solid var(--color-ink); }
-.ledger-row { border-bottom: 3px solid var(--color-ink); }
+.ledger-row { border-bottom: 1px solid var(--color-line); }
+.ledger-row:last-child { border-bottom: none; }
 
 /* Calendar agenda cards: a colored domain-thread spine instead of a full
    border, so a day with several tasks reads as a stack of tabs. */
@@ -326,6 +327,18 @@ textarea.field {
   @starting-style {
     opacity: 0;
     transform: scale(0.96);
+  }
+}
+
+/* Mount-time-only entrance (More nav list); each item's animation-delay is
+   set inline for the stagger, so this stays a single shared class. */
+.stagger-in {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 200ms ease-out, transform 200ms var(--ease-out);
+  @starting-style {
+    opacity: 0;
+    transform: translateY(4px);
   }
 }
 

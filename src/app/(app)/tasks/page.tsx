@@ -1,6 +1,7 @@
 import { getTasks } from "@/lib/data/tasks";
 import { getDomains, threadIndexFor } from "@/lib/data/domains";
 import { TaskRow } from "@/components/task-row";
+import { PageHeader } from "@/components/page-header";
 import { createTask } from "./actions";
 
 export default async function TasksPage() {
@@ -10,7 +11,7 @@ export default async function TasksPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold uppercase tracking-tight text-ink">Tasks</h1>
+      <PageHeader title="Tasks" context={`${open.length} open, ${done.length} done`} />
 
       <form action={createTask} className="field-row card mt-6 p-4">
         <label className="field-wide">

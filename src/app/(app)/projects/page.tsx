@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getProjects, getChecklistTemplates } from "@/lib/data/projects";
 import { getDomains } from "@/lib/data/domains";
+import { PageHeader } from "@/components/page-header";
 import { createDomain, createProject, createChecklistTemplate } from "./actions";
 
 export default async function ProjectsPage() {
@@ -14,7 +15,7 @@ export default async function ProjectsPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold uppercase tracking-tight text-ink">Projects</h1>
+      <PageHeader title="Projects" context={`${projects.length} projects across ${domains.length} domains`} />
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <form action={createDomain} className="card flex flex-col gap-2 p-4">

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { PageHeader } from "@/components/page-header";
 import { signOut } from "./actions";
 
 export default async function SettingsPage() {
@@ -12,7 +13,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-lg">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold uppercase tracking-tight text-ink">Settings</h1>
+      <PageHeader title="Settings" context="Account & integrations" />
 
       <section className="card mt-6 p-4">
         <h2 className="text-sm font-medium text-ink-faint">Account</h2>

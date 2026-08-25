@@ -1,5 +1,6 @@
 import { getRoutines, getRecentCompletions, currentStreak, todayStr, HISTORY_DAYS } from "@/lib/data/routines";
 import { RoutineRow } from "@/components/routine-row";
+import { PageHeader } from "@/components/page-header";
 import { createRoutine } from "./actions";
 import type { Routine } from "@/lib/supabase/types";
 
@@ -26,10 +27,13 @@ function historyFor(routineId: string, completions: Awaited<ReturnType<typeof ge
 export default async function RoutinesPage() {
   const [routines, completions] = await Promise.all([getRoutines(), getRecentCompletions()]);
   const today = todayStr();
+  const doneToday = routines.filter(
+    (r) => completions.find((c) => c.routine_id === r.id && c.date === today)?.completed,
+  ).length;
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold uppercase tracking-tight text-ink">Routines</h1>
+      <PageHeader title="Routines" context={`${doneToday}/${routines.length} done today`} />
 
       <form action={createRoutine} className="field-row card mt-6 p-4">
         <label className="field-wide">
