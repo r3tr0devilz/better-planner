@@ -14,6 +14,7 @@ export function DeleteButton({
   ariaLabel,
   className = "inline-flex shrink-0 items-center gap-1.5 text-xs text-ink-faint transition-colors duration-150 hover:text-vermillion",
   iconSize = 13,
+  skipConfirm = false,
 }: {
   confirmMessage: string;
   onDelete: () => Promise<void>;
@@ -23,11 +24,15 @@ export function DeleteButton({
   ariaLabel?: string;
   className?: string;
   iconSize?: number;
+  /** Skip the native confirm() — only for callers that already give the user
+   * a real way back out, e.g. an undo toast. A blocking dialog and an undo
+   * safety net are redundant friction stacked on top of each other; pick one. */
+  skipConfirm?: boolean;
 }) {
   const [pending, startTransition] = useTransition();
 
   function handleClick() {
-    if (!confirm(confirmMessage)) return;
+    if (!skipConfirm && !confirm(confirmMessage)) return;
     startTransition(() => onDelete());
   }
 

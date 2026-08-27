@@ -9,7 +9,7 @@ colors:
   ink-faint: "#625f59"
   oxblood: "#7a2330"
   cobalt: "#1e3ae0"
-  vermillion: "#e0431e"
+  vermillion: "#b33618"
   moss: "#276b4d"
   mustard: "#b8790f"
   plum: "#7a3466"
@@ -90,7 +90,7 @@ The palette reads as a warm study-lamp scene: cream paper, a stone desk, ink, an
 ### Secondary — Domain Thread Palette
 Six colors, cycled by index across every domain a user creates. The same domain always maps to the same color (tab, flag, row dot) as long as domain order is stable.
 - **Cobalt** (`#1e3ae0`): Thread 0.
-- **Vermillion** (`#e0431e`): Thread 1. Doubles as the fixed danger/overdue/high-priority signal everywhere in the app (task priority dots, "needs a look" slipping-project warnings, form errors) — when it appears outside the thread rail, it always means "something is wrong or late," never "this is domain N."
+- **Vermillion** (`#b33618`): Thread 1. Doubles as the fixed danger/overdue/high-priority signal everywhere in the app (task priority dots, "needs a look" slipping-project warnings, form errors) — when it appears outside the thread rail, it always means "something is wrong or late," never "this is domain N." Darkened from an earlier `#e0431e` to clear WCAG AA text contrast (5.73:1 on panel, 4.64:1 on stone) since this color is used as text, not just fills/dots.
 - **Moss** (`#276b4d`): Thread 2. Also the fixed color for every native checkbox (`accent-moss`) — completion state is always moss, regardless of which domain the item belongs to, so "done" reads the same everywhere.
 - **Mustard** (`#b8790f`): Thread 3. Also the fixed medium-priority signal on task rows.
 - **Plum** (`#7a3466`): Thread 4.

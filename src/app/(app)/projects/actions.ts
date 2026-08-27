@@ -181,11 +181,15 @@ export async function logActivity(projectId: string, formData: FormData) {
   revalidatePath(`/projects/${projectId}`);
 }
 
-export async function deleteProjectRedirect(projectId: string) {
+export async function deleteProject(projectId: string) {
   const supabase = await createClient();
   const { error } = await supabase.from("projects").delete().eq("id", projectId);
   if (error) throw error;
 
   revalidatePath("/projects");
+}
+
+export async function deleteProjectRedirect(projectId: string) {
+  await deleteProject(projectId);
   redirect("/projects");
 }

@@ -1,9 +1,9 @@
 import { getTasks } from "@/lib/data/tasks";
-import { getDomains, threadIndexFor } from "@/lib/data/domains";
-import { TaskRow } from "@/components/task-row";
+import { getDomains } from "@/lib/data/domains";
 import { PageHeader } from "@/components/page-header";
 import { CollapsibleForm } from "@/components/collapsible-form";
 import { SubmitButton } from "@/components/submit-button";
+import { TaskList } from "./task-list";
 import { createTask } from "./actions";
 
 export default async function TasksPage() {
@@ -46,28 +46,7 @@ export default async function TasksPage() {
         <SubmitButton>Add</SubmitButton>
       </CollapsibleForm>
 
-      <section className="mt-8">
-        <h2 className="text-sm font-medium text-ink-faint">Open ({open.length})</h2>
-        <div className="ledger mt-3">
-          {open.length === 0 && <p className="py-3 text-sm text-ink-faint">Nothing open. Add something above.</p>}
-          {open.map((task) => (
-            <TaskRow key={task.id} task={task} threadIndex={threadIndexFor(task.domain_id, domains)} domains={domains} />
-          ))}
-        </div>
-      </section>
-
-      {done.length > 0 && (
-        <details className="mt-8">
-          <summary className="cursor-pointer list-none text-sm font-medium text-ink-faint marker:hidden [&::-webkit-details-marker]:hidden">
-            Done ({done.length}) — tap to show
-          </summary>
-          <div className="ledger mt-3">
-            {done.map((task) => (
-              <TaskRow key={task.id} task={task} threadIndex={threadIndexFor(task.domain_id, domains)} domains={domains} />
-            ))}
-          </div>
-        </details>
-      )}
+      <TaskList tasks={tasks} domains={domains} />
     </div>
   );
 }

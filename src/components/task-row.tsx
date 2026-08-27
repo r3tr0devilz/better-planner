@@ -37,10 +37,26 @@ export function TaskRow({
   task,
   threadIndex,
   domains = [],
+  selectable = false,
+  selected = false,
+  onToggleSelect,
+  onDelete,
 }: {
   task: Task;
   threadIndex: number;
   domains?: Domain[];
+  /** Bulk-select mode (Tasks list "Select" toggle) — adds a selection
+   * checkbox ahead of the usual done-checkbox instead of replacing it, so
+   * marking things done and selecting them for a bulk action stay separate. */
+  selectable?: boolean;
+  selected?: boolean;
+  onToggleSelect?: () => void;
+  /** When the caller manages an undoable-delete flow (Tasks list), it hands
+   * down its own optimistic-remove + deferred-delete callback instead of
+   * this row calling the server action straight away. Omit it and this row
+   * falls back to the plain immediate delete, unchanged for every other
+   * place TaskRow renders (Today, Calendar, the domain binder-rail modal). */
+  onDelete?: (id: string) => void;
 }) {
   const [pending, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
@@ -49,8 +65,27 @@ export function TaskRow({
 
   const close = useCallback(() => setEditing(false), []);
 
+  function handleDelete() {
+    if (onDelete) {
+      onDelete(task.id);
+      return Promise.resolve();
+    }
+    return deleteTask(task.id);
+  }
+
   return (
     <div className="ledger-row flex items-center gap-3 px-1 py-3">
+      {selectable && (
+        <label className="-m-3.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onToggleSelect}
+            className="h-4 w-4 accent-oxblood"
+            aria-label={`Select "${task.title}"`}
+          />
+        </label>
+      )}
       <label className="-m-3.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center">
         <input
           type="checkbox"
@@ -101,7 +136,8 @@ export function TaskRow({
         label=""
         pendingLabel=""
         ariaLabel={`Delete "${task.title}"`}
-        onDelete={deleteTask.bind(null, task.id)}
+        onDelete={handleDelete}
+        skipConfirm={!!onDelete}
         className="-m-3 flex h-11 w-11 shrink-0 items-center justify-center text-ink-faint/60 transition-colors duration-150 hover:text-vermillion"
         iconSize={14}
       />
@@ -155,9 +191,10 @@ export function TaskRow({
             <div className="mt-1 flex items-center justify-between gap-3">
               <DeleteButton
                 confirmMessage={`Delete "${task.title}"? This can't be undone.`}
+                skipConfirm={!!onDelete}
                 onDelete={() => {
                   close();
-                  return deleteTask(task.id);
+                  return handleDelete();
                 }}
               />
               <button type="submit" className="btn">

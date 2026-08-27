@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getBookDetail } from "@/lib/data/library";
 import { StatusSelect } from "@/components/status-select";
@@ -19,7 +21,11 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="flex items-start justify-between gap-3">
+      <Link href="/library" className="inline-flex items-center gap-1 text-xs font-semibold text-ink-faint transition-colors duration-150 hover:text-ink">
+        <ArrowLeft size={13} />
+        Library
+      </Link>
+      <div className="mt-2 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-ink [overflow-wrap:anywhere]">{book.title}</h1>
           {book.author && <p className="mt-1 truncate text-sm text-ink-faint">{book.author}</p>}

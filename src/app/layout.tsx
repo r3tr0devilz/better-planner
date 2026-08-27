@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, JetBrains_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import { SwRegister } from "@/components/sw-register";
 import "./globals.css";
 
@@ -47,6 +48,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <SwRegister />
         {children}
+        <Toaster
+          position="bottom-center"
+          gap={8}
+          toastOptions={{
+            unstyled: true,
+            classNames: {
+              toast:
+                "card flex w-[min(22rem,calc(100vw-2rem))] items-center justify-between gap-3 border-ink px-4 py-3 text-sm text-ink",
+              actionButton: "btn shrink-0 px-3 py-1.5 text-xs",
+              error: "border-vermillion",
+            },
+          }}
+        />
       </body>
     </html>
   );

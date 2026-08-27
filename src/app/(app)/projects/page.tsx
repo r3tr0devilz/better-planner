@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { getProjects, getChecklistTemplates } from "@/lib/data/projects";
 import { getDomains } from "@/lib/data/domains";
 import { PageHeader } from "@/components/page-header";
 import { CollapsibleForm } from "@/components/collapsible-form";
 import { SubmitButton } from "@/components/submit-button";
+import { ProjectList } from "./project-list";
 import { createDomain, createProject, createChecklistTemplate } from "./actions";
 
 export default async function ProjectsPage() {
@@ -12,8 +12,6 @@ export default async function ProjectsPage() {
     getDomains(),
     getChecklistTemplates(),
   ]);
-
-  const unassigned = projects.filter((p) => !p.domain_id);
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -69,41 +67,7 @@ export default async function ProjectsPage() {
         </CollapsibleForm>
       </div>
 
-      {domains.map((domain, i) => {
-        const items = projects.filter((p) => p.domain_id === domain.id);
-        return (
-          <section key={domain.id} id={`domain-${domain.id}`} className="mt-8 scroll-mt-20">
-            <h2 className="flex items-center gap-2 text-sm font-medium text-ink-faint">
-              <span
-                className="h-2.5 w-2.5 rounded-full"
-                style={{ backgroundColor: domain.color }}
-                aria-hidden
-              />
-              {domain.name}
-            </h2>
-            {items.length === 0 ? (
-              <p className="mt-3 text-sm text-ink-faint">No projects in this domain yet — add one above.</p>
-            ) : (
-              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {items.map((project) => (
-                  <ProjectCard key={project.id} project={project} threadIndex={i % 6} />
-                ))}
-              </div>
-            )}
-          </section>
-        );
-      })}
-
-      {unassigned.length > 0 && (
-        <section className="mt-8">
-          <h2 className="text-sm font-medium text-ink-faint">No domain</h2>
-          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {unassigned.map((project) => (
-              <ProjectCard key={project.id} project={project} threadIndex={-1} />
-            ))}
-          </div>
-        </section>
-      )}
+      <ProjectList projects={projects} domains={domains} />
 
       <section className="mt-10">
         <h2 className="text-sm font-medium text-ink-faint">Checklist templates</h2>
@@ -137,29 +101,5 @@ export default async function ProjectsPage() {
         )}
       </section>
     </div>
-  );
-}
-
-function ProjectCard({
-  project,
-  threadIndex,
-}: {
-  project: Awaited<ReturnType<typeof getProjects>>[number];
-  threadIndex: number;
-}) {
-  return (
-    <Link
-      href={`/projects/${project.id}`}
-      className="card flex flex-col gap-1 px-4 py-3 transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99]"
-    >
-      <div className="flex items-center gap-2">
-        {threadIndex >= 0 && <span className="thread-mark" data-thread={threadIndex} aria-hidden />}
-        <p className="min-w-0 flex-1 truncate text-sm text-ink">{project.name}</p>
-        <span className="shrink-0 border border-line px-2 py-0.5 font-mono text-[11px] text-ink-faint">
-          {project.engagement === "retainer" ? "Retainer" : project.kind === "area" ? "Area" : "Project"}
-        </span>
-      </div>
-      <p className="pl-[19px] text-xs text-ink-faint">{project.hours_logged.toFixed(1)}h logged</p>
-    </Link>
   );
 }

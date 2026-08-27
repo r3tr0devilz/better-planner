@@ -53,11 +53,15 @@ export async function updatePerson(id: string, formData: FormData) {
   revalidatePath("/people");
 }
 
-export async function deletePerson(id: string) {
+export async function deletePersonInPlace(id: string) {
   const supabase = await createClient();
   const { error } = await supabase.from("people").delete().eq("id", id);
   if (error) throw error;
 
   revalidatePath("/people");
+}
+
+export async function deletePerson(id: string) {
+  await deletePersonInPlace(id);
   redirect("/people");
 }

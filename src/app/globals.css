@@ -12,7 +12,11 @@
      flags, thread-marks). cobalt lives here as thread 0 only; it no
      longer doubles as the interactive accent below. */
   --color-cobalt: #1e3ae0;
-  --color-vermillion: #e0431e;
+  /* Darkened from the original #e0431e — that value was only 3.97:1 on
+     panel (fails WCAG AA 4.5:1) despite being this app's danger/overdue/
+     high-priority text color. Same hue, same saturation ratio, just
+     darker: 5.73:1 on panel, 4.64:1 on stone. */
+  --color-vermillion: #b33618;
   --color-moss: #276b4d;
   --color-mustard: #b8790f;
   --color-plum: #7a3466;

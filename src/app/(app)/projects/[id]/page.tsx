@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getProjectDetail, getChecklistTemplates } from "@/lib/data/projects";
 import { MilestoneRow } from "@/components/milestone-row";
@@ -27,7 +29,11 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="flex items-start justify-between gap-3">
+      <Link href="/projects" className="inline-flex items-center gap-1 text-xs font-semibold text-ink-faint transition-colors duration-150 hover:text-ink">
+        <ArrowLeft size={13} />
+        Projects
+      </Link>
+      <div className="mt-2 flex items-start justify-between gap-3">
         <h1 className="min-w-0 font-[family-name:var(--font-display)] text-3xl font-semibold text-ink [overflow-wrap:anywhere]">{project.name}</h1>
         <span className="shrink-0 border border-line px-3 py-1 font-mono text-xs text-ink-faint">
           {project.engagement === "retainer" ? "Retainer" : project.kind === "area" ? "Area" : "Project"}

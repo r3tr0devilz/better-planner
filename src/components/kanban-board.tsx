@@ -16,7 +16,7 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Pencil } from "lucide-react";
+import { GripVertical } from "lucide-react";
 import { moveJobApplication, updateJobApplication, deleteJobApplication } from "@/app/(app)/career/actions";
 import { Modal } from "@/components/modal";
 import { DeleteButton } from "@/components/delete-button";
@@ -118,18 +118,11 @@ function ApplicationCard({ app }: { app: JobApplication }) {
       <button
         type="button"
         onClick={() => setEditing(true)}
+        aria-label={`Edit ${app.company} application: ${app.role}`}
         className="min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-left"
       >
         <p className="truncate text-sm text-ink">{app.role}</p>
         {deadline && <p className="mt-0.5 font-mono text-xs text-ink-faint">Due {deadline}</p>}
-      </button>
-      <button
-        type="button"
-        onClick={() => setEditing(true)}
-        aria-label={`Edit ${app.company} application`}
-        className="-m-2.5 flex h-11 w-11 shrink-0 items-center justify-center text-ink-faint/60 transition-colors hover:text-ink-faint"
-      >
-        <Pencil size={13} />
       </button>
 
       {editing && <ApplicationEditModal app={app} onClose={close} />}
@@ -366,8 +359,15 @@ export function KanbanBoard({ applications }: { applications: JobApplication[] }
         </div>
       </div>
 
-      {/* Desktop: full board, real drag-and-drop between columns. */}
-      <div className="hidden gap-5 overflow-x-auto pb-2 lg:flex">
+      {/* Desktop: full board, real drag-and-drop between columns. The right
+          edge fades instead of cutting off hard — a static hint that more
+          stages continue off-screen (Rejected/Archived at common laptop
+          widths), since the row otherwise gives no sign there's more to
+          scroll to. */}
+      <div
+        className="hidden gap-5 overflow-x-auto pb-2 pr-8 lg:flex"
+        style={{ maskImage: "linear-gradient(to right, black calc(100% - 2rem), transparent)", WebkitMaskImage: "linear-gradient(to right, black calc(100% - 2rem), transparent)" }}
+      >
         {COLUMNS.map((c) => (
           <Column key={c.status} status={c.status} label={c.label} dot={c.dot} apps={board.get(c.status) ?? []} />
         ))}

@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getPersonDetail } from "@/lib/data/people";
 import { PersonHeader } from "@/components/person-header";
@@ -16,7 +18,13 @@ export default async function PersonDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="mx-auto max-w-2xl">
-      <PersonHeader person={person} />
+      <Link href="/people" className="inline-flex items-center gap-1 text-xs font-semibold text-ink-faint transition-colors duration-150 hover:text-ink">
+        <ArrowLeft size={13} />
+        People
+      </Link>
+      <div className="mt-2">
+        <PersonHeader person={person} />
+      </div>
 
       <section className="mt-8">
         <h2 className="text-sm font-medium text-ink-faint">Things to remember</h2>

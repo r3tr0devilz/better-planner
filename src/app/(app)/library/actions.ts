@@ -79,12 +79,16 @@ export async function updateBookStatus(id: string, status: string) {
   revalidatePath(`/library/books/${id}`);
 }
 
-export async function deleteBook(id: string) {
+export async function deleteBookInPlace(id: string) {
   const supabase = await createClient();
   const { error } = await supabase.from("books").delete().eq("id", id);
   if (error) throw error;
 
   revalidatePath("/library");
+}
+
+export async function deleteBook(id: string) {
+  await deleteBookInPlace(id);
   redirect("/library");
 }
 

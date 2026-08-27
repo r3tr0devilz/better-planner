@@ -1,18 +1,9 @@
-import Link from "next/link";
 import { getLibraryNotes, getBooks } from "@/lib/data/library";
-import { NoteFlagToggle } from "@/components/note-flag-toggle";
 import { PageHeader } from "@/components/page-header";
 import { CollapsibleForm } from "@/components/collapsible-form";
 import { SubmitButton } from "@/components/submit-button";
-import { DeleteButton } from "@/components/delete-button";
-import { createNote, createBook, deleteNote, deleteBook } from "./actions";
-import type { LibraryNote } from "@/lib/supabase/types";
-
-const KINDS: { key: LibraryNote["kind"]; label: string }[] = [
-  { key: "note", label: "Notes" },
-  { key: "quote", label: "Quotes" },
-  { key: "journal", label: "Journal" },
-];
+import { LibraryList } from "./library-list";
+import { createNote, createBook } from "./actions";
 
 export default async function LibraryPage() {
   const [notes, books] = await Promise.all([getLibraryNotes(), getBooks()]);
@@ -47,81 +38,19 @@ export default async function LibraryPage() {
         <SubmitButton className="btn self-start">Save</SubmitButton>
       </CollapsibleForm>
 
-      {KINDS.map(({ key, label }) => {
-        const items = notes.filter((n) => n.kind === key);
-        if (items.length === 0) return null;
-        return (
-          <section key={key} className="mt-8">
-            <h2 className="text-sm font-medium text-ink-faint">{label}</h2>
-            <div className="ledger mt-3">
-              {items.map((note) => (
-                <div key={note.id} className="ledger-row flex items-start gap-3 px-1 py-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm text-ink [overflow-wrap:anywhere]">{note.body}</p>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-[11px] text-ink-faint">
-                      {note.source && <span className="max-w-[12rem] truncate">{note.source}</span>}
-                      {note.tags.map((t) => (
-                        <span key={t} className="max-w-[10rem] truncate border border-line px-1.5 py-0.5">
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-3">
-                    <NoteFlagToggle id={note.id} flagged={note.flagged_for_review} />
-                    <DeleteButton
-                      confirmMessage="Delete this note? This can't be undone."
-                      label=""
-                      pendingLabel=""
-                      ariaLabel="Delete note"
-                      onDelete={deleteNote.bind(null, note.id)}
-                      className="-m-2.5 flex h-11 w-11 shrink-0 items-center justify-center text-ink-faint transition-colors duration-150 hover:text-vermillion"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        );
-      })}
+      <CollapsibleForm action={createBook} triggerLabel="New book">
+        <label className="field-wide">
+          Title
+          <input name="title" required className="field" />
+        </label>
+        <label>
+          Author
+          <input name="author" className="field" />
+        </label>
+        <SubmitButton>Add</SubmitButton>
+      </CollapsibleForm>
 
-      <section className="mt-10">
-        <h2 className="text-sm font-medium text-ink-faint">Books</h2>
-        <CollapsibleForm action={createBook} triggerLabel="New book" topMargin="mt-3">
-          <label className="field-wide">
-            Title
-            <input name="title" required className="field" />
-          </label>
-          <label>
-            Author
-            <input name="author" className="field" />
-          </label>
-          <SubmitButton>Add</SubmitButton>
-        </CollapsibleForm>
-
-        {books.length > 0 && (
-          <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {books.map((book) => (
-              <div key={book.id} className="card relative min-w-0 p-4">
-                <Link href={`/library/books/${book.id}`} className="hoverable block min-w-0 pr-7">
-                  <p className="truncate text-sm text-ink">{book.title}</p>
-                  {book.author && <p className="truncate text-xs text-ink-faint">{book.author}</p>}
-                  <p className="mt-1 font-mono text-[11px] uppercase tracking-wide text-ink-faint">{book.status}</p>
-                </Link>
-                <DeleteButton
-                  confirmMessage={`Delete "${book.title}"? This also removes its highlights. This can't be undone.`}
-                  label=""
-                  pendingLabel=""
-                  ariaLabel={`Delete "${book.title}"`}
-                  onDelete={deleteBook.bind(null, book.id)}
-                  className="absolute right-0 top-0 flex h-11 w-11 shrink-0 items-center justify-center text-ink-faint/60 transition-colors duration-150 hover:text-vermillion"
-                  iconSize={14}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+      <LibraryList notes={notes} books={books} />
     </div>
   );
 }
