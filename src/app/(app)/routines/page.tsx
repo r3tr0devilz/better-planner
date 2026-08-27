@@ -1,5 +1,5 @@
-import { getRoutines, getRecentCompletions, currentStreak, todayStr, HISTORY_DAYS } from "@/lib/data/routines";
-import { RoutineRow } from "@/components/routine-row";
+import { getRoutines, getArchivedRoutines, getRecentCompletions, currentStreak, todayStr, HISTORY_DAYS } from "@/lib/data/routines";
+import { RoutineRow, ArchivedRoutineRow } from "@/components/routine-row";
 import { PageHeader } from "@/components/page-header";
 import { CollapsibleForm } from "@/components/collapsible-form";
 import { SubmitButton } from "@/components/submit-button";
@@ -27,7 +27,11 @@ function historyFor(routineId: string, completions: Awaited<ReturnType<typeof ge
 }
 
 export default async function RoutinesPage() {
-  const [routines, completions] = await Promise.all([getRoutines(), getRecentCompletions()]);
+  const [routines, archivedRoutines, completions] = await Promise.all([
+    getRoutines(),
+    getArchivedRoutines(),
+    getRecentCompletions(),
+  ]);
   const today = todayStr();
   const doneToday = routines.filter(
     (r) => completions.find((c) => c.routine_id === r.id && c.date === today)?.completed,
@@ -91,6 +95,17 @@ export default async function RoutinesPage() {
 
       {routines.length === 0 && (
         <p className="mt-8 text-sm text-ink-faint">No routines yet — add one above.</p>
+      )}
+
+      {archivedRoutines.length > 0 && (
+        <section className="mt-8">
+          <h2 className="text-sm font-medium text-ink-faint">Archived</h2>
+          <div className="ledger mt-3">
+            {archivedRoutines.map((routine) => (
+              <ArchivedRoutineRow key={routine.id} routine={routine} />
+            ))}
+          </div>
+        </section>
       )}
     </div>
   );

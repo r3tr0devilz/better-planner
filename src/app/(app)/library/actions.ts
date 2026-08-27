@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { LibraryNote, Book } from "@/lib/supabase/types";
 
@@ -38,6 +39,14 @@ export async function toggleNoteFlag(id: string, flagged: boolean) {
   revalidatePath("/library");
 }
 
+export async function deleteNote(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("library_notes").delete().eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/library");
+}
+
 export async function createBook(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   if (!title) return;
@@ -70,12 +79,29 @@ export async function updateBookStatus(id: string, status: string) {
   revalidatePath(`/library/books/${id}`);
 }
 
+export async function deleteBook(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("books").delete().eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/library");
+  redirect("/library");
+}
+
 export async function createHighlight(bookId: string, formData: FormData) {
   const quote = String(formData.get("quote") ?? "").trim();
   if (!quote) return;
 
   const supabase = await createClient();
   const { error } = await supabase.from("highlights").insert({ book_id: bookId, quote });
+  if (error) throw error;
+
+  revalidatePath(`/library/books/${bookId}`);
+}
+
+export async function deleteHighlight(bookId: string, id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("highlights").delete().eq("id", id);
   if (error) throw error;
 
   revalidatePath(`/library/books/${bookId}`);

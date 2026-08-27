@@ -2,7 +2,8 @@
 
 import { useTransition } from "react";
 import { Minus, Plus } from "lucide-react";
-import { updateCourseProgress } from "@/app/(app)/career/actions";
+import { updateCourseProgress, deleteCourse } from "@/app/(app)/career/actions";
+import { DeleteButton } from "@/components/delete-button";
 import type { Course } from "@/lib/supabase/types";
 
 const STATUS_LABEL: Record<Course["status"], string> = {
@@ -26,9 +27,19 @@ export function CourseCard({ course }: { course: Course }) {
           <p className="truncate text-sm text-ink">{course.name}</p>
           {course.platform && <p className="truncate text-xs text-ink-faint">{course.platform}</p>}
         </div>
-        <span className="shrink-0 font-mono text-[0.65rem] uppercase tracking-wide text-ink-faint">
-          {STATUS_LABEL[course.status]}
-        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="font-mono text-[0.65rem] uppercase tracking-wide text-ink-faint">
+            {STATUS_LABEL[course.status]}
+          </span>
+          <DeleteButton
+            confirmMessage={`Delete "${course.name}"? This can't be undone.`}
+            label=""
+            pendingLabel=""
+            ariaLabel="Delete course"
+            onDelete={deleteCourse.bind(null, course.id)}
+            className="-m-2.5 flex h-11 w-11 shrink-0 items-center justify-center text-ink-faint transition-colors duration-150 hover:text-vermillion"
+          />
+        </div>
       </div>
 
       <div className="mt-3 flex items-center gap-3">

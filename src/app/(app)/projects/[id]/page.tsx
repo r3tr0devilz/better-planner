@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getProjectDetail, getChecklistTemplates } from "@/lib/data/projects";
 import { MilestoneRow } from "@/components/milestone-row";
 import { ChecklistItemRow } from "@/components/checklist-item-row";
-import { DeleteProjectButton } from "@/components/delete-project-button";
+import { DeleteButton } from "@/components/delete-button";
 import { SubmitButton } from "@/components/submit-button";
 import {
   createMilestone,
@@ -35,7 +35,11 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       </div>
       <div className="mt-1 flex items-center justify-between gap-3">
         <p className="text-sm text-ink-faint">{project.hours_logged.toFixed(1)} hours logged</p>
-        <DeleteProjectButton projectName={project.name} onDelete={deleteProjectRedirect.bind(null, project.id)} />
+        <DeleteButton
+          confirmMessage={`Delete "${project.name}"? This also removes its milestones, checklists, and activity log. This can't be undone.`}
+          label="Delete project"
+          onDelete={deleteProjectRedirect.bind(null, project.id)}
+        />
       </div>
 
       <section className="mt-8">

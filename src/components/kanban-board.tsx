@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -16,8 +16,10 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical } from "lucide-react";
-import { moveJobApplication } from "@/app/(app)/career/actions";
+import { GripVertical, Pencil } from "lucide-react";
+import { moveJobApplication, updateJobApplication, deleteJobApplication } from "@/app/(app)/career/actions";
+import { Modal } from "@/components/modal";
+import { DeleteButton } from "@/components/delete-button";
 import type { JobApplication } from "@/lib/supabase/types";
 
 const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
@@ -36,8 +38,60 @@ function formatDate(d: string | null): string | null {
   return new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+/** Company/role/deadline/link edit + delete, shared by the desktop drag card
+ * and the mobile select-to-move card — the only two places a job
+ * application ever renders. */
+function ApplicationEditModal({ app, onClose }: { app: JobApplication; onClose: () => void }) {
+  const [, startTransition] = useTransition();
+
+  return (
+    <Modal onClose={onClose} title="Edit application">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const formData = new FormData(e.currentTarget);
+          startTransition(() => updateJobApplication(app.id, formData));
+          onClose();
+        }}
+        className="mt-4 flex flex-col gap-3"
+      >
+        <label className="flex flex-col gap-1.5 text-sm text-ink-faint">
+          Company
+          <input name="company" defaultValue={app.company} required className="field" />
+        </label>
+        <label className="flex flex-col gap-1.5 text-sm text-ink-faint">
+          Role
+          <input name="role" defaultValue={app.role} required className="field" />
+        </label>
+        <label className="flex flex-col gap-1.5 text-sm text-ink-faint">
+          Deadline
+          <input type="date" name="deadline" defaultValue={app.deadline ?? ""} className="field" />
+        </label>
+        <label className="flex flex-col gap-1.5 text-sm text-ink-faint">
+          Job link
+          <input type="url" name="job_link" defaultValue={app.job_link ?? ""} placeholder="https://…" className="field" />
+        </label>
+        <div className="mt-1 flex items-center justify-between gap-3">
+          <DeleteButton
+            confirmMessage={`Delete the application to ${app.company}? This can't be undone.`}
+            onDelete={() => {
+              onClose();
+              return deleteJobApplication(app.id);
+            }}
+          />
+          <button type="submit" className="btn">
+            Save
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
 function ApplicationCard({ app }: { app: JobApplication }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: app.id });
+  const [editing, setEditing] = useState(false);
+  const close = useCallback(() => setEditing(false), []);
   const deadline = formatDate(app.deadline);
 
   return (
@@ -61,10 +115,24 @@ function ApplicationCard({ app }: { app: JobApplication }) {
       >
         <GripVertical size={14} />
       </span>
-      <div className="min-w-0 flex-1">
+      <button
+        type="button"
+        onClick={() => setEditing(true)}
+        className="min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-left"
+      >
         <p className="truncate text-sm text-ink">{app.role}</p>
         {deadline && <p className="mt-0.5 font-mono text-xs text-ink-faint">Due {deadline}</p>}
-      </div>
+      </button>
+      <button
+        type="button"
+        onClick={() => setEditing(true)}
+        aria-label={`Edit ${app.company} application`}
+        className="-m-2.5 flex h-11 w-11 shrink-0 items-center justify-center text-ink-faint/60 transition-colors hover:text-ink-faint"
+      >
+        <Pencil size={13} />
+      </button>
+
+      {editing && <ApplicationEditModal app={app} onClose={close} />}
     </div>
   );
 }
@@ -79,16 +147,22 @@ function MobileApplicationCard({
   app: JobApplication;
   onMove: (id: string, status: JobApplication["status"]) => void;
 }) {
+  const [editing, setEditing] = useState(false);
+  const close = useCallback(() => setEditing(false), []);
   const deadline = formatDate(app.deadline);
   return (
     <div className="card flex items-start gap-2 p-3 pt-4">
       <span className="card-flag" style={{ background: "var(--color-ink-faint)" }}>
         {app.company}
       </span>
-      <div className="min-w-0 flex-1">
+      <button
+        type="button"
+        onClick={() => setEditing(true)}
+        className="min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-left"
+      >
         <p className="truncate text-sm text-ink">{app.role}</p>
         {deadline && <p className="mt-0.5 font-mono text-xs text-ink-faint">Due {deadline}</p>}
-      </div>
+      </button>
       <select
         value={app.status}
         onChange={(e) => onMove(app.id, e.target.value as JobApplication["status"])}
@@ -101,6 +175,8 @@ function MobileApplicationCard({
           </option>
         ))}
       </select>
+
+      {editing && <ApplicationEditModal app={app} onClose={close} />}
     </div>
   );
 }

@@ -40,3 +40,38 @@ export async function setCompletion(routineId: string, date: string, completed: 
   revalidatePath("/routines");
   revalidatePath("/today");
 }
+
+export async function updateRoutine(id: string, formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return;
+
+  const timeOfDay = String(formData.get("time_of_day") ?? "anytime");
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("routines")
+    .update({ name, time_of_day: timeOfDay as "morning" | "afternoon" | "evening" | "anytime" })
+    .eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/routines");
+  revalidatePath("/today");
+}
+
+export async function setRoutineArchived(id: string, archived: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("routines").update({ archived }).eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/routines");
+  revalidatePath("/today");
+}
+
+export async function deleteRoutine(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("routines").delete().eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/routines");
+  revalidatePath("/today");
+}

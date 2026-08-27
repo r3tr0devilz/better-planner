@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getPersonDetail } from "@/lib/data/people";
+import { PersonHeader } from "@/components/person-header";
 import { addFact, addInteraction } from "../actions";
 
 export default async function PersonDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -15,8 +16,7 @@ export default async function PersonDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-ink [overflow-wrap:anywhere]">{person.name}</h1>
-      {person.birthday && <p className="mt-1 text-sm text-ink-faint">Birthday: {person.birthday}</p>}
+      <PersonHeader person={person} />
 
       <section className="mt-8">
         <h2 className="text-sm font-medium text-ink-faint">Things to remember</h2>

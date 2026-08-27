@@ -4,7 +4,8 @@ import { NoteFlagToggle } from "@/components/note-flag-toggle";
 import { PageHeader } from "@/components/page-header";
 import { CollapsibleForm } from "@/components/collapsible-form";
 import { SubmitButton } from "@/components/submit-button";
-import { createNote, createBook } from "./actions";
+import { DeleteButton } from "@/components/delete-button";
+import { createNote, createBook, deleteNote } from "./actions";
 import type { LibraryNote } from "@/lib/supabase/types";
 
 const KINDS: { key: LibraryNote["kind"]; label: string }[] = [
@@ -66,7 +67,17 @@ export default async function LibraryPage() {
                       ))}
                     </div>
                   </div>
-                  <NoteFlagToggle id={note.id} flagged={note.flagged_for_review} />
+                  <div className="flex shrink-0 items-center gap-3">
+                    <NoteFlagToggle id={note.id} flagged={note.flagged_for_review} />
+                    <DeleteButton
+                      confirmMessage="Delete this note? This can't be undone."
+                      label=""
+                      pendingLabel=""
+                      ariaLabel="Delete note"
+                      onDelete={deleteNote.bind(null, note.id)}
+                      className="-m-2.5 flex h-11 w-11 shrink-0 items-center justify-center text-ink-faint transition-colors duration-150 hover:text-vermillion"
+                    />
+                  </div>
                 </div>
               ))}
             </div>

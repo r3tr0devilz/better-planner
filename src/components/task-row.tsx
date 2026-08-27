@@ -2,8 +2,9 @@
 
 import { useCallback, useState, useTransition } from "react";
 import { Sparkle } from "lucide-react";
-import { toggleTaskDone, toggleTopThree, updateTask } from "@/app/(app)/tasks/actions";
+import { deleteTask, toggleTaskDone, toggleTopThree, updateTask } from "@/app/(app)/tasks/actions";
 import { Modal } from "@/components/modal";
+import { DeleteButton } from "@/components/delete-button";
 import type { Domain, Task } from "@/lib/supabase/types";
 
 const SPARKLE_PATH =
@@ -141,9 +142,18 @@ export function TaskRow({
                 </select>
               </label>
             </div>
-            <button type="submit" className="btn mt-1 self-end">
-              Save
-            </button>
+            <div className="mt-1 flex items-center justify-between gap-3">
+              <DeleteButton
+                confirmMessage={`Delete "${task.title}"? This can't be undone.`}
+                onDelete={() => {
+                  close();
+                  return deleteTask(task.id);
+                }}
+              />
+              <button type="submit" className="btn">
+                Save
+              </button>
+            </div>
           </form>
         </Modal>
       )}

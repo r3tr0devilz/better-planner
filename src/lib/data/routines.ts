@@ -24,6 +24,17 @@ export async function getRoutines(): Promise<Routine[]> {
   return data;
 }
 
+export async function getArchivedRoutines(): Promise<Routine[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("routines")
+    .select("*")
+    .eq("archived", true)
+    .order("name");
+  if (error) throw error;
+  return data;
+}
+
 /** Completions for the last HISTORY_DAYS, across all routines, keyed for lookup. */
 export async function getRecentCompletions(): Promise<RoutineCompletion[]> {
   const supabase = await createClient();

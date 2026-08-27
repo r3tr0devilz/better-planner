@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export async function createPerson(formData: FormData) {
@@ -36,4 +37,27 @@ export async function addInteraction(personId: string, formData: FormData) {
   if (error) throw error;
 
   revalidatePath(`/people/${personId}`);
+}
+
+export async function updatePerson(id: string, formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return;
+
+  const birthday = String(formData.get("birthday") ?? "") || null;
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("people").update({ name, birthday }).eq("id", id);
+  if (error) throw error;
+
+  revalidatePath(`/people/${id}`);
+  revalidatePath("/people");
+}
+
+export async function deletePerson(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("people").delete().eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/people");
+  redirect("/people");
 }

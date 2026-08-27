@@ -47,6 +47,32 @@ export async function moveJobApplication(movedId: string, status: JobApplication
   revalidatePath("/career");
 }
 
+export async function updateJobApplication(id: string, formData: FormData) {
+  const company = String(formData.get("company") ?? "").trim();
+  const role = String(formData.get("role") ?? "").trim();
+  if (!company || !role) return;
+
+  const deadline = String(formData.get("deadline") ?? "") || null;
+  const jobLink = String(formData.get("job_link") ?? "").trim() || null;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("job_applications")
+    .update({ company, role, deadline, job_link: jobLink })
+    .eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/career");
+}
+
+export async function deleteJobApplication(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("job_applications").delete().eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/career");
+}
+
 export async function createCourse(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
@@ -86,6 +112,14 @@ export async function updateCourseProgress(id: string, percent: number) {
   revalidatePath("/career");
 }
 
+export async function deleteCourse(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("courses").delete().eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/career");
+}
+
 export async function createCertificate(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   if (!title) return;
@@ -114,6 +148,14 @@ export async function createCertificate(formData: FormData) {
   revalidatePath("/career");
 }
 
+export async function deleteCertificate(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("certificates").delete().eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/career");
+}
+
 export async function createCareerContact(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
@@ -130,6 +172,35 @@ export async function createCareerContact(formData: FormData) {
     next_follow_up: null,
     notes: null,
   });
+  if (error) throw error;
+
+  revalidatePath("/career");
+}
+
+export async function updateCareerContact(id: string, formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return;
+
+  const relationshipType = String(formData.get("relationship_type") ?? "contact");
+  const company = String(formData.get("company") ?? "").trim() || null;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("career_contacts")
+    .update({
+      name,
+      relationship_type: relationshipType as "recruiter" | "mentor" | "referral" | "company_contact" | "contact",
+      company,
+    })
+    .eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/career");
+}
+
+export async function deleteCareerContact(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("career_contacts").delete().eq("id", id);
   if (error) throw error;
 
   revalidatePath("/career");
