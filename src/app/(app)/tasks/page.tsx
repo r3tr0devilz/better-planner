@@ -57,14 +57,16 @@ export default async function TasksPage() {
       </section>
 
       {done.length > 0 && (
-        <section className="mt-8">
-          <h2 className="text-sm font-medium text-ink-faint">Done ({done.length})</h2>
+        <details className="mt-8">
+          <summary className="cursor-pointer list-none text-sm font-medium text-ink-faint marker:hidden [&::-webkit-details-marker]:hidden">
+            Done ({done.length}) — tap to show
+          </summary>
           <div className="ledger mt-3">
             {done.map((task) => (
               <TaskRow key={task.id} task={task} threadIndex={threadIndexFor(task.domain_id, domains)} domains={domains} />
             ))}
           </div>
-        </section>
+        </details>
       )}
     </div>
   );

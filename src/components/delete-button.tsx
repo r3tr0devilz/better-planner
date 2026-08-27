@@ -32,7 +32,13 @@ export function DeleteButton({
   }
 
   return (
-    <button onClick={handleClick} disabled={pending} aria-label={ariaLabel} className={className}>
+    <button
+      onClick={handleClick}
+      disabled={pending}
+      aria-label={ariaLabel}
+      title={label ? undefined : (ariaLabel ?? "Delete")}
+      className={className}
+    >
       <Trash2 size={iconSize} />
       {pending ? pendingLabel : label}
     </button>

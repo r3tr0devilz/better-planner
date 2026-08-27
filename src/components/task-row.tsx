@@ -96,6 +96,16 @@ export function TaskRow({
         )}
       </button>
 
+      <DeleteButton
+        confirmMessage={`Delete "${task.title}"? This can't be undone.`}
+        label=""
+        pendingLabel=""
+        ariaLabel={`Delete "${task.title}"`}
+        onDelete={deleteTask.bind(null, task.id)}
+        className="-m-3 flex h-11 w-11 shrink-0 items-center justify-center text-ink-faint/60 transition-colors duration-150 hover:text-vermillion"
+        iconSize={14}
+      />
+
       {editing && (
         <Modal onClose={close} title="Edit task">
           <form

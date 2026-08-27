@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/page-header";
 import { CollapsibleForm } from "@/components/collapsible-form";
 import { SubmitButton } from "@/components/submit-button";
 import { DeleteButton } from "@/components/delete-button";
-import { createNote, createBook, deleteNote } from "./actions";
+import { createNote, createBook, deleteNote, deleteBook } from "./actions";
 import type { LibraryNote } from "@/lib/supabase/types";
 
 const KINDS: { key: LibraryNote["kind"]; label: string }[] = [
@@ -102,11 +102,22 @@ export default async function LibraryPage() {
         {books.length > 0 && (
           <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {books.map((book) => (
-              <Link key={book.id} href={`/library/books/${book.id}`} className="hoverable card block min-w-0 p-4 hover:bg-stone">
-                <p className="truncate text-sm text-ink">{book.title}</p>
-                {book.author && <p className="truncate text-xs text-ink-faint">{book.author}</p>}
-                <p className="mt-1 font-mono text-[11px] uppercase tracking-wide text-ink-faint">{book.status}</p>
-              </Link>
+              <div key={book.id} className="card relative min-w-0 p-4">
+                <Link href={`/library/books/${book.id}`} className="hoverable block min-w-0 pr-7">
+                  <p className="truncate text-sm text-ink">{book.title}</p>
+                  {book.author && <p className="truncate text-xs text-ink-faint">{book.author}</p>}
+                  <p className="mt-1 font-mono text-[11px] uppercase tracking-wide text-ink-faint">{book.status}</p>
+                </Link>
+                <DeleteButton
+                  confirmMessage={`Delete "${book.title}"? This also removes its highlights. This can't be undone.`}
+                  label=""
+                  pendingLabel=""
+                  ariaLabel={`Delete "${book.title}"`}
+                  onDelete={deleteBook.bind(null, book.id)}
+                  className="absolute right-0 top-0 flex h-11 w-11 shrink-0 items-center justify-center text-ink-faint/60 transition-colors duration-150 hover:text-vermillion"
+                  iconSize={14}
+                />
+              </div>
             ))}
           </div>
         )}

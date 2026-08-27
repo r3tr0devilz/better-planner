@@ -58,6 +58,16 @@ export function RoutineRow({
         </div>
       </button>
 
+      <DeleteButton
+        confirmMessage={`Delete "${routine.name}"? This also removes its completion history. This can't be undone.`}
+        label=""
+        pendingLabel=""
+        ariaLabel={`Delete "${routine.name}"`}
+        onDelete={deleteRoutine.bind(null, routine.id)}
+        className="-m-3 flex h-11 w-11 shrink-0 items-center justify-center text-ink-faint/60 transition-colors duration-150 hover:text-vermillion"
+        iconSize={14}
+      />
+
       {streak > 0 && (
         <span className="shrink-0 border border-oxblood px-2 py-0.5 font-mono text-xs text-oxblood">
           {streak}d streak
