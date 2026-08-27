@@ -88,11 +88,11 @@ export function CareerTabs({
             tabIndex={active === t.id ? 0 : -1}
             onClick={() => setActive(t.id)}
             onKeyDown={(e) => onTabKeyDown(e, i)}
-            className={`relative z-10 flex-1 rounded-md px-3 py-1.5 text-center text-sm font-medium transition-colors ${
+            className={`relative z-10 min-w-0 flex-1 rounded-md px-1.5 py-1.5 text-center text-xs font-medium transition-colors sm:px-3 sm:text-sm ${
               active === t.id ? "text-ink" : "text-ink-faint hover:text-ink"
             }`}
           >
-            {t.label}
+            <span className="block truncate">{t.label}</span>
           </button>
         ))}
       </div>
@@ -143,7 +143,7 @@ export function CareerTabs({
             </label>
             <SubmitButton>Add</SubmitButton>
           </CollapsibleForm>
-          <div className="stagger-in mt-6 grid gap-3 sm:grid-cols-2">
+          <div className="stagger-in mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {courses.map((c, i) => (
               <div key={c.id} style={{ transitionDelay: `${Math.min(i, 5) * 40}ms` }}>
                 <CourseCard course={c} />
@@ -177,7 +177,7 @@ export function CareerTabs({
             </label>
             <SubmitButton>Add</SubmitButton>
           </CollapsibleForm>
-          <div className="stagger-in mt-6 grid gap-3 sm:grid-cols-2">
+          <div className="stagger-in mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {certificates.map((c, i) => (
               <div key={c.id} style={{ transitionDelay: `${Math.min(i, 5) * 40}ms` }}>
                 <CertificateCard certificate={c} />

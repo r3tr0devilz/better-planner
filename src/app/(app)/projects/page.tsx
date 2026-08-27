@@ -19,7 +19,7 @@ export default async function ProjectsPage() {
     <div className="mx-auto max-w-3xl">
       <PageHeader title="Projects" context={`${projects.length} projects across ${domains.length} domains`} />
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <CollapsibleForm action={createDomain} triggerLabel="New domain" className="flex flex-col gap-2" topMargin="">
           <span className="text-xs text-ink-faint">New domain</span>
           <div className="field-row">
@@ -84,7 +84,7 @@ export default async function ProjectsPage() {
             {items.length === 0 ? (
               <p className="mt-3 text-sm text-ink-faint">No projects in this domain yet — add one above.</p>
             ) : (
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {items.map((project) => (
                   <ProjectCard key={project.id} project={project} threadIndex={i % 6} />
                 ))}
@@ -97,7 +97,7 @@ export default async function ProjectsPage() {
       {unassigned.length > 0 && (
         <section className="mt-8">
           <h2 className="text-sm font-medium text-ink-faint">No domain</h2>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {unassigned.map((project) => (
               <ProjectCard key={project.id} project={project} threadIndex={-1} />
             ))}

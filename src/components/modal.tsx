@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -27,6 +28,10 @@ export function Modal({
 
   useEffect(() => {
     const previouslyFocused = document.activeElement as HTMLElement | null;
+    // Portaled to <body>, so this is a sibling of #app-root, not a descendant —
+    // safe to inert without also inerting the modal it's hiding behind.
+    const appRoot = document.getElementById("app-root");
+    appRoot?.setAttribute("inert", "");
 
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
@@ -50,11 +55,12 @@ export function Modal({
     window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("keydown", onKey);
+      appRoot?.removeAttribute("inert");
       previouslyFocused?.focus();
     };
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div
       className="modal-backdrop fixed inset-0 z-50 flex items-start justify-center bg-ink/40 px-4 pt-24"
       onClick={onClose}
@@ -80,6 +86,7 @@ export function Modal({
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

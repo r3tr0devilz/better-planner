@@ -22,14 +22,16 @@ export function RoutineRow({
 
   return (
     <div className="ledger-row flex items-center gap-3 px-1 py-3">
-      <input
-        type="checkbox"
-        checked={doneToday}
-        disabled={pending}
-        onChange={(e) => startTransition(() => setCompletion(routine.id, today, e.target.checked))}
-        className="h-4 w-4 shrink-0 accent-moss"
-        aria-label={`Mark "${routine.name}" ${doneToday ? "not done" : "done"} today`}
-      />
+      <label className="-m-3.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center">
+        <input
+          type="checkbox"
+          checked={doneToday}
+          disabled={pending}
+          onChange={(e) => startTransition(() => setCompletion(routine.id, today, e.target.checked))}
+          className="h-4 w-4 accent-moss"
+          aria-label={`Mark "${routine.name}" ${doneToday ? "not done" : "done"} today`}
+        />
+      </label>
 
       <div className="min-w-0 flex-1">
         <p className={`truncate text-sm transition-colors duration-150 ${doneToday ? "text-ink-faint line-through" : "text-ink"}`}>

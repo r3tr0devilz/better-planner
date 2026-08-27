@@ -79,7 +79,7 @@ export default async function TodayPage() {
 
         <section className="mt-8">
           <h2 className="text-sm font-medium text-ink-faint">Top three today</h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
             {topThree.map((task) => {
               const threadIndex = threadIndexFor(task.domain_id, domains);
               const domain = domains.find((d) => d.id === task.domain_id);
@@ -102,7 +102,7 @@ export default async function TodayPage() {
           </div>
         </section>
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
+        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1.4fr_1fr]">
           <div className="flex flex-col gap-8">
             <section>
               <h2 className="text-sm font-medium text-ink-faint">Open tasks ({open.length})</h2>

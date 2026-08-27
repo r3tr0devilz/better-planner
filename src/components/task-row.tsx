@@ -50,14 +50,16 @@ export function TaskRow({
 
   return (
     <div className="ledger-row flex items-center gap-3 px-1 py-3">
-      <input
-        type="checkbox"
-        checked={done}
-        disabled={pending}
-        onChange={(e) => startTransition(() => toggleTaskDone(task.id, e.target.checked))}
-        className="h-4 w-4 shrink-0 accent-moss"
-        aria-label={`Mark "${task.title}" ${done ? "open" : "done"}`}
-      />
+      <label className="-m-3.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center">
+        <input
+          type="checkbox"
+          checked={done}
+          disabled={pending}
+          onChange={(e) => startTransition(() => toggleTaskDone(task.id, e.target.checked))}
+          className="h-4 w-4 accent-moss"
+          aria-label={`Mark "${task.title}" ${done ? "open" : "done"}`}
+        />
+      </label>
 
       {threadIndex >= 0 && <span className="thread-mark" data-thread={threadIndex} aria-hidden />}
 
@@ -79,7 +81,7 @@ export function TaskRow({
         disabled={pending}
         aria-label={task.is_top_three ? "Remove from top three" : "Add to top three"}
         aria-pressed={task.is_top_three}
-        className={`shrink-0 transition-transform duration-150 active:scale-90 ${task.is_top_three ? "" : "text-ink-faint hover:text-ink"}`}
+        className={`-m-3 flex h-11 w-11 shrink-0 items-center justify-center transition-transform duration-150 active:scale-90 ${task.is_top_three ? "" : "text-ink-faint hover:text-ink"}`}
       >
         {task.is_top_three ? (
           <svg width={19} height={19} viewBox="0 0 24 24" aria-hidden>
