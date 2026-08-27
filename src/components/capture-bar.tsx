@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { Mic, Plus, Square, X } from "lucide-react";
+import { Mic, Plus, Square } from "lucide-react";
+import { Modal } from "./modal";
 
 function subscribeNoop() {
   return () => {};
@@ -135,71 +136,47 @@ export function CaptureBar() {
       </button>
 
       {open && (
-        <div
-          className="modal-backdrop fixed inset-0 z-50 flex items-start justify-center bg-ink/40 px-4 pt-24"
-          onClick={close}
-        >
-          <div
-            className="modal-panel card w-full max-w-lg p-5"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="font-[family-name:var(--font-display)] text-lg font-bold uppercase tracking-tight text-ink">
-                Capture
-              </h2>
-              <button
-                onClick={close}
-                aria-label="Close"
-                className="text-ink-faint transition-colors duration-150 hover:text-ink"
-              >
-                <X size={18} />
-              </button>
-            </div>
+        <Modal onClose={close} title="Capture">
+          <textarea
+            autoFocus
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Schedule a task, jot a note, log a quote…"
+            rows={3}
+            className="field mt-3"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit("text");
+            }}
+          />
 
-            <textarea
-              autoFocus
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Schedule a task, jot a note, log a quote…"
-              rows={3}
-              className="field mt-3"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit("text");
-              }}
-            />
-
+          <div role="status" aria-live="polite">
             {status === "error" && (
               <p role="alert" className="mt-2 text-sm text-vermillion">
                 Couldn&apos;t save that — try again.
               </p>
             )}
-            {status === "done" && resultLabel && (
-              <p className="mt-2 text-sm text-moss">Added: {resultLabel}</p>
+            {status === "done" && resultLabel && <p className="mt-2 text-sm text-moss">Added: {resultLabel}</p>}
+          </div>
+
+          <div className="mt-3 flex items-center justify-between">
+            {speechSupported ? (
+              <button onClick={toggleListening} className={listening ? "btn py-1.5" : "btn-outline py-1.5"}>
+                {listening ? <Square size={14} /> : <Mic size={14} />}
+                {listening ? "Stop" : "Voice"}
+              </button>
+            ) : (
+              <span />
             )}
 
-            <div className="mt-3 flex items-center justify-between">
-              {speechSupported ? (
-                <button
-                  onClick={toggleListening}
-                  className={listening ? "btn py-1.5" : "btn-outline py-1.5"}
-                >
-                  {listening ? <Square size={14} /> : <Mic size={14} />}
-                  {listening ? "Stop" : "Voice"}
-                </button>
-              ) : (
-                <span />
-              )}
-
-              <button
-                onClick={() => submit(listening ? "voice" : "text")}
-                disabled={status === "saving" || !text.trim()}
-                className="btn py-2"
-              >
-                {status === "saving" ? "Saving…" : "Add"}
-              </button>
-            </div>
+            <button
+              onClick={() => submit(listening ? "voice" : "text")}
+              disabled={status === "saving" || !text.trim()}
+              className="btn py-2"
+            >
+              {status === "saving" ? "Saving…" : "Add"}
+            </button>
           </div>
-        </div>
+        </Modal>
       )}
     </>
   );

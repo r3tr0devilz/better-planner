@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { useCallback, useState } from "react";
 import { THREAD_COUNT } from "@/lib/domain-threads";
 import type { Domain, Task } from "@/lib/supabase/types";
 import { TaskRow } from "@/components/task-row";
+import { Modal } from "@/components/modal";
 
 /** Long names ("YouTube — Field Notes") make the vertical binder tab heavy —
  * take the first segment/word or two and let the tooltip carry the rest. */
@@ -30,15 +30,6 @@ export function DomainTabs({ domains, tasks }: { domains: Domain[]; tasks: Task[
   const [openId, setOpenId] = useState<string | null>(null);
 
   const close = useCallback(() => setOpenId(null), []);
-
-  useEffect(() => {
-    if (!openId) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") close();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [openId, close]);
 
   if (domains.length === 0) return null;
 
@@ -73,30 +64,14 @@ export function DomainTabs({ domains, tasks }: { domains: Domain[]; tasks: Task[
       </nav>
 
       {openDomain && (
-        <div
-          className="modal-backdrop fixed inset-0 z-50 flex items-start justify-center bg-ink/40 px-4 pt-24"
-          onClick={close}
-        >
-          <div className="modal-panel card w-full max-w-lg p-5" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between">
-              <h2 className="font-[family-name:var(--font-display)] text-lg font-bold uppercase tracking-tight text-ink">
-                {openDomain.name}
-              </h2>
-              <button onClick={close} aria-label="Close" className="text-ink-faint transition-colors duration-150 hover:text-ink">
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="ledger mt-4 max-h-[60vh] overflow-y-auto">
-              {openTasks.map((task) => (
-                <TaskRow key={task.id} task={task} threadIndex={openIndex % THREAD_COUNT} domains={domains} />
-              ))}
-              {openTasks.length === 0 && (
-                <p className="py-3 text-sm text-ink-faint">No tasks in this domain yet.</p>
-              )}
-            </div>
+        <Modal onClose={close} title={openDomain.name}>
+          <div className="ledger mt-4 max-h-[60vh] overflow-y-auto">
+            {openTasks.map((task) => (
+              <TaskRow key={task.id} task={task} threadIndex={openIndex % THREAD_COUNT} domains={domains} />
+            ))}
+            {openTasks.length === 0 && <p className="py-3 text-sm text-ink-faint">No tasks in this domain yet.</p>}
           </div>
-        </div>
+        </Modal>
       )}
     </>
   );

@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition, type PointerEvent as ReactPointerEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { GripVertical } from "lucide-react";
@@ -192,6 +200,13 @@ function ResizableDayCard({
     window.addEventListener("pointerup", onUp);
   }
 
+  function handleKeyDown(e: ReactKeyboardEvent<HTMLDivElement>) {
+    if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+    e.preventDefault();
+    const next = Math.max(15, baseDuration + (e.key === "ArrowUp" ? 15 : -15));
+    onResize(task.id, next);
+  }
+
   return (
     <div
       className="day-card pointer-events-auto absolute inset-x-1 overflow-hidden"
@@ -211,7 +226,16 @@ function ResizableDayCard({
       </div>
       <div
         onPointerDown={handlePointerDown}
-        className="absolute inset-x-0 bottom-0 flex h-2.5 touch-none cursor-ns-resize items-center justify-center"
+        onKeyDown={handleKeyDown}
+        role="slider"
+        tabIndex={0}
+        aria-label={`Duration for "${task.title}" — use Up/Down arrows to adjust in 15-minute steps`}
+        aria-orientation="vertical"
+        aria-valuemin={15}
+        aria-valuemax={480}
+        aria-valuenow={Math.round(duration)}
+        aria-valuetext={`${Math.round(duration)} minutes`}
+        className="absolute inset-x-0 bottom-0 flex h-2.5 touch-none cursor-ns-resize items-center justify-center rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oxblood/40"
       >
         <span className="h-0.5 w-6 rounded-full bg-ink-faint/50" />
       </div>

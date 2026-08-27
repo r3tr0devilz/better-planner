@@ -2,6 +2,7 @@ import { getInventoryItems } from "@/lib/data/inventory";
 import { InventoryRow } from "@/components/inventory-row";
 import { PageHeader } from "@/components/page-header";
 import { CollapsibleForm } from "@/components/collapsible-form";
+import { SubmitButton } from "@/components/submit-button";
 import { createItem } from "./actions";
 
 export default async function InventoryPage() {
@@ -22,9 +23,7 @@ export default async function InventoryPage() {
           Location
           <input name="location" className="field" />
         </label>
-        <button type="submit" className="btn">
-          Add
-        </button>
+        <SubmitButton>Add</SubmitButton>
       </CollapsibleForm>
 
       <div className="ledger mt-8">

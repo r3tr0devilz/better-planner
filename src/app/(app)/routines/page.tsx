@@ -2,6 +2,7 @@ import { getRoutines, getRecentCompletions, currentStreak, todayStr, HISTORY_DAY
 import { RoutineRow } from "@/components/routine-row";
 import { PageHeader } from "@/components/page-header";
 import { CollapsibleForm } from "@/components/collapsible-form";
+import { SubmitButton } from "@/components/submit-button";
 import { createRoutine } from "./actions";
 import type { Routine } from "@/lib/supabase/types";
 
@@ -61,9 +62,7 @@ export default async function RoutinesPage() {
           Days (if fixed)
           <input type="number" name="total_days" min={1} placeholder="30" className="field" />
         </label>
-        <button type="submit" className="btn">
-          Add
-        </button>
+        <SubmitButton>Add</SubmitButton>
       </CollapsibleForm>
 
       {SECTIONS.map(({ key, label }) => {

@@ -3,6 +3,7 @@ import { getProjectDetail, getChecklistTemplates } from "@/lib/data/projects";
 import { MilestoneRow } from "@/components/milestone-row";
 import { ChecklistItemRow } from "@/components/checklist-item-row";
 import { DeleteProjectButton } from "@/components/delete-project-button";
+import { SubmitButton } from "@/components/submit-button";
 import {
   createMilestone,
   createChecklist,
@@ -46,9 +47,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           {milestones.length === 0 && <p className="text-sm text-ink-faint">No milestones yet.</p>}
           <form action={createMilestone.bind(null, project.id)} className="flex gap-2">
             <input name="name" required placeholder="New milestone" className="field min-w-0 flex-1" />
-            <button type="submit" className="btn">
-              Add
-            </button>
+            <SubmitButton>Add</SubmitButton>
           </form>
         </div>
       </section>
@@ -71,9 +70,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                 className="mt-2 flex gap-2"
               >
                 <input name="text" required placeholder="Add item" className="field min-w-0 flex-1 py-1 text-xs" />
-                <button type="submit" className="btn-outline py-1 text-xs">
-                  Add
-                </button>
+                <SubmitButton className="btn-outline py-1 text-xs" pendingText="…">Add</SubmitButton>
               </form>
             </div>
           ))}
@@ -96,9 +93,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                 </select>
               </label>
             )}
-            <button type="submit" className="btn">
-              Add
-            </button>
+            <SubmitButton>Add</SubmitButton>
           </form>
         </div>
       </section>
@@ -115,9 +110,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
               Note
               <input name="note" placeholder="What did you work on?" className="field" />
             </label>
-            <button type="submit" className="btn">
-              Log
-            </button>
+            <SubmitButton pendingText="Logging…">Log</SubmitButton>
           </form>
 
           {activityLogs.length > 0 && (

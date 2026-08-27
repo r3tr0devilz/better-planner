@@ -3,6 +3,7 @@ import { getDomains, threadIndexFor } from "@/lib/data/domains";
 import { TaskRow } from "@/components/task-row";
 import { PageHeader } from "@/components/page-header";
 import { CollapsibleForm } from "@/components/collapsible-form";
+import { SubmitButton } from "@/components/submit-button";
 import { createTask } from "./actions";
 
 export default async function TasksPage() {
@@ -42,9 +43,7 @@ export default async function TasksPage() {
             <option value="high">High</option>
           </select>
         </label>
-        <button type="submit" className="btn">
-          Add
-        </button>
+        <SubmitButton>Add</SubmitButton>
       </CollapsibleForm>
 
       <section className="mt-8">

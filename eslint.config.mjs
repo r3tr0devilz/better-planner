@@ -14,6 +14,12 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "supabase/.temp/**",
     "supabase/.branches/**",
+    // Agent/skill tooling, not app source — noisy and irrelevant to lint here.
+    ".agents/**",
+    ".claude/**",
+    ".codex/**",
+    ".impeccable/**",
+    ".lavish/**",
   ]),
 ]);
 

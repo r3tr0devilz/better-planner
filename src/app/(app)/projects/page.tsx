@@ -3,6 +3,7 @@ import { getProjects, getChecklistTemplates } from "@/lib/data/projects";
 import { getDomains } from "@/lib/data/domains";
 import { PageHeader } from "@/components/page-header";
 import { CollapsibleForm } from "@/components/collapsible-form";
+import { SubmitButton } from "@/components/submit-button";
 import { createDomain, createProject, createChecklistTemplate } from "./actions";
 
 export default async function ProjectsPage() {
@@ -30,9 +31,7 @@ export default async function ProjectsPage() {
               Color
               <input type="color" name="color" defaultValue="#33486e" className="h-9 w-full border border-line bg-transparent p-0" />
             </label>
-            <button type="submit" className="btn">
-              Add
-            </button>
+            <SubmitButton>Add</SubmitButton>
           </div>
         </CollapsibleForm>
 
@@ -65,9 +64,7 @@ export default async function ProjectsPage() {
                 <option value="retainer">Retainer</option>
               </select>
             </label>
-            <button type="submit" className="btn">
-              Add
-            </button>
+            <SubmitButton>Add</SubmitButton>
           </div>
         </CollapsibleForm>
       </div>
@@ -127,9 +124,7 @@ export default async function ProjectsPage() {
             placeholder={"One item per line\nSet up hosting\nInstall WordPress"}
             className="field"
           />
-          <button type="submit" className="btn self-start">
-            Save template
-          </button>
+          <SubmitButton className="btn self-start">Save template</SubmitButton>
         </CollapsibleForm>
         {templates.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2">

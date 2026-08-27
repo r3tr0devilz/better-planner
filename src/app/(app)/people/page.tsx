@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getPeople } from "@/lib/data/people";
 import { PageHeader } from "@/components/page-header";
 import { CollapsibleForm } from "@/components/collapsible-form";
+import { SubmitButton } from "@/components/submit-button";
 import { createPerson } from "./actions";
 
 function formatBirthday(birthday: string | null): string | null {
@@ -26,9 +27,7 @@ export default async function PeoplePage() {
           Birthday
           <input type="date" name="birthday" className="field" />
         </label>
-        <button type="submit" className="btn">
-          Add
-        </button>
+        <SubmitButton>Add</SubmitButton>
       </CollapsibleForm>
 
       <div className="ledger mt-8">

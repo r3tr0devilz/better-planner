@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
-import { Sparkle, X } from "lucide-react";
+import { useCallback, useState, useTransition } from "react";
+import { Sparkle } from "lucide-react";
 import { toggleTaskDone, toggleTopThree, updateTask } from "@/app/(app)/tasks/actions";
+import { Modal } from "@/components/modal";
 import type { Domain, Task } from "@/lib/supabase/types";
 
 const SPARKLE_PATH =
@@ -46,15 +47,6 @@ export function TaskRow({
   const done = task.status === "done";
 
   const close = useCallback(() => setEditing(false), []);
-
-  useEffect(() => {
-    if (!editing) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") close();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [editing, close]);
 
   return (
     <div className="ledger-row flex items-center gap-3 px-1 py-3">
@@ -102,70 +94,56 @@ export function TaskRow({
       </button>
 
       {editing && (
-        <div
-          className="modal-backdrop fixed inset-0 z-50 flex items-start justify-center bg-ink/40 px-4 pt-24"
-          onClick={close}
-        >
-          <div className="modal-panel card w-full max-w-lg p-5" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between">
-              <h2 className="font-[family-name:var(--font-display)] text-lg font-bold uppercase tracking-tight text-ink">
-                Edit task
-              </h2>
-              <button onClick={close} aria-label="Close" className="text-ink-faint transition-colors duration-150 hover:text-ink">
-                <X size={18} />
-              </button>
+        <Modal onClose={close} title="Edit task">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              startTransition(() => {
+                updateTask(task.id, formData);
+              });
+              close();
+            }}
+            className="mt-4 flex flex-col gap-3"
+          >
+            <label className="flex flex-col gap-1.5 text-sm text-ink-faint">
+              Title
+              <input name="title" defaultValue={task.title} required className="field" />
+            </label>
+            <label className="flex flex-col gap-1.5 text-sm text-ink-faint">
+              Notes
+              <textarea name="notes" defaultValue={task.notes ?? ""} rows={3} className="field" />
+            </label>
+            <div className="field-row">
+              <label className="field-wide">
+                Domain
+                <select name="domain_id" defaultValue={task.domain_id ?? ""} className="field">
+                  <option value="">None</option>
+                  {domains.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Due
+                <input type="datetime-local" name="due_at" defaultValue={toDatetimeLocal(task.due_at)} className="field" />
+              </label>
+              <label className="field-narrow">
+                Priority
+                <select name="priority" defaultValue={task.priority} className="field">
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </label>
             </div>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData(e.currentTarget);
-                startTransition(() => {
-                  updateTask(task.id, formData);
-                });
-                close();
-              }}
-              className="mt-4 flex flex-col gap-3"
-            >
-              <label className="flex flex-col gap-1.5 text-sm text-ink-faint">
-                Title
-                <input name="title" defaultValue={task.title} required className="field" />
-              </label>
-              <label className="flex flex-col gap-1.5 text-sm text-ink-faint">
-                Notes
-                <textarea name="notes" defaultValue={task.notes ?? ""} rows={3} className="field" />
-              </label>
-              <div className="field-row">
-                <label className="field-wide">
-                  Domain
-                  <select name="domain_id" defaultValue={task.domain_id ?? ""} className="field">
-                    <option value="">None</option>
-                    {domains.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Due
-                  <input type="datetime-local" name="due_at" defaultValue={toDatetimeLocal(task.due_at)} className="field" />
-                </label>
-                <label className="field-narrow">
-                  Priority
-                  <select name="priority" defaultValue={task.priority} className="field">
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                  </select>
-                </label>
-              </div>
-              <button type="submit" className="btn mt-1 self-end">
-                Save
-              </button>
-            </form>
-          </div>
-        </div>
+            <button type="submit" className="btn mt-1 self-end">
+              Save
+            </button>
+          </form>
+        </Modal>
       )}
     </div>
   );

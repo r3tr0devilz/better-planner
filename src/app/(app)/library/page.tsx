@@ -3,6 +3,7 @@ import { getLibraryNotes, getBooks } from "@/lib/data/library";
 import { NoteFlagToggle } from "@/components/note-flag-toggle";
 import { PageHeader } from "@/components/page-header";
 import { CollapsibleForm } from "@/components/collapsible-form";
+import { SubmitButton } from "@/components/submit-button";
 import { createNote, createBook } from "./actions";
 import type { LibraryNote } from "@/lib/supabase/types";
 
@@ -42,9 +43,7 @@ export default async function LibraryPage() {
           Body
           <textarea name="body" required rows={2} placeholder="What do you want to remember?" className="field" />
         </label>
-        <button type="submit" className="btn self-start">
-          Save
-        </button>
+        <SubmitButton className="btn self-start">Save</SubmitButton>
       </CollapsibleForm>
 
       {KINDS.map(({ key, label }) => {
@@ -86,9 +85,7 @@ export default async function LibraryPage() {
             Author
             <input name="author" className="field" />
           </label>
-          <button type="submit" className="btn">
-            Add
-          </button>
+          <SubmitButton>Add</SubmitButton>
         </CollapsibleForm>
 
         {books.length > 0 && (

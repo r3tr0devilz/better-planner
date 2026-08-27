@@ -1,11 +1,12 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import { type KeyboardEvent, type ReactNode, useState } from "react";
 import { KanbanBoard } from "@/components/kanban-board";
 import { CourseCard } from "@/components/course-card";
 import { CertificateCard } from "@/components/certificate-card";
 import { CareerContactRow } from "@/components/career-contact-row";
 import { CollapsibleForm } from "@/components/collapsible-form";
+import { SubmitButton } from "@/components/submit-button";
 import { createJobApplication, createCourse, createCertificate, createCareerContact } from "./actions";
 import type { JobApplication, Course, Certificate, CareerContact } from "@/lib/supabase/types";
 
@@ -19,9 +20,23 @@ const TABS = [
 type TabId = (typeof TABS)[number]["id"];
 
 /** Panels stay mounted the whole time (visibility, not display) so a
- * first-mount reveal never replays just from switching tabs back and forth. */
-function TabPanel({ active, children }: { active: boolean; children: ReactNode }) {
-  return <div className={active ? "" : "invisible absolute inset-0 pointer-events-none"}>{children}</div>;
+ * first-mount reveal never replays just from switching tabs back and forth.
+ * `inert` on the hidden ones is load-bearing, not decoration: visibility
+ * alone already keeps their controls out of the Tab order, but `inert` also
+ * pulls them out of the accessibility tree so a screen reader's virtual
+ * cursor can't land on a panel that isn't showing. */
+function TabPanel({ id, labelledBy, active, children }: { id: string; labelledBy: string; active: boolean; children: ReactNode }) {
+  return (
+    <div
+      id={id}
+      role="tabpanel"
+      aria-labelledby={labelledBy}
+      inert={!active}
+      className={active ? "" : "invisible absolute inset-0 pointer-events-none"}
+    >
+      {children}
+    </div>
+  );
 }
 
 export function CareerTabs({
@@ -38,9 +53,22 @@ export function CareerTabs({
   const [active, setActive] = useState<TabId>("applications");
   const activeIndex = TABS.findIndex((t) => t.id === active);
 
+  function onTabKeyDown(e: KeyboardEvent, index: number) {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    const nextIndex = (index + (e.key === "ArrowRight" ? 1 : -1) + TABS.length) % TABS.length;
+    const next = TABS[nextIndex];
+    setActive(next.id);
+    document.getElementById(`career-tab-${next.id}`)?.focus();
+  }
+
   return (
     <div>
-      <div className="relative flex max-w-md gap-1 rounded-lg border border-line bg-stone p-1">
+      <div
+        role="tablist"
+        aria-label="Career sections"
+        className="relative flex max-w-md gap-1 rounded-lg border border-line bg-stone p-1"
+      >
         <div
           className="absolute inset-y-1 rounded-md bg-panel transition-transform duration-[180ms]"
           style={{
@@ -49,11 +77,17 @@ export function CareerTabs({
             transitionTimingFunction: "var(--ease-out)",
           }}
         />
-        {TABS.map((t) => (
+        {TABS.map((t, i) => (
           <button
             key={t.id}
+            id={`career-tab-${t.id}`}
+            role="tab"
             type="button"
+            aria-selected={active === t.id}
+            aria-controls={`career-panel-${t.id}`}
+            tabIndex={active === t.id ? 0 : -1}
             onClick={() => setActive(t.id)}
+            onKeyDown={(e) => onTabKeyDown(e, i)}
             className={`relative z-10 flex-1 rounded-md px-3 py-1.5 text-center text-sm font-medium transition-colors ${
               active === t.id ? "text-ink" : "text-ink-faint hover:text-ink"
             }`}
@@ -64,7 +98,7 @@ export function CareerTabs({
       </div>
 
       <div className="relative mt-6">
-        <TabPanel active={active === "applications"}>
+        <TabPanel id="career-panel-applications" labelledBy="career-tab-applications" active={active === "applications"}>
           <CollapsibleForm action={createJobApplication} triggerLabel="New application">
             <label className="field-wide">
               Company
@@ -82,16 +116,14 @@ export function CareerTabs({
               Job link
               <input type="url" name="job_link" placeholder="https://…" className="field" />
             </label>
-            <button type="submit" className="btn">
-              Add
-            </button>
+            <SubmitButton>Add</SubmitButton>
           </CollapsibleForm>
           <div className="mt-6">
             <KanbanBoard applications={applications} />
           </div>
         </TabPanel>
 
-        <TabPanel active={active === "courses"}>
+        <TabPanel id="career-panel-courses" labelledBy="career-tab-courses" active={active === "courses"}>
           <CollapsibleForm action={createCourse} triggerLabel="New course">
             <label className="field-wide">
               Course name
@@ -109,9 +141,7 @@ export function CareerTabs({
               Course link
               <input type="url" name="course_link" placeholder="https://…" className="field" />
             </label>
-            <button type="submit" className="btn">
-              Add
-            </button>
+            <SubmitButton>Add</SubmitButton>
           </CollapsibleForm>
           <div className="stagger-in mt-6 grid gap-3 sm:grid-cols-2">
             {courses.map((c, i) => (
@@ -123,7 +153,7 @@ export function CareerTabs({
           </div>
         </TabPanel>
 
-        <TabPanel active={active === "certificates"}>
+        <TabPanel id="career-panel-certificates" labelledBy="career-tab-certificates" active={active === "certificates"}>
           <CollapsibleForm action={createCertificate} triggerLabel="New certificate">
             <label className="field-wide">
               Title
@@ -145,9 +175,7 @@ export function CareerTabs({
               Related skills (comma-separated)
               <input name="related_skills" placeholder="AWS, cloud architecture…" className="field" />
             </label>
-            <button type="submit" className="btn">
-              Add
-            </button>
+            <SubmitButton>Add</SubmitButton>
           </CollapsibleForm>
           <div className="stagger-in mt-6 grid gap-3 sm:grid-cols-2">
             {certificates.map((c, i) => (
@@ -159,7 +187,7 @@ export function CareerTabs({
           </div>
         </TabPanel>
 
-        <TabPanel active={active === "contacts"}>
+        <TabPanel id="career-panel-contacts" labelledBy="career-tab-contacts" active={active === "contacts"}>
           <CollapsibleForm action={createCareerContact} triggerLabel="New contact">
             <label className="field-wide">
               Name
@@ -179,9 +207,7 @@ export function CareerTabs({
               Company
               <input name="company" className="field" />
             </label>
-            <button type="submit" className="btn">
-              Add
-            </button>
+            <SubmitButton>Add</SubmitButton>
           </CollapsibleForm>
           <div className="ledger stagger-in mt-6">
             {contacts.map((c) => (

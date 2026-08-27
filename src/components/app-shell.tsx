@@ -11,12 +11,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
+      <a
+        href="#main-content"
+        className="fixed left-2 top-2 z-50 -translate-y-16 rounded-md bg-oxblood px-4 py-2 text-sm font-semibold text-panel transition-transform duration-150 focus:translate-y-0"
+      >
+        Skip to content
+      </a>
+
       <aside className="card sticky top-0 z-40 hidden h-screen w-56 shrink-0 flex-col justify-between rounded-none border-y-0 border-l-0 p-5 md:flex">
         <div>
           <Link href="/today" className="font-[family-name:var(--font-display)] text-xl font-bold uppercase tracking-tight text-ink">
             Better Planner
           </Link>
-          <nav className="mt-8 flex flex-col gap-1">
+          <nav aria-label="Main" className="mt-8 flex flex-col gap-1">
             {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
               const active = pathname.startsWith(href);
               return (
@@ -44,9 +51,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <CaptureBar />
       </header>
 
-      <main className="flex-1 px-4 py-6 pb-24 md:px-8 md:py-8 md:pb-8">{children}</main>
+      <main id="main-content" tabIndex={-1} className="flex-1 px-4 py-6 pb-24 focus:outline-none md:px-8 md:py-8 md:pb-8">
+        {children}
+      </main>
 
-      <nav className="card fixed inset-x-0 bottom-0 z-40 flex items-center justify-around rounded-none border-x-0 border-b-0 py-2 md:hidden">
+      <nav
+        aria-label="Primary"
+        className="card fixed inset-x-0 bottom-0 z-40 flex items-center justify-around rounded-none border-x-0 border-b-0 py-2 md:hidden"
+      >
         {PRIMARY_NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href);
           return (
