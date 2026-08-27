@@ -2,6 +2,7 @@ import { getTasks } from "@/lib/data/tasks";
 import { getDomains, threadIndexFor } from "@/lib/data/domains";
 import { TaskRow } from "@/components/task-row";
 import { PageHeader } from "@/components/page-header";
+import { CollapsibleForm } from "@/components/collapsible-form";
 import { createTask } from "./actions";
 
 export default async function TasksPage() {
@@ -13,7 +14,7 @@ export default async function TasksPage() {
     <div className="mx-auto max-w-2xl">
       <PageHeader title="Tasks" context={`${open.length} open, ${done.length} done`} />
 
-      <form action={createTask} className="field-row card mt-6 p-4">
+      <CollapsibleForm action={createTask} triggerLabel="New task">
         <label className="field-wide">
           New task
           <input name="title" required placeholder="What needs doing?" className="field" />
@@ -44,7 +45,7 @@ export default async function TasksPage() {
         <button type="submit" className="btn">
           Add
         </button>
-      </form>
+      </CollapsibleForm>
 
       <section className="mt-8">
         <h2 className="text-sm font-medium text-ink-faint">Open ({open.length})</h2>

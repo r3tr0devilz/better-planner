@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getPeople } from "@/lib/data/people";
 import { PageHeader } from "@/components/page-header";
+import { CollapsibleForm } from "@/components/collapsible-form";
 import { createPerson } from "./actions";
 
 function formatBirthday(birthday: string | null): string | null {
@@ -16,7 +17,7 @@ export default async function PeoplePage() {
     <div className="mx-auto max-w-2xl">
       <PageHeader title="People" context={`${people.length} people`} />
 
-      <form action={createPerson} className="field-row card mt-6 p-4">
+      <CollapsibleForm action={createPerson} triggerLabel="New person">
         <label className="field-wide">
           New person
           <input name="name" required placeholder="Name" className="field" />
@@ -28,7 +29,7 @@ export default async function PeoplePage() {
         <button type="submit" className="btn">
           Add
         </button>
-      </form>
+      </CollapsibleForm>
 
       <div className="ledger mt-8">
         {people.map((person) => (

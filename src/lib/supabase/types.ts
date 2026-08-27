@@ -216,6 +216,56 @@ export type InventoryItem = {
   removed_at: string | null;
 };
 
+export type JobApplication = Timestamped & {
+  id: string;
+  user_id: string;
+  company: string;
+  role: string;
+  status: "saved" | "applied" | "interviewing" | "offer" | "rejected" | "archived";
+  deadline: string | null;
+  job_link: string | null;
+  resume_version: string | null;
+  notes: string | null;
+  next_follow_up: string | null;
+  sort_order: number;
+};
+
+export type Course = Timestamped & {
+  id: string;
+  user_id: string;
+  name: string;
+  platform: string | null;
+  status: "not_started" | "in_progress" | "paused" | "completed";
+  progress_percent: number;
+  deadline: string | null;
+  next_lesson: string | null;
+  notes: string | null;
+  course_link: string | null;
+};
+
+export type Certificate = Timestamped & {
+  id: string;
+  user_id: string;
+  title: string;
+  issuer: string | null;
+  earned_date: string | null;
+  expiry_date: string | null;
+  credential_link: string | null;
+  file_link: string | null;
+  related_skills: string[];
+};
+
+export type CareerContact = Timestamped & {
+  id: string;
+  user_id: string;
+  name: string;
+  relationship_type: "recruiter" | "mentor" | "referral" | "company_contact" | "contact";
+  company: string | null;
+  last_contacted: string | null;
+  next_follow_up: string | null;
+  notes: string | null;
+};
+
 type TableDef<Row, Insert> = {
   Row: Row;
   Insert: Insert;
@@ -248,6 +298,10 @@ export type Database = {
       highlights: TableDef<Highlight, Omit<Highlight, "id" | "user_id" | "created_at"> & { user_id?: string }>;
       highlight_thoughts: TableDef<HighlightThought, Omit<HighlightThought, "id" | "user_id" | "created_at"> & { user_id?: string }>;
       inventory_items: TableDef<InventoryItem, Omit<InventoryItem, "id" | "user_id" | "added_at"> & { user_id?: string; added_at?: string }>;
+      job_applications: TableDef<JobApplication, Omit<JobApplication, "id" | "user_id" | "created_at"> & { user_id?: string }>;
+      courses: TableDef<Course, Omit<Course, "id" | "user_id" | "created_at"> & { user_id?: string }>;
+      certificates: TableDef<Certificate, Omit<Certificate, "id" | "user_id" | "created_at"> & { user_id?: string }>;
+      career_contacts: TableDef<CareerContact, Omit<CareerContact, "id" | "user_id" | "created_at"> & { user_id?: string }>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

@@ -10,8 +10,17 @@ function systemPrompt(domains: Domain[]): string {
   return `You turn a captured voice/text note into a structured record for a personal planner.
 Current date/time: ${new Date().toISOString()}.
 Existing domains: ${domains.map((d) => d.name).join(", ") || "(none yet)"}.
-If the note describes something to do (a task, chore, reminder), set kind "task". Otherwise set kind "other".
-Resolve relative dates/times ("tomorrow at 2pm") against the current date/time above.`;
+
+Pick "kind" from:
+- "job_application": the note is about a NEW job opportunity to save or an application just submitted (a company + role are identifiable). Set company, role, application_status (e.g. "applied to X" → applied, "saved a listing" → saved), job_link, due_at (deadline) as mentioned.
+- "course": the note is about a NEW course to start tracking. Set course_platform, course_link.
+- "certificate": the note is about a NEW certificate/credential to save. Set issuer, credential_link.
+- "career_contact": the note is about a NEW networking contact to remember (recruiter/mentor/referral/company contact). Set company, relationship_type, due_at (next follow-up date) as mentioned.
+- "task": anything else actionable — a chore, reminder, or action item, including progress reminders about an existing course/application/certificate ("finish module 3 tomorrow") that aren't themselves creating one of the above records.
+- "other": everything else.
+
+Resolve relative dates/times ("tomorrow at 2pm", "next Friday") against the current date/time above.
+Leave every field not relevant to the chosen kind as null.`;
 }
 
 async function parseWithAnthropic(text: string, domains: Domain[]): Promise<CaptureResult | null> {

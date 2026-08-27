@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getLibraryNotes, getBooks } from "@/lib/data/library";
 import { NoteFlagToggle } from "@/components/note-flag-toggle";
 import { PageHeader } from "@/components/page-header";
+import { CollapsibleForm } from "@/components/collapsible-form";
 import { createNote, createBook } from "./actions";
 import type { LibraryNote } from "@/lib/supabase/types";
 
@@ -18,7 +19,7 @@ export default async function LibraryPage() {
     <div className="mx-auto max-w-3xl">
       <PageHeader title="Library" context={`${notes.length} notes, ${books.length} books`} />
 
-      <form action={createNote} className="card mt-6 flex flex-col gap-3 p-4">
+      <CollapsibleForm action={createNote} triggerLabel="New note" className="flex flex-col gap-3">
         <div className="field-row">
           <label className="field-narrow">
             Kind
@@ -44,7 +45,7 @@ export default async function LibraryPage() {
         <button type="submit" className="btn self-start">
           Save
         </button>
-      </form>
+      </CollapsibleForm>
 
       {KINDS.map(({ key, label }) => {
         const items = notes.filter((n) => n.kind === key);
@@ -76,7 +77,7 @@ export default async function LibraryPage() {
 
       <section className="mt-10">
         <h2 className="text-sm font-medium text-ink-faint">Books</h2>
-        <form action={createBook} className="field-row card mt-3 p-4">
+        <CollapsibleForm action={createBook} triggerLabel="New book" topMargin="mt-3">
           <label className="field-wide">
             Title
             <input name="title" required className="field" />
@@ -88,7 +89,7 @@ export default async function LibraryPage() {
           <button type="submit" className="btn">
             Add
           </button>
-        </form>
+        </CollapsibleForm>
 
         {books.length > 0 && (
           <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">

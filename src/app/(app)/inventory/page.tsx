@@ -1,6 +1,7 @@
 import { getInventoryItems } from "@/lib/data/inventory";
 import { InventoryRow } from "@/components/inventory-row";
 import { PageHeader } from "@/components/page-header";
+import { CollapsibleForm } from "@/components/collapsible-form";
 import { createItem } from "./actions";
 
 export default async function InventoryPage() {
@@ -12,7 +13,7 @@ export default async function InventoryPage() {
     <div className="mx-auto max-w-2xl">
       <PageHeader title="Inventory" context={`${active.length} active item${active.length === 1 ? "" : "s"}`} />
 
-      <form action={createItem} className="field-row card mt-6 p-4">
+      <CollapsibleForm action={createItem} triggerLabel="New item">
         <label className="field-wide">
           Item
           <input name="name" required placeholder="What are you keeping tabs on?" className="field" />
@@ -24,7 +25,7 @@ export default async function InventoryPage() {
         <button type="submit" className="btn">
           Add
         </button>
-      </form>
+      </CollapsibleForm>
 
       <div className="ledger mt-8">
         {active.map((item) => (

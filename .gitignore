@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/playwright-report
+/test-results
 
 # next.js
 /.next/
@@ -47,3 +49,6 @@ supabase/.temp
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.vercel
+.env*

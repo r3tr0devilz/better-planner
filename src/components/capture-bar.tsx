@@ -127,10 +127,10 @@ export function CaptureBar() {
         <Plus size={18} />
         <span className="hidden sm:inline">Capture</span>
         <kbd
-          className="hidden border border-panel/30 px-1.5 py-0.5 font-mono text-xs sm:inline"
+          className="hidden items-center rounded border border-panel/30 px-2 py-0.5 font-mono text-xs text-panel/70 sm:inline-flex"
           title={isMac ? "Cmd+J" : "Ctrl+J"}
         >
-          {isMac ? "⌘J" : "⊞J"}
+          {isMac ? "⌘J" : "Ctrl+J"}
         </kbd>
       </button>
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getProjects, getChecklistTemplates } from "@/lib/data/projects";
 import { getDomains } from "@/lib/data/domains";
 import { PageHeader } from "@/components/page-header";
+import { CollapsibleForm } from "@/components/collapsible-form";
 import { createDomain, createProject, createChecklistTemplate } from "./actions";
 
 export default async function ProjectsPage() {
@@ -18,7 +19,7 @@ export default async function ProjectsPage() {
       <PageHeader title="Projects" context={`${projects.length} projects across ${domains.length} domains`} />
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <form action={createDomain} className="card flex flex-col gap-2 p-4">
+        <CollapsibleForm action={createDomain} triggerLabel="New domain" className="flex flex-col gap-2" topMargin="">
           <span className="text-xs text-ink-faint">New domain</span>
           <div className="field-row">
             <label className="field-wide">
@@ -33,9 +34,9 @@ export default async function ProjectsPage() {
               Add
             </button>
           </div>
-        </form>
+        </CollapsibleForm>
 
-        <form action={createProject} className="card flex flex-col gap-2 p-4">
+        <CollapsibleForm action={createProject} triggerLabel="New project or area" className="flex flex-col gap-2" topMargin="">
           <span className="text-xs text-ink-faint">New project or area</span>
           <input name="name" required placeholder="Client website, Family…" className="field" />
           <div className="field-row">
@@ -68,7 +69,7 @@ export default async function ProjectsPage() {
               Add
             </button>
           </div>
-        </form>
+        </CollapsibleForm>
       </div>
 
       {domains.map((domain, i) => {
@@ -109,7 +110,12 @@ export default async function ProjectsPage() {
         <p className="mt-1 text-xs text-ink-faint">
           Reusable checklists (e.g. &ldquo;New website&rdquo;) you can drop into any project.
         </p>
-        <form action={createChecklistTemplate} className="card mt-3 flex flex-col gap-2 p-4">
+        <CollapsibleForm
+          action={createChecklistTemplate}
+          triggerLabel="New template"
+          className="flex flex-col gap-2"
+          topMargin="mt-3"
+        >
           <input name="name" required placeholder="Template name" className="field" />
           <textarea
             name="items"
@@ -121,7 +127,7 @@ export default async function ProjectsPage() {
           <button type="submit" className="btn self-start">
             Save template
           </button>
-        </form>
+        </CollapsibleForm>
         {templates.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2">
             {templates.map((t) => (

@@ -54,6 +54,56 @@ export async function POST(request: Request) {
     });
     if (taskErr) throw taskErr;
     label = `Task created: ${parsed.title}`;
+  } else if (parsed.kind === "job_application") {
+    const { error: appErr } = await supabase.from("job_applications").insert({
+      company: parsed.company ?? parsed.title,
+      role: parsed.role ?? parsed.title,
+      status: parsed.application_status ?? "saved",
+      deadline: parsed.due_at,
+      job_link: parsed.job_link,
+      resume_version: null,
+      notes: null,
+      next_follow_up: null,
+      sort_order: 0,
+    });
+    if (appErr) throw appErr;
+    label = `Application saved: ${parsed.company ?? parsed.title}`;
+  } else if (parsed.kind === "course") {
+    const { error: courseErr } = await supabase.from("courses").insert({
+      name: parsed.title,
+      platform: parsed.course_platform,
+      status: "not_started",
+      progress_percent: 0,
+      deadline: parsed.due_at,
+      next_lesson: null,
+      notes: null,
+      course_link: parsed.course_link,
+    });
+    if (courseErr) throw courseErr;
+    label = `Course saved: ${parsed.title}`;
+  } else if (parsed.kind === "certificate") {
+    const { error: certErr } = await supabase.from("certificates").insert({
+      title: parsed.title,
+      issuer: parsed.issuer,
+      earned_date: null,
+      expiry_date: null,
+      credential_link: parsed.credential_link,
+      file_link: null,
+      related_skills: [],
+    });
+    if (certErr) throw certErr;
+    label = `Certificate saved: ${parsed.title}`;
+  } else if (parsed.kind === "career_contact") {
+    const { error: contactErr } = await supabase.from("career_contacts").insert({
+      name: parsed.title,
+      relationship_type: parsed.relationship_type ?? "contact",
+      company: parsed.company,
+      last_contacted: null,
+      next_follow_up: parsed.due_at,
+      notes: null,
+    });
+    if (contactErr) throw contactErr;
+    label = `Contact saved: ${parsed.title}`;
   } else {
     label = `Captured: ${parsed.title}`;
   }

@@ -1,6 +1,7 @@
 import { getRoutines, getRecentCompletions, currentStreak, todayStr, HISTORY_DAYS } from "@/lib/data/routines";
 import { RoutineRow } from "@/components/routine-row";
 import { PageHeader } from "@/components/page-header";
+import { CollapsibleForm } from "@/components/collapsible-form";
 import { createRoutine } from "./actions";
 import type { Routine } from "@/lib/supabase/types";
 
@@ -35,7 +36,7 @@ export default async function RoutinesPage() {
     <div className="mx-auto max-w-2xl">
       <PageHeader title="Routines" context={`${doneToday}/${routines.length} done today`} />
 
-      <form action={createRoutine} className="field-row card mt-6 p-4">
+      <CollapsibleForm action={createRoutine} triggerLabel="New routine">
         <label className="field-wide">
           New routine
           <input name="name" required placeholder="Take vitamins, check email…" className="field" />
@@ -63,7 +64,7 @@ export default async function RoutinesPage() {
         <button type="submit" className="btn">
           Add
         </button>
-      </form>
+      </CollapsibleForm>
 
       {SECTIONS.map(({ key, label }) => {
         const items = routines.filter((r) => r.time_of_day === key);

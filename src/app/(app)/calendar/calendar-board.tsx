@@ -458,15 +458,15 @@ export function CalendarBoard({
             ))
           ) : (
             <>
-              <div className="flex flex-col items-center gap-2">
-                <div className="font-[family-name:var(--font-display)] text-xl font-bold text-ink">
+              <div className="flex flex-col items-center gap-2 md:flex-row md:justify-center md:gap-4">
+                <div className="font-[family-name:var(--font-display)] text-xl font-bold text-ink md:order-2">
                   {selectedDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
                 </div>
-                <div className="flex w-full items-center justify-between gap-2">
-                  <Link href={dayHref(addDays(selectedDate, -1), fullDay)} className="btn-outline px-3 py-1.5 text-sm">
+                <div className="flex w-full items-center justify-between gap-2 md:contents">
+                  <Link href={dayHref(addDays(selectedDate, -1), fullDay)} className="btn-outline px-3 py-1.5 text-sm md:order-1">
                     ← Prev
                   </Link>
-                  <Link href={dayHref(addDays(selectedDate, 1), fullDay)} className="btn-outline px-3 py-1.5 text-sm">
+                  <Link href={dayHref(addDays(selectedDate, 1), fullDay)} className="btn-outline px-3 py-1.5 text-sm md:order-3">
                     Next →
                   </Link>
                 </div>
