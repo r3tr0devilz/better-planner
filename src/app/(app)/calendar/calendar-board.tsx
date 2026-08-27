@@ -359,41 +359,40 @@ export function CalendarBoard({
   return (
     <DndContext id="calendar-dnd" sensors={sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
       <div className="mx-auto flex max-w-6xl flex-col gap-6 lg:flex-row lg:items-start">
-        <aside className="w-full shrink-0 lg:w-64">
-          <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold uppercase tracking-tight text-ink">
-            Calendar
-          </h1>
-          <p className="mt-1 text-xs text-ink-faint">
-            Google Calendar isn&apos;t connected —{" "}
-            <Link href="/settings" className="underline hover:text-ink">
-              connect it
+        <aside className="contents w-full shrink-0 lg:block lg:w-64">
+          <div className="order-1">
+            <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold uppercase tracking-tight text-ink">
+              Calendar
+            </h1>
+            <p className="mt-1 text-xs text-ink-faint">Google Calendar isn&apos;t connected.</p>
+            <Link href="/settings" className="btn-outline mt-2 inline-block px-3 py-1.5 text-xs">
+              Connect calendar
             </Link>
-            .
-          </p>
 
-          <div className="relative mt-4 flex gap-1 rounded-lg border border-line bg-stone p-1">
-            <div
-              className="absolute inset-y-1 w-[calc(50%-0.375rem)] rounded-md bg-panel transition-transform duration-[180ms]"
-              style={{
-                transform: view === "day" ? "translateX(calc(100% + 0.5rem))" : "translateX(0)",
-                transitionTimingFunction: EASE_OUT,
-              }}
-            />
-            <Link
-              href={monthHref("month", year, monthIndex)}
-              className={`relative z-10 flex-1 rounded-md px-2 py-1 text-center text-xs font-medium transition-colors ${view === "month" ? "text-ink" : "text-ink-faint hover:text-ink"}`}
-            >
-              Month
-            </Link>
-            <Link
-              href={dayHref(selectedDate, fullDay)}
-              className={`relative z-10 flex-1 rounded-md px-2 py-1 text-center text-xs font-medium transition-colors ${view === "day" ? "text-ink" : "text-ink-faint hover:text-ink"}`}
-            >
-              Day
-            </Link>
+            <div className="relative mt-4 flex gap-1 rounded-lg border border-line bg-stone p-1">
+              <div
+                className="absolute inset-y-1 w-[calc(50%-0.375rem)] rounded-md bg-panel transition-transform duration-[180ms]"
+                style={{
+                  transform: view === "day" ? "translateX(calc(100% + 0.5rem))" : "translateX(0)",
+                  transitionTimingFunction: EASE_OUT,
+                }}
+              />
+              <Link
+                href={monthHref("month", year, monthIndex)}
+                className={`relative z-10 flex-1 rounded-md px-2 py-3.5 text-center text-xs font-medium transition-colors md:py-1 ${view === "month" ? "text-ink" : "text-ink-faint hover:text-ink"}`}
+              >
+                Month
+              </Link>
+              <Link
+                href={dayHref(selectedDate, fullDay)}
+                className={`relative z-10 flex-1 rounded-md px-2 py-3.5 text-center text-xs font-medium transition-colors md:py-1 ${view === "day" ? "text-ink" : "text-ink-faint hover:text-ink"}`}
+              >
+                Day
+              </Link>
+            </div>
           </div>
 
-          <div className="card mt-4 p-3">
+          <div className="card order-3 p-3 lg:order-none lg:mt-4">
             <div className="flex items-center justify-between">
               <Link href={monthHref(view, monthIndex === 0 ? year - 1 : year, monthIndex === 0 ? 11 : monthIndex - 1)} aria-label="Previous month" className="px-1 text-ink-faint hover:text-ink">
                 ‹
@@ -432,7 +431,7 @@ export function CalendarBoard({
           </div>
 
           {sidebarTasks.length > 0 && (
-            <div className="mt-6">
+            <div className="order-4 lg:order-none lg:mt-6">
               <h2 className="text-sm font-medium text-ink-faint">
                 {view === "month" ? "This month" : selectedDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
               </h2>
@@ -445,7 +444,7 @@ export function CalendarBoard({
           )}
         </aside>
 
-        <div className="min-w-0 flex-1">
+        <div className="order-2 min-w-0 flex-1 lg:order-none">
           {view === "month" ? (
             days.map((day) => (
               <MonthAgendaRow
@@ -482,13 +481,13 @@ export function CalendarBoard({
                 />
                 <Link
                   href={dayHref(selectedDate, false)}
-                  className={`relative z-10 flex-1 rounded-md px-3 py-1.5 text-center font-mono text-[0.65rem] transition-colors ${!fullDay ? "text-ink" : "text-ink-faint hover:text-ink"}`}
+                  className={`relative z-10 flex-1 rounded-md px-3 py-3.5 text-center font-mono text-[0.65rem] transition-colors md:py-1.5 ${!fullDay ? "text-ink" : "text-ink-faint hover:text-ink"}`}
                 >
                   6 AM – 12 AM
                 </Link>
                 <Link
                   href={dayHref(selectedDate, true)}
-                  className={`relative z-10 flex-1 rounded-md px-3 py-1.5 text-center font-mono text-[0.65rem] transition-colors ${fullDay ? "text-ink" : "text-ink-faint hover:text-ink"}`}
+                  className={`relative z-10 flex-1 rounded-md px-3 py-3.5 text-center font-mono text-[0.65rem] transition-colors md:py-1.5 ${fullDay ? "text-ink" : "text-ink-faint hover:text-ink"}`}
                 >
                   Full Day
                 </Link>

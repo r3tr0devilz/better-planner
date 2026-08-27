@@ -6,6 +6,14 @@ import { THREAD_COUNT } from "@/lib/domain-threads";
 import type { Domain, Task } from "@/lib/supabase/types";
 import { TaskRow } from "@/components/task-row";
 
+/** Long names ("YouTube — Field Notes") make the vertical binder tab heavy —
+ * take the first segment/word or two and let the tooltip carry the rest. */
+function shortDomainLabel(name: string): string {
+  const firstSegment = name.split(/[—–|:]/)[0].trim();
+  const words = firstSegment.split(/\s+/);
+  return words.length <= 2 ? firstSegment : words.slice(0, 2).join(" ");
+}
+
 /**
  * Physical binder-tab navigation, one per domain, cycling the same accent
  * set as thread-mark/card-flag. Desktop only — a fixed vertical strip has
@@ -42,15 +50,25 @@ export function DomainTabs({ domains, tasks }: { domains: Domain[]; tasks: Task[
     <>
       <nav aria-label="Jump to a domain" className="hidden shrink-0 flex-col md:flex">
         {domains.map((domain, i) => (
-          <button
-            key={domain.id}
-            type="button"
-            onClick={() => setOpenId(domain.id)}
-            className="tab"
-            data-thread={i % THREAD_COUNT}
-          >
-            {domain.name}
-          </button>
+          <div key={domain.id} className="group relative">
+            <button
+              type="button"
+              onClick={() => setOpenId(domain.id)}
+              className="tab"
+              data-thread={i % THREAD_COUNT}
+              aria-label={domain.name}
+            >
+              {shortDomainLabel(domain.name)}
+            </button>
+            {domain.name !== shortDomainLabel(domain.name) && (
+              <span
+                role="tooltip"
+                className="pointer-events-none absolute left-full top-1/2 z-10 ml-1 -translate-y-1/2 whitespace-nowrap rounded border border-ink bg-ink px-2 py-1 font-mono text-[0.65rem] text-panel opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+              >
+                {domain.name}
+              </span>
+            )}
+          </div>
         ))}
       </nav>
 

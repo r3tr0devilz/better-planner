@@ -74,7 +74,6 @@ export default async function ProjectsPage() {
 
       {domains.map((domain, i) => {
         const items = projects.filter((p) => p.domain_id === domain.id);
-        if (items.length === 0) return null;
         return (
           <section key={domain.id} id={`domain-${domain.id}`} className="mt-8 scroll-mt-20">
             <h2 className="flex items-center gap-2 text-sm font-medium text-ink-faint">
@@ -85,11 +84,15 @@ export default async function ProjectsPage() {
               />
               {domain.name}
             </h2>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              {items.map((project) => (
-                <ProjectCard key={project.id} project={project} threadIndex={i % 6} />
-              ))}
-            </div>
+            {items.length === 0 ? (
+              <p className="mt-3 text-sm text-ink-faint">No projects in this domain yet — add one above.</p>
+            ) : (
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {items.map((project) => (
+                  <ProjectCard key={project.id} project={project} threadIndex={i % 6} />
+                ))}
+              </div>
+            )}
           </section>
         );
       })}

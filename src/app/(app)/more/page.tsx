@@ -7,12 +7,11 @@ export default function MorePage() {
     <div className="mx-auto max-w-md">
       <PageHeader title="More" />
       <div className="mt-6 flex flex-col gap-2">
-        {SECONDARY_NAV_ITEMS.map(({ href, label, icon: Icon }, i) => (
+        {SECONDARY_NAV_ITEMS.map(({ href, label, icon: Icon }) => (
           <Link
             key={href}
             href={href}
-            className="hoverable card stagger-in flex items-center gap-3 px-4 py-3 text-sm text-ink hover:bg-stone"
-            style={{ transitionDelay: `${i * 40}ms` }}
+            className="hoverable card flex items-center gap-3 px-4 py-3 text-sm text-ink hover:bg-stone"
           >
             <Icon size={18} />
             {label}

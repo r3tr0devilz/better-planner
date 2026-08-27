@@ -69,6 +69,42 @@ function ApplicationCard({ app }: { app: JobApplication }) {
   );
 }
 
+/** Mobile has no room for six side-by-side columns, and no spatial "other
+ * column" to drop into anyway — so instead of drag, a stage move here is an
+ * explicit select, same idea as StatusSelect elsewhere in the app. */
+function MobileApplicationCard({
+  app,
+  onMove,
+}: {
+  app: JobApplication;
+  onMove: (id: string, status: JobApplication["status"]) => void;
+}) {
+  const deadline = formatDate(app.deadline);
+  return (
+    <div className="card flex items-start gap-2 p-3 pt-4">
+      <span className="card-flag" style={{ background: "var(--color-ink-faint)" }}>
+        {app.company}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm text-ink">{app.role}</p>
+        {deadline && <p className="mt-0.5 font-mono text-xs text-ink-faint">Due {deadline}</p>}
+      </div>
+      <select
+        value={app.status}
+        onChange={(e) => onMove(app.id, e.target.value as JobApplication["status"])}
+        aria-label={`Move ${app.company} to a different stage`}
+        className="field w-auto shrink-0 py-1 font-mono text-xs uppercase"
+      >
+        {COLUMNS.map((c) => (
+          <option key={c.status} value={c.status}>
+            {c.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 function Column({
   status,
   label,
@@ -116,6 +152,7 @@ export function KanbanBoard({ applications }: { applications: JobApplication[] }
 
   const [board, setBoard] = useState(grouped);
   const [activeApp, setActiveApp] = useState<JobApplication | null>(null);
+  const [mobileStage, setMobileStage] = useState<JobApplication["status"]>("saved");
 
   // Re-sync after the server revalidates (e.g. once a drop's moveJobApplication
   // lands) — adjusting state during render, not in an effect, per React's
@@ -198,6 +235,22 @@ export function KanbanBoard({ applications }: { applications: JobApplication[] }
     moveJobApplication(activeId, status, ordered);
   }
 
+  function handleManualMove(id: string, newStatus: JobApplication["status"]) {
+    const fromStatus = columnOf(id);
+    if (!fromStatus || fromStatus === newStatus) return;
+
+    setBoard((prev) => {
+      const moving = prev.get(fromStatus)?.find((a) => a.id === id);
+      if (!moving) return prev;
+      const next = new Map(prev);
+      next.set(fromStatus, (prev.get(fromStatus) ?? []).filter((a) => a.id !== id));
+      const toApps = [...(prev.get(newStatus) ?? []), { ...moving, status: newStatus }];
+      next.set(newStatus, toApps);
+      moveJobApplication(id, newStatus, toApps.map((a) => a.id));
+      return next;
+    });
+  }
+
   return (
     <DndContext
       id="career-kanban"
@@ -207,7 +260,38 @@ export function KanbanBoard({ applications }: { applications: JobApplication[] }
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-5 overflow-x-auto pb-2">
+      {/* Mobile: one stage at a time via a picker, no drag — there's nowhere
+          spatial to drop a card when only one column is ever on screen. */}
+      <div className="lg:hidden">
+        <div className="flex gap-1.5 overflow-x-auto pb-2">
+          {COLUMNS.map((c) => {
+            const active = c.status === mobileStage;
+            return (
+              <button
+                key={c.status}
+                type="button"
+                onClick={() => setMobileStage(c.status)}
+                className={`flex shrink-0 items-center rounded-full border px-3 py-3.5 font-mono text-xs transition-colors duration-150 ${
+                  active ? "border-oxblood bg-oxblood text-panel" : "border-line bg-panel text-ink-faint"
+                }`}
+              >
+                {c.label} {(board.get(c.status) ?? []).length}
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-3 flex flex-col gap-3">
+          {(board.get(mobileStage) ?? []).map((app) => (
+            <MobileApplicationCard key={app.id} app={app} onMove={handleManualMove} />
+          ))}
+          {(board.get(mobileStage) ?? []).length === 0 && (
+            <p className="px-1 py-3 text-sm text-ink-faint">Nothing here.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Desktop: full board, real drag-and-drop between columns. */}
+      <div className="hidden gap-5 overflow-x-auto pb-2 lg:flex">
         {COLUMNS.map((c) => (
           <Column key={c.status} status={c.status} label={c.label} dot={c.dot} apps={board.get(c.status) ?? []} />
         ))}

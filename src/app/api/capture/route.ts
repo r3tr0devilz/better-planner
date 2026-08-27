@@ -4,6 +4,19 @@ import { getDomains } from "@/lib/data/domains";
 import { parseCapture } from "@/lib/capture/parse";
 
 export async function POST(request: Request) {
+  try {
+    return await handleCapture(request);
+  } catch (err) {
+    // Anything thrown here (a bad Supabase insert, a parse-provider error, a
+    // malformed LLM response) used to crash the whole request with no
+    // response at all — the client's fetch would just fail. Always answer
+    // with JSON so the capture bar's own error state can show instead.
+    console.error("capture failed:", err);
+    return NextResponse.json({ error: "capture failed" }, { status: 500 });
+  }
+}
+
+async function handleCapture(request: Request) {
   const { text, source } = (await request.json()) as { text: string; source: "text" | "voice" };
   if (!text?.trim()) {
     return NextResponse.json({ error: "empty capture" }, { status: 400 });

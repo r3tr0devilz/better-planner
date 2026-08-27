@@ -62,6 +62,9 @@ export function CollapsibleForm({
         <X size={14} />
       </button>
       {children}
+      <button type="button" onClick={close} className="btn-outline shrink-0">
+        Cancel
+      </button>
     </form>
   );
 }

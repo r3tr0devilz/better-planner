@@ -7,6 +7,7 @@ import { getRecentNotifications } from "@/lib/data/notifications";
 import { TaskRow } from "@/components/task-row";
 import { RoutineRow } from "@/components/routine-row";
 import { DomainTabs } from "@/components/domain-tabs";
+import { OpenCaptureButton } from "@/components/open-capture-button";
 
 function greeting(): string {
   const hour = new Date().getHours();
@@ -32,6 +33,11 @@ export default async function TodayPage() {
     (r) => completions.find((c) => c.routine_id === r.id && c.date === today)?.completed,
   ).length;
 
+  const now = new Date();
+  const overdueCount = open.filter((t) => t.due_at && new Date(t.due_at) < now).length;
+  const topThreeRemaining = topThree.filter((t) => t.status !== "done").length;
+  const routinesRemaining = routines.length - routinesDoneToday;
+
   return (
     <div className="flex gap-6 md:-ml-8">
       <DomainTabs domains={domains} tasks={tasks} />
@@ -45,16 +51,29 @@ export default async function TodayPage() {
           <div>
             <div className="font-[family-name:var(--font-display)] text-5xl font-black leading-none text-ink">{topThree.length}</div>
             <div className="mt-1 font-mono text-[0.65rem] uppercase tracking-wide text-ink-faint">Top three</div>
+            {topThree.length > 0 && (
+              <div className={`font-mono text-[0.65rem] uppercase tracking-wide ${topThreeRemaining > 0 ? "text-ink-faint" : "text-moss"}`}>
+                {topThreeRemaining > 0 ? `${topThreeRemaining} remaining` : "all done"}
+              </div>
+            )}
           </div>
           <div>
             <div className="font-[family-name:var(--font-display)] text-5xl font-black leading-none text-ink">{open.length}</div>
             <div className="mt-1 font-mono text-[0.65rem] uppercase tracking-wide text-ink-faint">Open tasks</div>
+            {overdueCount > 0 && (
+              <div className="font-mono text-[0.65rem] uppercase tracking-wide text-vermillion">{overdueCount} overdue</div>
+            )}
           </div>
           <div>
             <div className="font-[family-name:var(--font-display)] text-5xl font-black leading-none text-ink">
               {routinesDoneToday}/{routines.length}
             </div>
             <div className="mt-1 font-mono text-[0.65rem] uppercase tracking-wide text-ink-faint">Routines done</div>
+            {routines.length > 0 && (
+              <div className={`font-mono text-[0.65rem] uppercase tracking-wide ${routinesRemaining > 0 ? "text-ink-faint" : "text-moss"}`}>
+                {routinesRemaining > 0 ? `${routinesRemaining} left today` : "all done"}
+              </div>
+            )}
           </div>
         </div>
 
@@ -124,11 +143,16 @@ export default async function TodayPage() {
             <section className="card p-4">
               <h2 className="text-sm font-medium text-ink-faint">Calendar</h2>
               <p className="mt-2 text-xs text-ink-faint">
-                Google Calendar sync isn&apos;t connected yet — set it up from Settings.
+                Google Calendar sync isn&apos;t connected yet.
               </p>
-              <Link href="/calendar" className="mt-2 inline-block text-xs font-semibold text-oxblood hover:underline">
-                View calendar →
-              </Link>
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <Link href="/settings" className="btn-outline px-3 py-1.5 text-xs">
+                  Connect calendar
+                </Link>
+                <Link href="/calendar" className="text-xs font-semibold text-oxblood hover:underline">
+                  View calendar →
+                </Link>
+              </div>
             </section>
 
             {slipping.length > 0 && (
@@ -158,7 +182,10 @@ export default async function TodayPage() {
                   </div>
                 ))}
                 {notifications.length === 0 && (
-                  <p className="text-sm text-ink-faint">Nothing captured yet — try the Capture button.</p>
+                  <div className="card p-4">
+                    <p className="text-sm text-ink-faint">Nothing captured yet.</p>
+                    <OpenCaptureButton />
+                  </div>
                 )}
               </div>
             </section>

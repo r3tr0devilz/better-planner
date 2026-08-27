@@ -2,7 +2,15 @@ import { notFound } from "next/navigation";
 import { getProjectDetail, getChecklistTemplates } from "@/lib/data/projects";
 import { MilestoneRow } from "@/components/milestone-row";
 import { ChecklistItemRow } from "@/components/checklist-item-row";
-import { createMilestone, createChecklist, addChecklistItem, toggleChecklistItem, logActivity } from "../actions";
+import { DeleteProjectButton } from "@/components/delete-project-button";
+import {
+  createMilestone,
+  createChecklist,
+  addChecklistItem,
+  toggleChecklistItem,
+  logActivity,
+  deleteProjectRedirect,
+} from "../actions";
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -24,7 +32,10 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           {project.engagement === "retainer" ? "Retainer" : project.kind === "area" ? "Area" : "Project"}
         </span>
       </div>
-      <p className="mt-1 text-sm text-ink-faint">{project.hours_logged.toFixed(1)} hours logged</p>
+      <div className="mt-1 flex items-center justify-between gap-3">
+        <p className="text-sm text-ink-faint">{project.hours_logged.toFixed(1)} hours logged</p>
+        <DeleteProjectButton projectName={project.name} onDelete={deleteProjectRedirect.bind(null, project.id)} />
+      </div>
 
       <section className="mt-8">
         <h2 className="text-sm font-medium text-ink-faint">Milestones</h2>
