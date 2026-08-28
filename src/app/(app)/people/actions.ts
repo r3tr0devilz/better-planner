@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export async function createPerson(formData: FormData) {
@@ -59,9 +58,4 @@ export async function deletePersonInPlace(id: string) {
   if (error) throw error;
 
   revalidatePath("/people");
-}
-
-export async function deletePerson(id: string) {
-  await deletePersonInPlace(id);
-  redirect("/people");
 }

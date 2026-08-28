@@ -6,16 +6,20 @@ import { TaskRow } from "@/components/task-row";
 import { FilterBar } from "@/components/filter-bar";
 import { threadIndexFor } from "@/lib/domain-threads";
 import { useUndoableDelete } from "@/lib/use-undoable-delete";
-import { bulkSetStatus, bulkDelete, deleteTask } from "./actions";
+import { useUrlState } from "@/lib/use-url-state";
+import { bulkSetStatus, deleteTask } from "./actions";
 import type { Domain, Task } from "@/lib/supabase/types";
 
+const OPEN_PAGE_SIZE = 25;
+
 export function TaskList({ tasks, domains }: { tasks: Task[]; domains: Domain[] }) {
-  const [search, setSearch] = useState("");
-  const [domainId, setDomainId] = useState<string | null>(null);
+  const [search, setSearch] = useUrlState("q");
+  const [domainId, setDomainId] = useUrlState("domain");
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [showAllOpen, setShowAllOpen] = useState(false);
   const [pending, startTransition] = useTransition();
-  const { hiddenIds, requestDelete } = useUndoableDelete(deleteTask);
+  const { hiddenIds, requestDelete, requestDeleteMany } = useUndoableDelete(deleteTask);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -29,7 +33,8 @@ export function TaskList({ tasks, domains }: { tasks: Task[]; domains: Domain[] 
 
   const open = filtered.filter((t) => t.status === "open");
   const done = filtered.filter((t) => t.status === "done");
-  const filtering = search.trim() !== "" || domainId !== null;
+  const filtering = search.trim() !== "" || domainId !== "";
+  const openShown = showAllOpen || filtering ? open : open.slice(0, OPEN_PAGE_SIZE);
 
   function toggleSelect(id: string) {
     setSelected((prev) => {
@@ -52,9 +57,11 @@ export function TaskList({ tasks, domains }: { tasks: Task[]; domains: Domain[] 
   }
 
   function handleBulkDelete() {
-    if (!confirm(`Delete ${selected.size} task${selected.size === 1 ? "" : "s"}? This can't be undone.`)) return;
-    const ids = [...selected];
-    startTransition(() => bulkDelete(ids));
+    // Same undoable path as a single-row delete, collapsed into one toast —
+    // consistent with every other delete in the app instead of stacking a
+    // blocking confirm() on top of a bulk action.
+    const targets = tasks.filter((t) => selected.has(t.id)).map((t) => ({ id: t.id, label: `"${t.title}"` }));
+    requestDeleteMany(targets, "task");
     exitSelectMode();
   }
 
@@ -73,7 +80,14 @@ export function TaskList({ tasks, domains }: { tasks: Task[]; domains: Domain[] 
   return (
     <>
       <div className="mt-6">
-        <FilterBar search={search} onSearchChange={setSearch} searchPlaceholder="Search tasks…" domains={domains} activeDomainId={domainId} onDomainChange={setDomainId} />
+        <FilterBar
+          search={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search tasks…"
+          domains={domains}
+          activeDomainId={domainId || null}
+          onDomainChange={(id) => setDomainId(id ?? "")}
+        />
       </div>
 
       <div className="mt-4 flex min-h-9 items-center">
@@ -117,10 +131,19 @@ export function TaskList({ tasks, domains }: { tasks: Task[]; domains: Domain[] 
               {filtering ? "No open tasks match this filter." : "Nothing open. Add something above."}
             </p>
           )}
-          {open.map((task) => (
+          {openShown.map((task) => (
             <TaskRow key={task.id} {...rowProps(task)} />
           ))}
         </div>
+        {!filtering && open.length > openShown.length && (
+          <button
+            type="button"
+            onClick={() => setShowAllOpen(true)}
+            className="mt-2 text-xs font-semibold text-oxblood hover:underline"
+          >
+            Show all {open.length} →
+          </button>
+        )}
       </section>
 
       {done.length > 0 && (

@@ -42,7 +42,7 @@ export function FilterBar({
             type="button"
             onClick={() => onDomainChange(null)}
             aria-pressed={activeDomainId == null}
-            className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-xs transition-colors duration-150 ${
+            className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-xs transition-colors duration-150 ${
               activeDomainId == null ? "border-oxblood bg-oxblood text-panel" : "border-line bg-panel text-ink-faint"
             }`}
           >
@@ -56,7 +56,7 @@ export function FilterBar({
                 type="button"
                 onClick={() => onDomainChange(active ? null : d.id)}
                 aria-pressed={active}
-                className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-xs transition-colors duration-150 ${
+                className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-xs transition-colors duration-150 ${
                   active ? "border-oxblood bg-oxblood text-panel" : "border-line bg-panel text-ink-faint"
                 }`}
               >

@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { FilterBar } from "@/components/filter-bar";
 import { DeleteButton } from "@/components/delete-button";
 import { useUndoableDelete } from "@/lib/use-undoable-delete";
+import { useUrlState } from "@/lib/use-url-state";
 import { deletePersonInPlace } from "./actions";
 import type { Person } from "@/lib/supabase/types";
 
@@ -15,7 +16,7 @@ function formatBirthday(birthday: string | null): string | null {
 }
 
 export function PeopleList({ people }: { people: Person[] }) {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useUrlState("q");
   const { hiddenIds, requestDelete } = useUndoableDelete(deletePersonInPlace);
 
   const filtered = useMemo(() => {

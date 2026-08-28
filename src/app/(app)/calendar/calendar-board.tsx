@@ -418,11 +418,19 @@ export function CalendarBoard({
 
           <div className="card order-3 p-3 lg:order-none lg:mt-4">
             <div className="flex items-center justify-between">
-              <Link href={monthHref(view, monthIndex === 0 ? year - 1 : year, monthIndex === 0 ? 11 : monthIndex - 1)} aria-label="Previous month" className="px-1 text-ink-faint hover:text-ink">
+              <Link
+                href={monthHref(view, monthIndex === 0 ? year - 1 : year, monthIndex === 0 ? 11 : monthIndex - 1)}
+                aria-label="Previous month"
+                className="-m-2.5 flex h-11 w-11 shrink-0 items-center justify-center text-ink-faint hover:text-ink"
+              >
                 ‹
               </Link>
               <span className="text-xs font-medium text-ink">{monthLabel(year, monthIndex)}</span>
-              <Link href={monthHref(view, monthIndex === 11 ? year + 1 : year, monthIndex === 11 ? 0 : monthIndex + 1)} aria-label="Next month" className="px-1 text-ink-faint hover:text-ink">
+              <Link
+                href={monthHref(view, monthIndex === 11 ? year + 1 : year, monthIndex === 11 ? 0 : monthIndex + 1)}
+                aria-label="Next month"
+                className="-m-2.5 flex h-11 w-11 shrink-0 items-center justify-center text-ink-faint hover:text-ink"
+              >
                 ›
               </Link>
             </div>
@@ -486,10 +494,10 @@ export function CalendarBoard({
                   {selectedDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
                 </div>
                 <div className="flex w-full items-center justify-between gap-2 md:contents">
-                  <Link href={dayHref(addDays(selectedDate, -1), fullDay)} className="btn-outline px-3 py-1.5 text-sm md:order-1">
+                  <Link href={dayHref(addDays(selectedDate, -1), fullDay)} className="btn-outline px-3 py-3 text-sm md:order-1 md:py-1.5">
                     ← Prev
                   </Link>
-                  <Link href={dayHref(addDays(selectedDate, 1), fullDay)} className="btn-outline px-3 py-1.5 text-sm md:order-3">
+                  <Link href={dayHref(addDays(selectedDate, 1), fullDay)} className="btn-outline px-3 py-3 text-sm md:order-3 md:py-1.5">
                     Next →
                   </Link>
                 </div>

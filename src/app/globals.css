@@ -321,6 +321,10 @@ textarea.field {
 .modal-backdrop {
   opacity: 1;
   transition: opacity 180ms ease-out;
+  /* Without this, a mobile scroll gesture that runs out of room inside the
+     modal "leaks" into scrolling the page behind it once it hits the
+     backdrop's own scroll boundary. */
+  overscroll-behavior: contain;
   @starting-style {
     opacity: 0;
   }

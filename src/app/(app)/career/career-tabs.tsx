@@ -88,7 +88,7 @@ export function CareerTabs({
             tabIndex={active === t.id ? 0 : -1}
             onClick={() => setActive(t.id)}
             onKeyDown={(e) => onTabKeyDown(e, i)}
-            className={`relative z-10 min-w-0 flex-1 rounded-md px-1.5 py-1.5 text-center text-xs font-medium transition-colors sm:px-3 sm:text-sm ${
+            className={`relative z-10 flex min-h-11 min-w-0 flex-1 items-center justify-center rounded-md px-1.5 py-1.5 text-center text-xs font-medium transition-colors sm:px-3 sm:text-sm ${
               active === t.id ? "text-ink" : "text-ink-faint hover:text-ink"
             }`}
           >

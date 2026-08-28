@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { FilterBar } from "@/components/filter-bar";
 import { DeleteButton } from "@/components/delete-button";
 import { useUndoableDelete } from "@/lib/use-undoable-delete";
+import { useUrlState } from "@/lib/use-url-state";
 import { deleteProject } from "./actions";
 import type { Domain, Project } from "@/lib/supabase/types";
 
@@ -47,10 +48,10 @@ function ProjectCard({
 }
 
 export function ProjectList({ projects, domains }: { projects: Project[]; domains: Domain[] }) {
-  const [search, setSearch] = useState("");
-  const [domainId, setDomainId] = useState<string | null>(null);
+  const [search, setSearch] = useUrlState("q");
+  const [domainId, setDomainId] = useUrlState("domain");
   const { hiddenIds, requestDelete } = useUndoableDelete(deleteProject);
-  const filtering = search.trim() !== "" || domainId !== null;
+  const filtering = search.trim() !== "" || domainId !== "";
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -68,7 +69,14 @@ export function ProjectList({ projects, domains }: { projects: Project[]; domain
   return (
     <>
       <div className="mt-6">
-        <FilterBar search={search} onSearchChange={setSearch} searchPlaceholder="Search projects…" domains={domains} activeDomainId={domainId} onDomainChange={setDomainId} />
+        <FilterBar
+          search={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search projects…"
+          domains={domains}
+          activeDomainId={domainId || null}
+          onDomainChange={(id) => setDomainId(id ?? "")}
+        />
       </div>
 
       {domains.map((domain, i) => {

@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { getBookDetail } from "@/lib/data/library";
 import { StatusSelect } from "@/components/status-select";
 import { DeleteButton } from "@/components/delete-button";
-import { updateBookStatus, createHighlight, addThought, deleteBook, deleteHighlight } from "../../actions";
+import { RedirectDeleteButton } from "@/components/redirect-delete-button";
+import { updateBookStatus, createHighlight, addThought, deleteBookInPlace, deleteHighlight } from "../../actions";
 
 const STATUSES = ["want", "reading", "finished", "abandoned"] as const;
 
@@ -32,10 +33,12 @@ export default async function BookDetailPage({ params }: { params: Promise<{ id:
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">
           <StatusSelect value={book.status} options={STATUSES} onChange={updateBookStatus.bind(null, book.id)} />
-          <DeleteButton
-            confirmMessage={`Delete "${book.title}"? This also removes its highlights. This can't be undone.`}
-            label="Delete book"
-            onDelete={deleteBook.bind(null, book.id)}
+          <RedirectDeleteButton
+            id={book.id}
+            label={`"${book.title}"`}
+            buttonLabel="Delete book"
+            deleteFn={deleteBookInPlace}
+            redirectTo="/library"
           />
         </div>
       </div>

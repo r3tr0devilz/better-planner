@@ -2,9 +2,9 @@
 
 import { useCallback, useState, useTransition } from "react";
 import { Pencil } from "lucide-react";
-import { updatePerson, deletePerson } from "@/app/(app)/people/actions";
+import { updatePerson, deletePersonInPlace } from "@/app/(app)/people/actions";
 import { Modal } from "@/components/modal";
-import { DeleteButton } from "@/components/delete-button";
+import { RedirectDeleteButton } from "@/components/redirect-delete-button";
 import type { Person } from "@/lib/supabase/types";
 
 export function PersonHeader({ person }: { person: Person }) {
@@ -47,12 +47,11 @@ export function PersonHeader({ person }: { person: Person }) {
               <input type="date" name="birthday" defaultValue={person.birthday ?? ""} className="field" />
             </label>
             <div className="mt-1 flex items-center justify-between gap-3">
-              <DeleteButton
-                confirmMessage={`Delete "${person.name}"? This also removes everything logged about them. This can't be undone.`}
-                onDelete={() => {
-                  close();
-                  return deletePerson(person.id);
-                }}
+              <RedirectDeleteButton
+                id={person.id}
+                label={`"${person.name}"`}
+                deleteFn={deletePersonInPlace}
+                redirectTo="/people"
               />
               <button type="submit" className="btn">
                 Save

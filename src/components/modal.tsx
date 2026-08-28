@@ -62,7 +62,7 @@ export function Modal({
 
   return createPortal(
     <div
-      className="modal-backdrop fixed inset-0 z-50 flex items-start justify-center bg-ink/40 px-4 pt-24"
+      className="modal-backdrop fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/40 px-4 pt-24 pb-24"
       onClick={onClose}
     >
       <div

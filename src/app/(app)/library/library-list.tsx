@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { FilterBar } from "@/components/filter-bar";
 import { NoteFlagToggle } from "@/components/note-flag-toggle";
 import { DeleteButton } from "@/components/delete-button";
 import { useUndoableDelete } from "@/lib/use-undoable-delete";
+import { useUrlState } from "@/lib/use-url-state";
 import { deleteNote, deleteBookInPlace } from "./actions";
 import type { Book, LibraryNote } from "@/lib/supabase/types";
 
@@ -16,7 +17,7 @@ const KINDS: { key: LibraryNote["kind"]; label: string }[] = [
 ];
 
 export function LibraryList({ notes, books }: { notes: LibraryNote[]; books: Book[] }) {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useUrlState("q");
   const noteUndo = useUndoableDelete(deleteNote);
   const bookUndo = useUndoableDelete(deleteBookInPlace);
 

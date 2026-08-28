@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { LibraryNote, Book } from "@/lib/supabase/types";
 
@@ -85,11 +84,6 @@ export async function deleteBookInPlace(id: string) {
   if (error) throw error;
 
   revalidatePath("/library");
-}
-
-export async function deleteBook(id: string) {
-  await deleteBookInPlace(id);
-  redirect("/library");
 }
 
 export async function createHighlight(bookId: string, formData: FormData) {

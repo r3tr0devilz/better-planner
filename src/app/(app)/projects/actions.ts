@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export async function createDomain(formData: FormData) {
@@ -187,9 +186,4 @@ export async function deleteProject(projectId: string) {
   if (error) throw error;
 
   revalidatePath("/projects");
-}
-
-export async function deleteProjectRedirect(projectId: string) {
-  await deleteProject(projectId);
-  redirect("/projects");
 }

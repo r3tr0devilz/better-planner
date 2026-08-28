@@ -40,7 +40,7 @@ export function DeleteButton({
     <button
       onClick={handleClick}
       disabled={pending}
-      aria-label={ariaLabel}
+      aria-label={label ? undefined : ariaLabel}
       title={label ? undefined : (ariaLabel ?? "Delete")}
       className={className}
     >

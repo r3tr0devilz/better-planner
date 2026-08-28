@@ -75,7 +75,12 @@ export function TaskRow({
 
   return (
     <div className="ledger-row flex items-center gap-3 px-1 py-3">
-      {selectable && (
+      {selectable ? (
+        // Select mode swaps the done-checkbox out for a selection checkbox
+        // in the same slot — two checkboxes side by side (one for "select",
+        // one for "done") read as an unlabeled pair with no way to tell
+        // them apart. Bulk actions are the point of select mode; per-row
+        // done-toggling can wait until you're out of it.
         <label className="-m-3.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center">
           <input
             type="checkbox"
@@ -85,17 +90,18 @@ export function TaskRow({
             aria-label={`Select "${task.title}"`}
           />
         </label>
+      ) : (
+        <label className="-m-3.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center">
+          <input
+            type="checkbox"
+            checked={done}
+            disabled={pending}
+            onChange={(e) => startTransition(() => toggleTaskDone(task.id, e.target.checked))}
+            className="h-4 w-4 accent-moss"
+            aria-label={`Mark "${task.title}" ${done ? "open" : "done"}`}
+          />
+        </label>
       )}
-      <label className="-m-3.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center">
-        <input
-          type="checkbox"
-          checked={done}
-          disabled={pending}
-          onChange={(e) => startTransition(() => toggleTaskDone(task.id, e.target.checked))}
-          className="h-4 w-4 accent-moss"
-          aria-label={`Mark "${task.title}" ${done ? "open" : "done"}`}
-        />
-      </label>
 
       {threadIndex >= 0 && <span className="thread-mark" data-thread={threadIndex} aria-hidden />}
 
