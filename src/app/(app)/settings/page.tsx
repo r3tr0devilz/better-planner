@@ -1,15 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/page-header";
+import { CaptureSettingsForm } from "@/components/capture-settings-form";
+import { getCaptureSettings } from "@/lib/data/settings";
 import { signOut } from "./actions";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const usingOllama = process.env.CAPTURE_LLM_PROVIDER === "ollama";
-  const captureModel = usingOllama ? (process.env.OLLAMA_MODEL ?? "llama3.2:3b") : "claude-sonnet-5";
+  const [
+    {
+      data: { user },
+    },
+    captureSettings,
+  ] = await Promise.all([supabase.auth.getUser(), getCaptureSettings()]);
 
   return (
     <div className="mx-auto max-w-lg">
@@ -27,18 +29,7 @@ export default async function SettingsPage() {
 
       <section className="card mt-4 p-4">
         <h2 className="text-sm font-medium text-ink-faint">Capture AI</h2>
-        <div className="mt-3 flex items-center justify-between text-sm">
-          <span className="text-ink">Provider</span>
-          <span className="font-mono text-xs text-ink-faint">{usingOllama ? "Ollama (local)" : "Anthropic"}</span>
-        </div>
-        <div className="mt-2 flex items-center justify-between text-sm">
-          <span className="text-ink">Model</span>
-          <span className="font-mono text-xs text-ink-faint">{captureModel}</span>
-        </div>
-        <p className="mt-3 text-xs text-ink-faint">
-          Set by <code className="font-mono">CAPTURE_LLM_PROVIDER</code> in your environment — this page just reports it,
-          it can&apos;t be changed here.
-        </p>
+        <CaptureSettingsForm settings={captureSettings} />
       </section>
 
       <section className="card mt-4 p-4">

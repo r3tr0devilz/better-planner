@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { CheckSquare, Trash2, X } from "lucide-react";
+import { CheckSquare, ChevronRight, Trash2, X } from "lucide-react";
 import { TaskRow } from "@/components/task-row";
 import { FilterBar } from "@/components/filter-bar";
 import { threadIndexFor } from "@/lib/domain-threads";
@@ -147,9 +147,10 @@ export function TaskList({ tasks, domains }: { tasks: Task[]; domains: Domain[] 
       </section>
 
       {done.length > 0 && (
-        <details className="mt-8">
-          <summary className="cursor-pointer list-none text-sm font-medium text-ink-faint marker:hidden [&::-webkit-details-marker]:hidden">
-            Done ({done.length}) — tap to show
+        <details className="group mt-8">
+          <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-ink-faint marker:hidden transition-colors duration-150 hover:text-ink [&::-webkit-details-marker]:hidden">
+            <ChevronRight size={14} className="shrink-0 transition-transform duration-150 group-open:rotate-90" aria-hidden />
+            Done ({done.length})
           </summary>
           <div className="ledger mt-3">
             {done.map((task) => (

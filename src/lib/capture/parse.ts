@@ -3,6 +3,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import { CaptureSchema, type CaptureResult } from "./schema";
 import type { Domain } from "@/lib/supabase/types";
+import type { CaptureSettings } from "@/lib/data/settings";
 
 const anthropic = new Anthropic();
 
@@ -23,9 +24,9 @@ Resolve relative dates/times ("tomorrow at 2pm", "next Friday") against the curr
 Leave every field not relevant to the chosen kind as null.`;
 }
 
-async function parseWithAnthropic(text: string, domains: Domain[]): Promise<CaptureResult | null> {
+async function parseWithAnthropic(text: string, domains: Domain[], model: string): Promise<CaptureResult | null> {
   const response = await anthropic.messages.parse({
-    model: "claude-sonnet-5",
+    model,
     max_tokens: 1024,
     system: systemPrompt(domains),
     messages: [{ role: "user", content: text }],
@@ -34,9 +35,8 @@ async function parseWithAnthropic(text: string, domains: Domain[]): Promise<Capt
   return response.parsed_output;
 }
 
-async function parseWithOllama(text: string, domains: Domain[]): Promise<CaptureResult | null> {
+async function parseWithOllama(text: string, domains: Domain[], model: string): Promise<CaptureResult | null> {
   const baseUrl = process.env.OLLAMA_BASE_URL ?? "http://localhost:11434";
-  const model = process.env.OLLAMA_MODEL ?? "llama3.2:3b";
 
   const res = await fetch(`${baseUrl}/api/chat`, {
     method: "POST",
@@ -68,11 +68,12 @@ async function parseWithOllama(text: string, domains: Domain[]): Promise<Capture
   return parsed.success ? parsed.data : null;
 }
 
-/** Provider is a deployment-time choice (env var), not a per-request one — a
- * local model only exists on whichever machine has Ollama running. */
-export async function parseCapture(text: string, domains: Domain[]): Promise<CaptureResult | null> {
-  if (process.env.CAPTURE_LLM_PROVIDER === "ollama") {
-    return parseWithOllama(text, domains);
+/** Provider/model come from Settings (DB, per user) with the env vars as the
+ * fallback default — see src/lib/data/settings.ts. Note a local Ollama model
+ * only exists on whichever machine has Ollama running. */
+export async function parseCapture(text: string, domains: Domain[], settings: CaptureSettings): Promise<CaptureResult | null> {
+  if (settings.provider === "ollama") {
+    return parseWithOllama(text, domains, settings.model ?? process.env.OLLAMA_MODEL ?? "llama3.2:3b");
   }
-  return parseWithAnthropic(text, domains);
+  return parseWithAnthropic(text, domains, settings.model ?? "claude-sonnet-5");
 }

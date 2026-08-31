@@ -1,0 +1,69 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
+import { updateCaptureSettings } from "@/app/(app)/settings/actions";
+import type { CaptureSettings } from "@/lib/data/settings";
+
+const ANTHROPIC_MODELS = [
+  { value: "claude-sonnet-5", label: "Sonnet 5 (recommended)" },
+  { value: "claude-opus-5", label: "Opus 5" },
+  { value: "claude-haiku-4-5-20251001", label: "Haiku 4.5" },
+  { value: "claude-fable-5", label: "Fable 5" },
+];
+
+export function CaptureSettingsForm({ settings }: { settings: CaptureSettings }) {
+  const [provider, setProvider] = useState(settings.provider);
+  const [pending, startTransition] = useTransition();
+
+  return (
+    <form
+      action={(formData) => startTransition(async () => {
+        await updateCaptureSettings(formData);
+        toast("Capture settings saved");
+      })}
+      className="mt-3 flex flex-col gap-3"
+    >
+      <label className="flex flex-col gap-1.5 text-xs text-ink-faint">
+        Provider
+        <select
+          name="capture_provider"
+          value={provider}
+          onChange={(e) => setProvider(e.target.value as CaptureSettings["provider"])}
+          className="field"
+        >
+          <option value="anthropic">Anthropic</option>
+          <option value="ollama">Ollama (local)</option>
+        </select>
+      </label>
+
+      {provider === "anthropic" ? (
+        <label className="flex flex-col gap-1.5 text-xs text-ink-faint">
+          Model
+          <select name="capture_model" defaultValue={settings.model ?? "claude-sonnet-5"} className="field">
+            {ANTHROPIC_MODELS.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : (
+        <label className="flex flex-col gap-1.5 text-xs text-ink-faint">
+          Model
+          <input
+            name="capture_model"
+            defaultValue={settings.model ?? ""}
+            placeholder="llama3.2:3b"
+            className="field"
+          />
+          <span className="text-[11px] text-ink-faint">Whatever you&apos;ve pulled locally with Ollama — must be running on the same machine as the server.</span>
+        </label>
+      )}
+
+      <button type="submit" disabled={pending} className="btn-outline self-start px-3 py-1.5 text-xs">
+        {pending ? "Saving…" : "Save"}
+      </button>
+    </form>
+  );
+}

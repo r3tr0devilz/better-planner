@@ -266,6 +266,13 @@ export type CareerContact = Timestamped & {
   notes: string | null;
 };
 
+export type UserSettings = Timestamped & {
+  id: string;
+  user_id: string;
+  capture_provider: "anthropic" | "ollama";
+  capture_model: string | null;
+};
+
 type TableDef<Row, Insert> = {
   Row: Row;
   Insert: Insert;
@@ -302,6 +309,7 @@ export type Database = {
       courses: TableDef<Course, Omit<Course, "id" | "user_id" | "created_at"> & { user_id?: string }>;
       certificates: TableDef<Certificate, Omit<Certificate, "id" | "user_id" | "created_at"> & { user_id?: string }>;
       career_contacts: TableDef<CareerContact, Omit<CareerContact, "id" | "user_id" | "created_at"> & { user_id?: string }>;
+      user_settings: TableDef<UserSettings, Omit<UserSettings, "id" | "user_id" | "created_at"> & { user_id?: string }>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

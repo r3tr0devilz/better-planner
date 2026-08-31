@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getDomains } from "@/lib/data/domains";
+import { getCaptureSettings } from "@/lib/data/settings";
 import { parseCapture } from "@/lib/capture/parse";
 
 export async function POST(request: Request) {
@@ -28,7 +29,7 @@ async function handleCapture(request: Request) {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const domains = await getDomains();
+  const [domains, captureSettings] = await Promise.all([getDomains(), getCaptureSettings()]);
 
   const { data: inbox, error: inboxErr } = await supabase
     .from("capture_inbox")
@@ -37,7 +38,7 @@ async function handleCapture(request: Request) {
     .single();
   if (inboxErr) throw inboxErr;
 
-  const parsed = await parseCapture(text, domains);
+  const parsed = await parseCapture(text, domains, captureSettings);
   if (!parsed) {
     return NextResponse.json({ error: "could not parse capture" }, { status: 502 });
   }
