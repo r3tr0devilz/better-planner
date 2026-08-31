@@ -25,7 +25,7 @@ Leave every field not relevant to the chosen kind as null.`;
 
 async function parseWithAnthropic(text: string, domains: Domain[]): Promise<CaptureResult | null> {
   const response = await anthropic.messages.parse({
-    model: "claude-opus-5",
+    model: "claude-sonnet-5",
     max_tokens: 1024,
     system: systemPrompt(domains),
     messages: [{ role: "user", content: text }],

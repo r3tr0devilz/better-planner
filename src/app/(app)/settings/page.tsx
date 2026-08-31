@@ -9,7 +9,7 @@ export default async function SettingsPage() {
   } = await supabase.auth.getUser();
 
   const usingOllama = process.env.CAPTURE_LLM_PROVIDER === "ollama";
-  const captureModel = usingOllama ? (process.env.OLLAMA_MODEL ?? "llama3.2:3b") : "claude-opus-5";
+  const captureModel = usingOllama ? (process.env.OLLAMA_MODEL ?? "llama3.2:3b") : "claude-sonnet-5";
 
   return (
     <div className="mx-auto max-w-lg">
