@@ -332,7 +332,10 @@ export function KanbanBoard({ applications }: { applications: JobApplication[] }
       {/* Mobile: one stage at a time via a picker, no drag — there's nowhere
           spatial to drop a card when only one column is ever on screen. */}
       <div className="lg:hidden">
-        <div className="flex gap-1.5 overflow-x-auto pb-2">
+        <div
+          className="flex gap-1.5 overflow-x-auto pb-2"
+          style={{ maskImage: "linear-gradient(to right, black calc(100% - 1.5rem), transparent)", WebkitMaskImage: "linear-gradient(to right, black calc(100% - 1.5rem), transparent)" }}
+        >
           {COLUMNS.map((c) => {
             const active = c.status === mobileStage;
             return (
@@ -360,13 +363,20 @@ export function KanbanBoard({ applications }: { applications: JobApplication[] }
       </div>
 
       {/* Desktop: full board, real drag-and-drop between columns. The right
-          edge fades instead of cutting off hard — a static hint that more
-          stages continue off-screen (Rejected/Archived at common laptop
-          widths), since the row otherwise gives no sign there's more to
-          scroll to. */}
+          edge fades instead of cutting off hard, plus an explicit caption —
+          the fade alone read as broken clipping rather than a scroll hint
+          in review, so it's backed up with words. tabIndex/role/aria-label
+          make the scrollable row itself reachable and announced, not just
+          the cards inside it. */}
+      <p className="hidden font-mono text-[11px] uppercase tracking-wide text-ink-faint lg:block">
+        {COLUMNS.length} stages — scroll for more →
+      </p>
       <div
-        className="hidden gap-5 overflow-x-auto pb-2 pr-8 lg:flex"
+        className="mt-2 hidden gap-5 overflow-x-auto pb-2 pr-8 lg:flex"
         style={{ maskImage: "linear-gradient(to right, black calc(100% - 2rem), transparent)", WebkitMaskImage: "linear-gradient(to right, black calc(100% - 2rem), transparent)" }}
+        tabIndex={0}
+        role="group"
+        aria-label="Application stages, scroll horizontally for more"
       >
         {COLUMNS.map((c) => (
           <Column key={c.status} status={c.status} label={c.label} dot={c.dot} apps={board.get(c.status) ?? []} />

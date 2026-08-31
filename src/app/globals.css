@@ -125,12 +125,21 @@ body {
    card scale instead of a full nav column. */
 .card-flag {
   position: absolute;
-  inset-block: 0;
+  /* Physical top/bottom, not the logical inset-block — this element also
+     sets writing-mode: vertical-rl on itself, so inset-block would resolve
+     against ITS OWN block axis (horizontal in vertical-rl) instead of the
+     physical vertical stretch this needs, leaving height unconstrained and
+     sized to the text (a real bug: long domain names overflowed the card). */
+  top: 0;
+  bottom: 0;
   left: -1px;
   width: 1.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* Plain block box, not flex: text-overflow:ellipsis on a flex container
+     doesn't reliably truncate its anonymous text-node item (confirmed by
+     testing — align-items had no effect at all on where truncation landed,
+     it was clipping both ends of the text with no ellipsis regardless).
+     text-align centers the single line the normal way instead. */
+  text-align: center;
   padding: 0.5rem 0;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
