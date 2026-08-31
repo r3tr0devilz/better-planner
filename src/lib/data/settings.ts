@@ -29,3 +29,18 @@ function envDefaults(): CaptureSettings {
     model: null,
   };
 }
+
+/** Same graceful-fallback contract as getCaptureSettings: null (not a
+ * throw) whenever there's no user, no row, or the migration hasn't landed
+ * yet — the Today masthead greeting must never crash the page over this. */
+export async function getDisplayName(): Promise<string | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase.from("user_settings").select("display_name").eq("user_id", user.id).maybeSingle();
+  if (error || !data) return null;
+  return data.display_name;
+}

@@ -5,17 +5,17 @@ import { getDomains, threadIndexFor } from "@/lib/data/domains";
 import { getRoutines, getRecentCompletions, todayStr } from "@/lib/data/routines";
 import { getSlippingProjects } from "@/lib/data/projects";
 import { getRecentNotifications } from "@/lib/data/notifications";
+import { getDisplayName } from "@/lib/data/settings";
 import { TaskRow } from "@/components/task-row";
 import { RoutineRow } from "@/components/routine-row";
 import { DomainTabs } from "@/components/domain-tabs";
 import { OpenCaptureButton } from "@/components/open-capture-button";
 import { EmptyState } from "@/components/empty-state";
 
-function greeting(): string {
+function greeting(name: string | null): string {
   const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
+  const base = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  return name ? `${base}, ${name}` : base;
 }
 
 /** Masthead dateline — a real orientation device (what day is it), not
@@ -28,10 +28,32 @@ function dateline(): string {
   return `${weekday} · ${monthDay}`.toUpperCase();
 }
 
+/** A second line under the greeting, in the ledger's own voice rather than
+ * generic chat-assistant small talk — rotates once per calendar day (seeded
+ * by date, not per render) so it reads as a deliberate daily line rather
+ * than flickering on every reload. */
+const DAILY_LINES = [
+  "Let's see what's on the books today.",
+  "New page, same handwriting — let's fill it in.",
+  "Let's take stock of what's due.",
+  "Nothing's crossed off yet. Let's fix that.",
+  "The day's wide open — let's narrow it down.",
+  "Another entry in the ledger. Let's see what's on it.",
+  "Let's get today squared away.",
+  "How are we doing today? Let's have a look.",
+];
+
+function dailyLine(): string {
+  const seed = todayStr();
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  return DAILY_LINES[hash % DAILY_LINES.length];
+}
+
 const TONE_CLASS = { moss: "text-moss", vermillion: "text-vermillion", faint: "text-ink-faint" } as const;
 
 export default async function TodayPage() {
-  const [topThree, tasks, domains, routines, completions, slipping, notifications] = await Promise.all([
+  const [topThree, tasks, domains, routines, completions, slipping, notifications, displayName] = await Promise.all([
     getTopThree(),
     getTasks(),
     getDomains(),
@@ -39,6 +61,7 @@ export default async function TodayPage() {
     getRecentCompletions(),
     getSlippingProjects(),
     getRecentNotifications(),
+    getDisplayName(),
   ]);
 
   const open = tasks.filter((t) => t.status === "open");
@@ -79,11 +102,14 @@ export default async function TodayPage() {
 
       <div className="mx-auto w-full min-w-0 max-w-5xl flex-1">
         <div className="border-b-[3px] border-ink pb-4">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <h1 className="font-[family-name:var(--font-display)] text-5xl font-black uppercase leading-none tracking-tight text-ink sm:text-6xl md:text-7xl">
-              {greeting()}
-            </h1>
-            <p className="pb-1 font-mono text-[11px] uppercase tracking-wide text-ink-faint">{dateline()}</p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h1 className="font-[family-name:var(--font-display)] text-5xl font-black uppercase leading-none tracking-tight text-ink sm:text-6xl md:text-7xl">
+                {greeting(displayName)}
+              </h1>
+              <p className="mt-2 text-sm text-ink-faint sm:text-base">{dailyLine()}</p>
+            </div>
+            <p className="shrink-0 pt-1 font-mono text-[11px] uppercase tracking-wide text-ink-faint">{dateline()}</p>
           </div>
         </div>
 

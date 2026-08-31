@@ -271,6 +271,7 @@ export type UserSettings = Timestamped & {
   user_id: string;
   capture_provider: "anthropic" | "ollama";
   capture_model: string | null;
+  display_name: string | null;
 };
 
 type TableDef<Row, Insert> = {

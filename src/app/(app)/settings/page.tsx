@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/page-header";
 import { CaptureSettingsForm } from "@/components/capture-settings-form";
-import { getCaptureSettings } from "@/lib/data/settings";
-import { signOut } from "./actions";
+import { SubmitButton } from "@/components/submit-button";
+import { getCaptureSettings, getDisplayName } from "@/lib/data/settings";
+import { signOut, updateDisplayName } from "./actions";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -11,7 +12,8 @@ export default async function SettingsPage() {
       data: { user },
     },
     captureSettings,
-  ] = await Promise.all([supabase.auth.getUser(), getCaptureSettings()]);
+    displayName,
+  ] = await Promise.all([supabase.auth.getUser(), getCaptureSettings(), getDisplayName()]);
 
   return (
     <div className="mx-auto max-w-lg">
@@ -20,6 +22,20 @@ export default async function SettingsPage() {
       <section className="card mt-6 p-4">
         <h2 className="text-sm font-medium text-ink-faint">Account</h2>
         <p className="mt-2 truncate text-sm text-ink">{user?.email}</p>
+
+        <form action={updateDisplayName} className="mt-4 flex items-end gap-2">
+          <label className="flex-1 text-xs text-ink-faint">
+            Display name
+            <input
+              name="display_name"
+              defaultValue={displayName ?? ""}
+              placeholder="What should Today call you?"
+              className="field mt-1.5"
+            />
+          </label>
+          <SubmitButton className="btn-outline px-3 py-1.5 text-xs">Save</SubmitButton>
+        </form>
+
         <form action={signOut} className="mt-4">
           <button type="submit" className="btn-outline">
             Sign out

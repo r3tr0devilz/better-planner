@@ -10,6 +10,41 @@ export async function signOut() {
   redirect("/login");
 }
 
+/** user_settings is one row per user shared by two separate forms (this one
+ * and Capture AI below) — the insert type requires every column explicitly,
+ * so each action reads the existing row first and carries its other columns
+ * forward untouched instead of upserting a partial row that would reset
+ * them to column defaults. */
+export async function updateDisplayName(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const displayName = (formData.get("display_name") as string)?.trim() || null;
+
+  const { data: existing } = await supabase
+    .from("user_settings")
+    .select("capture_provider, capture_model")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const { error } = await supabase.from("user_settings").upsert(
+    {
+      user_id: user.id,
+      display_name: displayName,
+      capture_provider: existing?.capture_provider ?? "anthropic",
+      capture_model: existing?.capture_model ?? null,
+    },
+    { onConflict: "user_id" },
+  );
+  if (error) throw error;
+
+  revalidatePath("/settings");
+  revalidatePath("/today");
+}
+
 export async function updateCaptureSettings(formData: FormData) {
   const supabase = await createClient();
   const {
@@ -20,9 +55,17 @@ export async function updateCaptureSettings(formData: FormData) {
   const provider = formData.get("capture_provider") === "ollama" ? "ollama" : "anthropic";
   const model = (formData.get("capture_model") as string)?.trim() || null;
 
-  const { error } = await supabase
-    .from("user_settings")
-    .upsert({ user_id: user.id, capture_provider: provider, capture_model: model }, { onConflict: "user_id" });
+  const { data: existing } = await supabase.from("user_settings").select("display_name").eq("user_id", user.id).maybeSingle();
+
+  const { error } = await supabase.from("user_settings").upsert(
+    {
+      user_id: user.id,
+      capture_provider: provider,
+      capture_model: model,
+      display_name: existing?.display_name ?? null,
+    },
+    { onConflict: "user_id" },
+  );
   if (error) throw error;
 
   revalidatePath("/settings");
