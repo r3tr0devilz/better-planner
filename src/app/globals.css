@@ -85,8 +85,7 @@ body {
 }
 
 /* Signature: every domain gets a color, cycling through the accent set —
-   carried by the DomainTabs rail, the top-three card flag, and the
-   thread-mark on dense rows. */
+   carried by the DomainTabs rail and the thread-mark on dense rows. */
 [data-thread="0"] { --dot: var(--color-cobalt); }
 [data-thread="1"] { --dot: var(--color-vermillion); }
 [data-thread="2"] { --dot: var(--color-moss); }
@@ -117,44 +116,6 @@ body {
   border: 1px solid var(--color-line);
   border-radius: 10px;
   box-shadow: 0 1px 2px rgba(20, 19, 15, 0.06), 0 6px 20px rgba(20, 19, 15, 0.06);
-}
-
-/* card-flag: a vertical spine tag running the card's full height, standing
-   in for the domain-thread signature wherever there's room for a label —
-   the same vertical-text device as the binder-tab rail (.tab), just at
-   card scale instead of a full nav column. */
-.card-flag {
-  position: absolute;
-  /* Physical top/bottom, not the logical inset-block — this element also
-     sets writing-mode: vertical-rl on itself, so inset-block would resolve
-     against ITS OWN block axis (horizontal in vertical-rl) instead of the
-     physical vertical stretch this needs, leaving height unconstrained and
-     sized to the text (a real bug: long domain names overflowed the card). */
-  top: 0;
-  bottom: 0;
-  left: -1px;
-  width: 1.75rem;
-  /* Plain block box, not flex: text-overflow:ellipsis on a flex container
-     doesn't reliably truncate its anonymous text-node item (confirmed by
-     testing — align-items had no effect at all on where truncation landed,
-     it was clipping both ends of the text with no ellipsis regardless).
-     text-align centers the single line the normal way instead. */
-  text-align: center;
-  padding: 0.5rem 0;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  background: var(--dot, var(--color-ink-faint));
-  color: var(--color-panel);
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border: 1px solid var(--color-ink);
-  border-radius: 9px 0 0 9px;
 }
 
 .ledger { border-top: 3px solid var(--color-ink); }

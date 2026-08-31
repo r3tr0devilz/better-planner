@@ -136,16 +136,9 @@ export default async function TodayPage() {
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
             {topThree.map((task) => {
               const threadIndex = threadIndexFor(task.domain_id, domains);
-              const domain = domains.find((d) => d.id === task.domain_id);
-              const hasFlag = threadIndex >= 0 && !!domain;
               return (
-                <div key={task.id} className={`card p-4 ${hasFlag ? "pl-9" : ""}`}>
-                  {hasFlag && (
-                    <span className="card-flag" data-thread={threadIndex}>
-                      {domain!.name}
-                    </span>
-                  )}
-                  <TaskRow task={task} threadIndex={-1} domains={domains} />
+                <div key={task.id} className="card p-4">
+                  <TaskRow task={task} threadIndex={threadIndex} domains={domains} />
                 </div>
               );
             })}

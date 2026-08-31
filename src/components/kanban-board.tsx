@@ -101,11 +101,8 @@ function ApplicationCard({ app }: { app: JobApplication }) {
         transform: CSS.Transform.toString(transform),
         transition: transition ?? `transform 200ms var(--ease-in-out)`,
       }}
-      className={`card relative flex items-start gap-1.5 p-3 pl-8 transition-opacity duration-150 ${isDragging ? "opacity-35" : ""}`}
+      className={`card relative flex items-start gap-1.5 p-3 transition-opacity duration-150 ${isDragging ? "opacity-35" : ""}`}
     >
-      <span className="card-flag" data-thread={-1} style={{ background: "var(--color-ink-faint)" }}>
-        {app.company}
-      </span>
       <span
         {...attributes}
         {...listeners}
@@ -121,6 +118,7 @@ function ApplicationCard({ app }: { app: JobApplication }) {
         aria-label={`Edit ${app.company} application: ${app.role}`}
         className="min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-left"
       >
+        <p className="truncate text-xs font-medium text-ink-faint">{app.company}</p>
         <p className="truncate text-sm text-ink">{app.role}</p>
         {deadline && <p className="mt-0.5 font-mono text-xs text-ink-faint">Due {deadline}</p>}
       </button>
@@ -144,15 +142,13 @@ function MobileApplicationCard({
   const close = useCallback(() => setEditing(false), []);
   const deadline = formatDate(app.deadline);
   return (
-    <div className="card relative flex items-start gap-2 p-3 pl-8">
-      <span className="card-flag" style={{ background: "var(--color-ink-faint)" }}>
-        {app.company}
-      </span>
+    <div className="card relative flex items-start gap-2 p-3">
       <button
         type="button"
         onClick={() => setEditing(true)}
         className="min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-left"
       >
+        <p className="truncate text-xs font-medium text-ink-faint">{app.company}</p>
         <p className="truncate text-sm text-ink">{app.role}</p>
         {deadline && <p className="mt-0.5 font-mono text-xs text-ink-faint">Due {deadline}</p>}
       </button>
@@ -386,12 +382,10 @@ export function KanbanBoard({ applications }: { applications: JobApplication[] }
       <DragOverlay dropAnimation={{ duration: 220, easing: EASE_OUT }}>
         {activeApp ? (
           <div
-            className="card relative w-60 rotate-[-1.5deg] scale-[1.03] p-3 pl-8"
+            className="card relative w-60 rotate-[-1.5deg] scale-[1.03] p-3"
             style={{ boxShadow: "0 14px 30px rgba(20, 19, 15, 0.32)" }}
           >
-            <span className="card-flag" style={{ background: "var(--color-ink-faint)" }}>
-              {activeApp.company}
-            </span>
+            <p className="truncate text-xs font-medium text-ink-faint">{activeApp.company}</p>
             <p className="truncate text-sm text-ink">{activeApp.role}</p>
           </div>
         ) : null}

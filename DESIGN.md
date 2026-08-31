@@ -70,12 +70,12 @@ Better Planner reads as a well-used ledger book left open on a desk, not a piece
 
 The system is quiet and disciplined on purpose. It carries no gradients, no glassmorphism, no glowing surfaces, and no "AI product" sheen — that entire register is the confirmed anti-reference. Numbers and metadata (timestamps, percentages, streak counts, tab captions) are set in JetBrains Mono, uppercase, letter-spaced, so they read like a stamped or typewritten ledger entry rather than app UI chrome. Headlines are bold, uppercase, tight-tracked Archivo, present only where a screen needs to announce what it is. Everything else is quiet, dense, and built to be scanned dozens of times a day without ceremony.
 
-A second, load-bearing rule sits underneath the palette: the app deliberately splits its corners into two families. Functional controls the user touches — buttons, fields, cards — get a soft radius, because they're meant to feel like usable objects. Physical-artifact elements — binder tabs, card flags, the ledger's own rule-lines, progress bars — stay perfectly sharp, because they're meant to feel like paper and ink, not UI chrome. The one deliberate exception is the mini calendar's day marker, which goes fully circular, borrowing the read of a rubber date-stamp.
+A second, load-bearing rule sits underneath the palette: the app deliberately splits its corners into two families. Functional controls the user touches — buttons, fields, cards — get a soft radius, because they're meant to feel like usable objects. Physical-artifact elements — binder tabs, the ledger's own rule-lines, progress bars — stay perfectly sharp, because they're meant to feel like paper and ink, not UI chrome. The one deliberate exception is the mini calendar's day marker, which goes fully circular, borrowing the read of a rubber date-stamp.
 
 **Key Characteristics:**
 - Warm cream-on-stone paper surfaces with near-black ink text; no dark mode, no gradients, no glass.
 - One accent (oxblood) reserved exclusively for call-to-action, focus, and active states — never for identity or decoration.
-- Six domain colors act as a filing-tab system, cycling consistently across tabs, card flags, and row markers.
+- Six domain colors act as a filing-tab system, cycling consistently across tabs and row markers.
 - JetBrains Mono, uppercase and letter-spaced, exclusively for numbers, timestamps, and stamped labels; Archivo for everything else.
 - A hard split between soft-radius functional controls and sharp-edged "paper" artifacts, with one circular exception (the date stamp).
 - Ledger rule-lines replace nested cards as the list pattern — rows are divided by a line, never boxed inside another box.
@@ -118,7 +118,7 @@ Six colors, cycled by index across every domain a user creates. The same domain 
 ### Hierarchy
 - **Display** (700–900 weight, 1.875–3rem depending on context, tight/leading-none): Page titles and section-defining numbers. Always uppercase, always tight-tracked. The heaviest weight (900/"black") is reserved for the big stat digits on the Today dashboard (top-three count, open-task count, routines-done count) — a number that size is meant to be read before anything else on the page.
 - **Body** (400–600 weight, 0.875rem, normal case): All row text, form labels, buttons, and section sub-headers ("Top three today," "Open tasks"). Section sub-headers use medium weight (500) at 0.875rem in ink-faint rather than promoting to the display face — they're wayfinding, not headlines.
-- **Label** (600 weight, 0.6–0.75rem, uppercase, 0.04–0.06em tracking): Timestamps, percentages, streak counts, tab captions, card-flag text, status-select values. This is the "stamped ledger entry" voice — it never appears in a paragraph, only as a short, isolated piece of metadata.
+- **Label** (600 weight, 0.6–0.75rem, uppercase, 0.04–0.06em tracking): Timestamps, percentages, streak counts, tab captions, status-select values. This is the "stamped ledger entry" voice — it never appears in a paragraph, only as a short, isolated piece of metadata.
 
 ### Named Rules
 **The Two-Voice Rule.** Archivo speaks for structure and identity (titles, buttons, body copy); JetBrains Mono speaks for data (numbers, dates, statuses). A string never switches faces mid-sentence, and mono is never used for anything a user would call "content."
@@ -146,7 +146,7 @@ The system is almost entirely flat. Depth comes from the ink/line borders and th
 
 ## Shapes
 
-Two corner families, used to keep "thing you touch" and "thing that's paper" visually distinct at a glance. **Soft** (8px on fields and buttons, 10px on cards) marks a functional control. **Flat** (0px) marks a physical-artifact element: binder tabs, card-flags, ledger rule-lines, milestone progress bars, and the day-card's own outer corners (which round only on the side away from its colored spine, `0 8px 8px 0`, so the spine itself reads as a cut edge). The single break from both families is the mini-calendar day marker, which is fully circular (`border-radius: 999px`) — a deliberate "rubber stamp" read for today's date.
+Two corner families, used to keep "thing you touch" and "thing that's paper" visually distinct at a glance. **Soft** (8px on fields and buttons, 10px on cards) marks a functional control. **Flat** (0px) marks a physical-artifact element: binder tabs, ledger rule-lines, milestone progress bars, and the day-card's own outer corners (which round only on the side away from its colored spine, `0 8px 8px 0`, so the spine itself reads as a cut edge). The single break from both families is the mini-calendar day marker, which is fully circular (`border-radius: 999px`) — a deliberate "rubber stamp" read for today's date.
 
 ### Named Rules
 **The Touch-vs-Paper Rule.** If a corner needs rounding, ask first whether the element is something the user interacts with (round it, 8–10px) or something that represents a physical ledger artifact (leave it sharp). Don't split the difference with a small "safe" radius on either side.
@@ -164,7 +164,6 @@ Two corner families, used to keep "thing you touch" and "thing that's paper" vis
 - **Corner Style:** 10px radius.
 - **Background:** Panel, 1px line border.
 - **Shadow Strategy:** Paper Lift (see Elevation & Depth) — constant, not stateful.
-- **Card Flag** (signature): A sharp-cornered oxblood/thread-colored tab protruding `-0.85rem` above the card's top edge, carrying the domain name in mono/uppercase/label type. Stands in for a full border-color treatment wherever a card needs to announce its domain without room for a persistent border.
 
 ### Inputs / Fields
 - **Style:** Panel background, 1px line border, 8px radius, `0.5rem 0.75rem` padding, inherited font.
