@@ -28,6 +28,7 @@ import {
 import { rescheduleTask, updateTaskDuration } from "@/app/(app)/tasks/actions";
 import { TaskRow } from "@/components/task-row";
 import { threadIndexFor } from "@/lib/domain-threads";
+import type { GoogleCalendarStatus } from "@/lib/google-calendar";
 import type { Domain, Task } from "@/lib/supabase/types";
 import { NowLine } from "./now-line";
 import { ROW_HEIGHT } from "./constants";
@@ -257,6 +258,7 @@ export function CalendarBoard({
   fullDay,
   tasks: initialTasks,
   domains,
+  calendarStatus,
 }: {
   view: "month" | "day";
   year: number;
@@ -266,6 +268,7 @@ export function CalendarBoard({
   fullDay: boolean;
   tasks: Task[];
   domains: Domain[];
+  calendarStatus: GoogleCalendarStatus;
 }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
@@ -388,10 +391,18 @@ export function CalendarBoard({
             <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold uppercase tracking-tight text-ink">
               Calendar
             </h1>
-            <p className="mt-1 text-xs text-ink-faint">Google Calendar isn&apos;t connected.</p>
-            <Link href="/settings" className="btn-outline mt-2 inline-block px-3 py-1.5 text-xs">
-              Connect calendar
-            </Link>
+            <p className="mt-1 text-xs text-ink-faint">
+              {calendarStatus.connected ? "Google Calendar is connected." : "Google Calendar isn't connected."}
+            </p>
+            {calendarStatus.connected ? (
+              <Link href="/settings" className="btn-outline mt-2 inline-block px-3 py-1.5 text-xs">
+                Manage calendar
+              </Link>
+            ) : (
+              <a href="/api/auth/google" className="btn-outline mt-2 inline-block px-3 py-1.5 text-xs">
+                Connect calendar
+              </a>
+            )}
 
             <div className="relative mt-4 flex gap-1 rounded-lg border border-line bg-stone p-1">
               <div

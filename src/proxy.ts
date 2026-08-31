@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/login"];
+const PUBLIC_PATHS = ["/login", "/api/auth/google/callback"];
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });

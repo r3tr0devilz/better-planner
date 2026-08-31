@@ -131,6 +131,18 @@ export type NotificationRow = Timestamped & {
   read: boolean;
 };
 
+export type IntegrationStatus = {
+  id: string;
+  user_id: string;
+  provider: string;
+  connected: boolean;
+  last_synced_at: string | null;
+  access_token: string | null;
+  refresh_token: string | null;
+  token_expires_at: string | null;
+  scope: string | null;
+};
+
 export type ContentItem = Timestamped & {
   id: string;
   user_id: string;
@@ -297,6 +309,7 @@ export type Database = {
       routine_completions: TableDef<RoutineCompletion, Omit<RoutineCompletion, "id" | "user_id"> & { user_id?: string }>;
       capture_inbox: TableDef<CaptureInbox, Omit<CaptureInbox, "id" | "user_id" | "created_at"> & { user_id?: string }>;
       notifications: TableDef<NotificationRow, Omit<NotificationRow, "id" | "user_id" | "created_at"> & { user_id?: string }>;
+      integration_status: TableDef<IntegrationStatus, Omit<IntegrationStatus, "id" | "user_id"> & { user_id?: string }>;
       content_items: TableDef<ContentItem, Omit<ContentItem, "id" | "user_id" | "created_at"> & { user_id?: string }>;
       people: TableDef<Person, Omit<Person, "id" | "user_id" | "created_at"> & { user_id?: string }>;
       people_facts: TableDef<PersonFact, Omit<PersonFact, "id" | "user_id" | "created_at"> & { user_id?: string }>;

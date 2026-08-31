@@ -1,5 +1,6 @@
 import { getTasks } from "@/lib/data/tasks";
 import { getDomains } from "@/lib/data/domains";
+import { getGoogleCalendarStatus } from "@/lib/google-calendar";
 import { CalendarBoard } from "./calendar-board";
 import { dayKey, parseDateParam, parseMonthParam } from "./lib";
 
@@ -16,7 +17,7 @@ export default async function CalendarPage({
   const selectedDate = parseDateParam(dateParam) ?? today;
   const [year, monthIndex] = parseMonthParam(monthParam) ?? [selectedDate.getFullYear(), selectedDate.getMonth()];
 
-  const [tasks, domains] = await Promise.all([getTasks(), getDomains()]);
+  const [tasks, domains, calendarStatus] = await Promise.all([getTasks(), getDomains(), getGoogleCalendarStatus()]);
 
   return (
     <CalendarBoard
@@ -28,6 +29,7 @@ export default async function CalendarPage({
       fullDay={fullDay}
       tasks={tasks}
       domains={domains}
+      calendarStatus={calendarStatus}
     />
   );
 }

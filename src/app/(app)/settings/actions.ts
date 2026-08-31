@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { GOOGLE_CALENDAR_PROVIDER } from "@/lib/google-calendar";
 
 export async function signOut() {
   const supabase = await createClient();
@@ -70,4 +71,29 @@ export async function updateCaptureSettings(formData: FormData) {
   if (error) throw error;
 
   revalidatePath("/settings");
+}
+
+export async function disconnectGoogleCalendar() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { error } = await supabase
+    .from("integration_status")
+    .update({
+      connected: false,
+      access_token: null,
+      refresh_token: null,
+      token_expires_at: null,
+      scope: null,
+    })
+    .eq("user_id", user.id)
+    .eq("provider", GOOGLE_CALENDAR_PROVIDER);
+  if (error) throw error;
+
+  revalidatePath("/settings");
+  revalidatePath("/calendar");
+  revalidatePath("/today");
 }

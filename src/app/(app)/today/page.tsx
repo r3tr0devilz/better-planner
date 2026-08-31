@@ -6,6 +6,7 @@ import { getRoutines, getRecentCompletions, todayStr } from "@/lib/data/routines
 import { getSlippingProjects } from "@/lib/data/projects";
 import { getRecentNotifications } from "@/lib/data/notifications";
 import { getDisplayName } from "@/lib/data/settings";
+import { getGoogleCalendarStatus } from "@/lib/google-calendar";
 import { TaskRow } from "@/components/task-row";
 import { RoutineRow } from "@/components/routine-row";
 import { DomainTabs } from "@/components/domain-tabs";
@@ -53,7 +54,7 @@ function dailyLine(): string {
 const TONE_CLASS = { moss: "text-moss", vermillion: "text-vermillion", faint: "text-ink-faint" } as const;
 
 export default async function TodayPage() {
-  const [topThree, tasks, domains, routines, completions, slipping, notifications, displayName] = await Promise.all([
+  const [topThree, tasks, domains, routines, completions, slipping, notifications, displayName, calendarStatus] = await Promise.all([
     getTopThree(),
     getTasks(),
     getDomains(),
@@ -62,6 +63,7 @@ export default async function TodayPage() {
     getSlippingProjects(),
     getRecentNotifications(),
     getDisplayName(),
+    getGoogleCalendarStatus(),
   ]);
 
   const open = tasks.filter((t) => t.status === "open");
@@ -201,12 +203,18 @@ export default async function TodayPage() {
             <section className="card p-4">
               <h2 className="text-sm font-medium text-ink-faint">Calendar</h2>
               <p className="mt-2 text-xs text-ink-faint">
-                Google Calendar sync isn&apos;t connected yet.
+                {calendarStatus.connected ? "Google Calendar is connected." : "Google Calendar sync isn't connected yet."}
               </p>
               <div className="mt-2 flex flex-wrap items-center gap-3">
-                <Link href="/settings" className="btn-outline px-3 py-1.5 text-xs">
-                  Connect calendar
-                </Link>
+                {calendarStatus.connected ? (
+                  <Link href="/settings" className="btn-outline px-3 py-1.5 text-xs">
+                    Manage calendar
+                  </Link>
+                ) : (
+                  <a href="/api/auth/google" className="btn-outline px-3 py-1.5 text-xs">
+                    Connect calendar
+                  </a>
+                )}
                 <Link href="/calendar" className="text-xs font-semibold text-oxblood hover:underline">
                   View calendar →
                 </Link>
