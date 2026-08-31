@@ -1,8 +1,10 @@
+import { Repeat } from "lucide-react";
 import { getRoutines, getArchivedRoutines, getRecentCompletions, currentStreak, todayStr, HISTORY_DAYS } from "@/lib/data/routines";
 import { RoutineRow, ArchivedRoutineRow } from "@/components/routine-row";
 import { PageHeader } from "@/components/page-header";
 import { CollapsibleForm } from "@/components/collapsible-form";
 import { SubmitButton } from "@/components/submit-button";
+import { EmptyState } from "@/components/empty-state";
 import { createRoutine } from "./actions";
 import type { Routine } from "@/lib/supabase/types";
 
@@ -94,7 +96,9 @@ export default async function RoutinesPage() {
       })}
 
       {routines.length === 0 && (
-        <p className="mt-8 text-sm text-ink-faint">No routines yet — add one above.</p>
+        <div className="mt-8">
+          <EmptyState icon={Repeat} message="No routines yet — add one above to start a streak." />
+        </div>
       )}
 
       {archivedRoutines.length > 0 && (

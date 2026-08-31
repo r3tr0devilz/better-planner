@@ -1,8 +1,10 @@
+import { Package } from "lucide-react";
 import { getInventoryItems } from "@/lib/data/inventory";
 import { InventoryRow } from "@/components/inventory-row";
 import { PageHeader } from "@/components/page-header";
 import { CollapsibleForm } from "@/components/collapsible-form";
 import { SubmitButton } from "@/components/submit-button";
+import { EmptyState } from "@/components/empty-state";
 import { createItem } from "./actions";
 
 export default async function InventoryPage() {
@@ -26,12 +28,17 @@ export default async function InventoryPage() {
         <SubmitButton>Add</SubmitButton>
       </CollapsibleForm>
 
-      <div className="ledger mt-8">
-        {active.map((item) => (
-          <InventoryRow key={item.id} item={item} />
-        ))}
-        {active.length === 0 && <p className="py-3 text-sm text-ink-faint">Nothing logged yet.</p>}
-      </div>
+      {active.length === 0 ? (
+        <div className="mt-8">
+          <EmptyState icon={Package} message="Nothing logged yet — add the first thing you want to keep tabs on." />
+        </div>
+      ) : (
+        <div className="ledger mt-8">
+          {active.map((item) => (
+            <InventoryRow key={item.id} item={item} />
+          ))}
+        </div>
+      )}
 
       {removed.length > 0 && (
         <section className="mt-8">

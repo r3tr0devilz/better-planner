@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { CheckSquare, ChevronRight, Trash2, X } from "lucide-react";
+import { CheckSquare, ChevronRight, ListTodo, Trash2, X } from "lucide-react";
 import { TaskRow } from "@/components/task-row";
 import { FilterBar } from "@/components/filter-bar";
+import { EmptyState } from "@/components/empty-state";
 import { threadIndexFor } from "@/lib/domain-threads";
 import { useUndoableDelete } from "@/lib/use-undoable-delete";
 import { useUrlState } from "@/lib/use-url-state";
@@ -125,16 +126,20 @@ export function TaskList({ tasks, domains }: { tasks: Task[]; domains: Domain[] 
 
       <section className="mt-4">
         <h2 className="text-sm font-medium text-ink-faint">Open ({open.length})</h2>
-        <div className="ledger mt-3">
-          {open.length === 0 && (
-            <p className="py-3 text-sm text-ink-faint">
-              {filtering ? "No open tasks match this filter." : "Nothing open. Add something above."}
-            </p>
-          )}
-          {openShown.map((task) => (
-            <TaskRow key={task.id} {...rowProps(task)} />
-          ))}
-        </div>
+        {open.length === 0 ? (
+          <div className="mt-3">
+            <EmptyState
+              icon={ListTodo}
+              message={filtering ? "No open tasks match this filter." : "Nothing open — add your first task above."}
+            />
+          </div>
+        ) : (
+          <div className="ledger mt-3">
+            {openShown.map((task) => (
+              <TaskRow key={task.id} {...rowProps(task)} />
+            ))}
+          </div>
+        )}
         {!filtering && open.length > openShown.length && (
           <button
             type="button"
