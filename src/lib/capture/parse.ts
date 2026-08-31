@@ -68,12 +68,51 @@ async function parseWithOllama(text: string, domains: Domain[], model: string): 
   return parsed.success ? parsed.data : null;
 }
 
+/** OpenRouter is OpenAI-compatible, so this is a plain fetch rather than a
+ * dedicated SDK. json_object mode (not the stricter json_schema mode) on
+ * purpose — schema mode isn't reliably supported across OpenRouter's full
+ * model catalog, especially free ones, so this asks for JSON in the prompt
+ * and parses forgivingly, same as the Ollama path. */
+async function parseWithOpenRouter(text: string, domains: Domain[], model: string): Promise<CaptureResult | null> {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) throw new Error("OPENROUTER_API_KEY is not set");
+
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: "system", content: `${systemPrompt(domains)}\n\nRespond with ONLY a JSON object matching this shape — no other text, no markdown fences.` },
+        { role: "user", content: text },
+      ],
+      response_format: { type: "json_object" },
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`OpenRouter request failed (${res.status}): ${await res.text()}`);
+  }
+
+  const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) return null;
+
+  const parsed = CaptureSchema.safeParse(JSON.parse(content));
+  return parsed.success ? parsed.data : null;
+}
+
 /** Provider/model come from Settings (DB, per user) with the env vars as the
  * fallback default — see src/lib/data/settings.ts. Note a local Ollama model
- * only exists on whichever machine has Ollama running. */
+ * only exists on whichever machine has Ollama running. OpenRouter has no
+ * hardcoded default model — its free-model catalog shifts over time, so a
+ * guessed slug could silently be dead; the model field is required for it. */
 export async function parseCapture(text: string, domains: Domain[], settings: CaptureSettings): Promise<CaptureResult | null> {
   if (settings.provider === "ollama") {
     return parseWithOllama(text, domains, settings.model ?? process.env.OLLAMA_MODEL ?? "llama3.2:3b");
+  }
+  if (settings.provider === "openrouter") {
+    if (!settings.model) throw new Error("Pick a model in Settings for OpenRouter (see openrouter.ai/models)");
+    return parseWithOpenRouter(text, domains, settings.model);
   }
   return parseWithAnthropic(text, domains, settings.model ?? "claude-sonnet-5");
 }

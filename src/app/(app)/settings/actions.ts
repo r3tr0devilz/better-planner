@@ -52,7 +52,8 @@ export async function updateCaptureSettings(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) return;
 
-  const provider = formData.get("capture_provider") === "ollama" ? "ollama" : "anthropic";
+  const providerRaw = formData.get("capture_provider");
+  const provider = providerRaw === "ollama" ? "ollama" : providerRaw === "openrouter" ? "openrouter" : "anthropic";
   const model = (formData.get("capture_model") as string)?.trim() || null;
 
   const { data: existing } = await supabase.from("user_settings").select("display_name").eq("user_id", user.id).maybeSingle();

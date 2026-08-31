@@ -34,10 +34,11 @@ export function CaptureSettingsForm({ settings }: { settings: CaptureSettings })
         >
           <option value="anthropic">Anthropic</option>
           <option value="ollama">Ollama (local)</option>
+          <option value="openrouter">OpenRouter</option>
         </select>
       </label>
 
-      {provider === "anthropic" ? (
+      {provider === "anthropic" && (
         <label className="flex flex-col gap-1.5 text-xs text-ink-faint">
           Model
           <select name="capture_model" defaultValue={settings.model ?? "claude-sonnet-5"} className="field">
@@ -48,7 +49,9 @@ export function CaptureSettingsForm({ settings }: { settings: CaptureSettings })
             ))}
           </select>
         </label>
-      ) : (
+      )}
+
+      {provider === "ollama" && (
         <label className="flex flex-col gap-1.5 text-xs text-ink-faint">
           Model
           <input
@@ -58,6 +61,22 @@ export function CaptureSettingsForm({ settings }: { settings: CaptureSettings })
             className="field"
           />
           <span className="text-[11px] text-ink-faint">Whatever you&apos;ve pulled locally with Ollama — must be running on the same machine as the server.</span>
+        </label>
+      )}
+
+      {provider === "openrouter" && (
+        <label className="flex flex-col gap-1.5 text-xs text-ink-faint">
+          Model
+          <input
+            name="capture_model"
+            defaultValue={settings.model ?? ""}
+            placeholder="meta-llama/llama-3.2-3b-instruct:free"
+            required
+            className="field"
+          />
+          <span className="text-[11px] text-ink-faint">
+            A model slug from openrouter.ai/models — filter by &quot;Free&quot; for no-cost options. Needs OPENROUTER_API_KEY set in the server&apos;s environment.
+          </span>
         </label>
       )}
 

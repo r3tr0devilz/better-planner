@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 
-export type CaptureSettings = { provider: "anthropic" | "ollama"; model: string | null };
+export type CaptureSettings = { provider: "anthropic" | "ollama" | "openrouter"; model: string | null };
 
 /** Falls back to the env-var defaults (the original deploy-time-only config)
  * whenever there's no saved row — including the 0004 migration not having

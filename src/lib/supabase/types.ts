@@ -269,7 +269,7 @@ export type CareerContact = Timestamped & {
 export type UserSettings = Timestamped & {
   id: string;
   user_id: string;
-  capture_provider: "anthropic" | "ollama";
+  capture_provider: "anthropic" | "ollama" | "openrouter";
   capture_model: string | null;
   display_name: string | null;
 };
