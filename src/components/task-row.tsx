@@ -62,6 +62,7 @@ export function TaskRow({
   const [editing, setEditing] = useState(false);
   const due = formatDue(task.due_at);
   const done = task.status === "done";
+  const domainName = domains.find((d) => d.id === task.domain_id)?.name;
 
   const close = useCallback(() => setEditing(false), []);
 
@@ -103,7 +104,9 @@ export function TaskRow({
         </label>
       )}
 
-      {threadIndex >= 0 && <span className="thread-mark" data-thread={threadIndex} aria-hidden />}
+      {threadIndex >= 0 && domainName && (
+        <span className="thread-mark" data-thread={threadIndex} title={domainName} role="img" aria-label={domainName} />
+      )}
 
       <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_COLOR[task.priority]}`} aria-hidden />
 
