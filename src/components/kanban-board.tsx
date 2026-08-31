@@ -101,7 +101,7 @@ function ApplicationCard({ app }: { app: JobApplication }) {
         transform: CSS.Transform.toString(transform),
         transition: transition ?? `transform 200ms var(--ease-in-out)`,
       }}
-      className={`card relative flex items-start gap-1.5 p-3 pt-4 transition-opacity duration-150 ${isDragging ? "opacity-35" : ""}`}
+      className={`card relative flex items-start gap-1.5 p-3 pl-8 transition-opacity duration-150 ${isDragging ? "opacity-35" : ""}`}
     >
       <span className="card-flag" data-thread={-1} style={{ background: "var(--color-ink-faint)" }}>
         {app.company}
@@ -144,7 +144,7 @@ function MobileApplicationCard({
   const close = useCallback(() => setEditing(false), []);
   const deadline = formatDate(app.deadline);
   return (
-    <div className="card flex items-start gap-2 p-3 pt-4">
+    <div className="card relative flex items-start gap-2 p-3 pl-8">
       <span className="card-flag" style={{ background: "var(--color-ink-faint)" }}>
         {app.company}
       </span>
@@ -376,7 +376,7 @@ export function KanbanBoard({ applications }: { applications: JobApplication[] }
       <DragOverlay dropAnimation={{ duration: 220, easing: EASE_OUT }}>
         {activeApp ? (
           <div
-            className="card w-60 rotate-[-1.5deg] scale-[1.03] p-3 pt-4"
+            className="card relative w-60 rotate-[-1.5deg] scale-[1.03] p-3 pl-8"
             style={{ boxShadow: "0 14px 30px rgba(20, 19, 15, 0.32)" }}
           >
             <span className="card-flag" style={{ background: "var(--color-ink-faint)" }}>

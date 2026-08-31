@@ -137,11 +137,12 @@ export default async function TodayPage() {
             {topThree.map((task) => {
               const threadIndex = threadIndexFor(task.domain_id, domains);
               const domain = domains.find((d) => d.id === task.domain_id);
+              const hasFlag = threadIndex >= 0 && !!domain;
               return (
-                <div key={task.id} className="card p-4 pt-5">
-                  {threadIndex >= 0 && domain && (
+                <div key={task.id} className={`card p-4 ${hasFlag ? "pl-9" : ""}`}>
+                  {hasFlag && (
                     <span className="card-flag" data-thread={threadIndex}>
-                      {domain.name}
+                      {domain!.name}
                     </span>
                   )}
                   <TaskRow task={task} threadIndex={-1} domains={domains} />

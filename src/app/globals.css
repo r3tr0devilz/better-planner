@@ -119,25 +119,33 @@ body {
   box-shadow: 0 1px 2px rgba(20, 19, 15, 0.06), 0 6px 20px rgba(20, 19, 15, 0.06);
 }
 
-/* card-flag: a solid tab protruding from the top of a card, standing in for
-   the domain-thread signature wherever there's room for a label. */
+/* card-flag: a vertical spine tag running the card's full height, standing
+   in for the domain-thread signature wherever there's room for a label —
+   the same vertical-text device as the binder-tab rail (.tab), just at
+   card scale instead of a full nav column. */
 .card-flag {
   position: absolute;
-  top: -0.85rem;
-  left: 1rem;
-  max-width: calc(100% - 2rem);
-  padding: 0.2rem 0.55rem;
+  inset-block: 0;
+  left: -1px;
+  width: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
   background: var(--dot, var(--color-ink-faint));
   color: var(--color-panel);
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   border: 1px solid var(--color-ink);
+  border-radius: 9px 0 0 9px;
 }
 
 .ledger { border-top: 3px solid var(--color-ink); }
