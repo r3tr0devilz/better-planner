@@ -45,6 +45,8 @@ export function CaptureSettingsForm({ settings }: { settings: CaptureSettings })
           <option value="anthropic">Anthropic</option>
           <option value="ollama">Ollama (local)</option>
           <option value="openrouter">OpenRouter</option>
+          <option value="groq">Groq</option>
+          <option value="gemini">Google Gemini</option>
         </select>
       </label>
 
@@ -86,6 +88,36 @@ export function CaptureSettingsForm({ settings }: { settings: CaptureSettings })
           />
           <span className="text-[11px] text-ink-faint">
             A model slug from openrouter.ai/models — filter by &quot;Free&quot; for no-cost options. Needs OPENROUTER_API_KEY set in the server&apos;s environment.
+          </span>
+        </label>
+      )}
+
+      {provider === "groq" && (
+        <label className="flex flex-col gap-1.5 text-xs text-ink-faint">
+          Model
+          <input
+            name="capture_model"
+            defaultValue={settings.model ?? "llama-3.3-70b-versatile"}
+            placeholder="llama-3.3-70b-versatile"
+            className="field"
+          />
+          <span className="text-[11px] text-ink-faint">
+            A model from console.groq.com/docs/models — free tier, runs on Groq&apos;s own hardware (fast, no shared-pool waits). Needs GROQ_API_KEY set in the server&apos;s environment.
+          </span>
+        </label>
+      )}
+
+      {provider === "gemini" && (
+        <label className="flex flex-col gap-1.5 text-xs text-ink-faint">
+          Model
+          <input
+            name="capture_model"
+            defaultValue={settings.model ?? "gemini-2.5-flash"}
+            placeholder="gemini-2.5-flash"
+            className="field"
+          />
+          <span className="text-[11px] text-ink-faint">
+            A model from ai.google.dev/gemini-api/docs/models — free tier. Needs GEMINI_API_KEY set in the server&apos;s environment.
           </span>
         </label>
       )}

@@ -101,6 +101,73 @@ async function parseWithOpenRouter(text: string, domains: Domain[], model: strin
   return parsed.success ? parsed.data : null;
 }
 
+/** Groq is OpenAI-compatible like OpenRouter, but hosts its own fixed model
+ * catalog on dedicated inference hardware rather than routing across a
+ * shared pool of third-party providers — so unlike OpenRouter, a hardcoded
+ * default model is safe here. */
+async function parseWithGroq(text: string, domains: Domain[], model: string): Promise<CaptureResult | null> {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) throw new Error("GROQ_API_KEY is not set");
+
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: "system", content: `${systemPrompt(domains)}\n\nRespond with ONLY a JSON object matching this shape — no other text, no markdown fences.` },
+        { role: "user", content: text },
+      ],
+      response_format: { type: "json_object" },
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`Groq request failed (${res.status}): ${await res.text()}`);
+  }
+
+  const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) return null;
+
+  const parsed = CaptureSchema.safeParse(JSON.parse(content));
+  return parsed.success ? parsed.data : null;
+}
+
+/** Plain JSON mode (responseMimeType, no responseSchema) rather than
+ * Gemini's native schema-constrained output — z.toJSONSchema's nullable
+ * unions and other JSON Schema shapes don't map cleanly onto Gemini's more
+ * restrictive Schema object, so this asks for JSON in the prompt and parses
+ * forgivingly, same as the OpenRouter/Groq paths. */
+async function parseWithGemini(text: string, domains: Domain[], model: string): Promise<CaptureResult | null> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: {
+          parts: [{ text: `${systemPrompt(domains)}\n\nRespond with ONLY a JSON object matching this shape — no other text, no markdown fences.` }],
+        },
+        contents: [{ role: "user", parts: [{ text }] }],
+        generationConfig: { responseMimeType: "application/json" },
+      }),
+    },
+  );
+  if (!res.ok) {
+    throw new Error(`Gemini request failed (${res.status}): ${await res.text()}`);
+  }
+
+  const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
+  const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!content) return null;
+
+  const parsed = CaptureSchema.safeParse(JSON.parse(content));
+  return parsed.success ? parsed.data : null;
+}
+
 /** Provider/model come from Settings (DB, per user) with the env vars as the
  * fallback default — see src/lib/data/settings.ts. Note a local Ollama model
  * only exists on whichever machine has Ollama running. OpenRouter has no
@@ -113,6 +180,12 @@ export async function parseCapture(text: string, domains: Domain[], settings: Ca
   if (settings.provider === "openrouter") {
     if (!settings.model) throw new Error("Pick a model in Settings for OpenRouter (see openrouter.ai/models)");
     return parseWithOpenRouter(text, domains, settings.model);
+  }
+  if (settings.provider === "groq") {
+    return parseWithGroq(text, domains, settings.model ?? "llama-3.3-70b-versatile");
+  }
+  if (settings.provider === "gemini") {
+    return parseWithGemini(text, domains, settings.model ?? "gemini-2.5-flash");
   }
   return parseWithAnthropic(text, domains, settings.model ?? "claude-sonnet-5");
 }
