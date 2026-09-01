@@ -4,6 +4,12 @@ import { getDomains } from "@/lib/data/domains";
 import { getCaptureSettings } from "@/lib/data/settings";
 import { parseCapture } from "@/lib/capture/parse";
 
+// Free-tier OpenRouter models can take well past Vercel's default serverless
+// timeout to respond, especially under shared-pool load — the request gets
+// killed mid-flight (502) instead of reaching parseCapture's own error
+// handling. 60s is the max allowed on Hobby without Fluid Compute.
+export const maxDuration = 60;
+
 export async function POST(request: Request) {
   try {
     return await handleCapture(request);
