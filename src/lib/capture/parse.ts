@@ -185,7 +185,7 @@ export async function parseCapture(text: string, domains: Domain[], settings: Ca
     return parseWithGroq(text, domains, settings.model ?? "llama-3.3-70b-versatile");
   }
   if (settings.provider === "gemini") {
-    return parseWithGemini(text, domains, settings.model ?? "gemini-2.5-flash");
+    return parseWithGemini(text, domains, settings.model ?? "gemini-3.6-flash");
   }
   return parseWithAnthropic(text, domains, settings.model ?? "claude-sonnet-5");
 }

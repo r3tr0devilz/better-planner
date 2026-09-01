@@ -118,8 +118,8 @@ export function CaptureSettingsForm({ settings }: { settings: CaptureSettings })
           Model
           <input
             name="capture_model"
-            defaultValue={savedModel ?? "gemini-2.5-flash"}
-            placeholder="gemini-2.5-flash"
+            defaultValue={savedModel ?? "gemini-3.6-flash"}
+            placeholder="gemini-3.6-flash"
             className="field"
           />
           <span className="text-[11px] text-ink-faint">
