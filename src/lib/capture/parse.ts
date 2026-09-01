@@ -24,6 +24,25 @@ Resolve relative dates/times ("tomorrow at 2pm", "next Friday") against the curr
 Leave every field not relevant to the chosen kind as null.`;
 }
 
+/** Anthropic and Ollama get the actual schema attached to the request
+ * (zodOutputFormat / Ollama's own `format`) and the model is constrained
+ * server-side to match it, whatever the input says — including a request
+ * that describes several items, which still yields one object. Providers
+ * without schema-constrained output have nothing forcing that shape: a
+ * prompt that only described the field semantics in prose (no field names,
+ * no "single object" instruction) let a real response come back as
+ * {"summary": ..., "tasks": [...]} for "create 4 random tasks" — a
+ * plausible-sounding but unparseable structure the model invented because
+ * it was never told what shape was actually expected. Spelling out the
+ * exact JSON Schema plus an explicit single-object instruction removes that
+ * ambiguity. */
+function jsonModeSystemPrompt(domains: Domain[]): string {
+  return `${systemPrompt(domains)}
+
+Respond with ONLY a single JSON object matching this exact JSON Schema — never an array, even if the note describes multiple items (capture only the first/primary one then). No other text, no markdown fences.
+${JSON.stringify(z.toJSONSchema(CaptureSchema))}`;
+}
+
 async function parseWithAnthropic(text: string, domains: Domain[], model: string): Promise<CaptureResult | null> {
   const response = await anthropic.messages.parse({
     model,
@@ -83,7 +102,7 @@ async function parseWithOpenRouter(text: string, domains: Domain[], model: strin
     body: JSON.stringify({
       model,
       messages: [
-        { role: "system", content: `${systemPrompt(domains)}\n\nRespond with ONLY a JSON object matching this shape — no other text, no markdown fences.` },
+        { role: "system", content: jsonModeSystemPrompt(domains) },
         { role: "user", content: text },
       ],
       response_format: { type: "json_object" },
@@ -115,7 +134,7 @@ async function parseWithGroq(text: string, domains: Domain[], model: string): Pr
     body: JSON.stringify({
       model,
       messages: [
-        { role: "system", content: `${systemPrompt(domains)}\n\nRespond with ONLY a JSON object matching this shape — no other text, no markdown fences.` },
+        { role: "system", content: jsonModeSystemPrompt(domains) },
         { role: "user", content: text },
       ],
       response_format: { type: "json_object" },
@@ -149,7 +168,7 @@ async function parseWithGemini(text: string, domains: Domain[], model: string): 
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         systemInstruction: {
-          parts: [{ text: `${systemPrompt(domains)}\n\nRespond with ONLY a JSON object matching this shape — no other text, no markdown fences.` }],
+          parts: [{ text: jsonModeSystemPrompt(domains) }],
         },
         contents: [{ role: "user", parts: [{ text }] }],
         generationConfig: { responseMimeType: "application/json" },
