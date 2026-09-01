@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { updateCaptureSettings } from "@/app/(app)/settings/actions";
 import type { CaptureSettings } from "@/lib/data/settings";
@@ -15,11 +16,20 @@ const ANTHROPIC_MODELS = [
 export function CaptureSettingsForm({ settings }: { settings: CaptureSettings }) {
   const [provider, setProvider] = useState(settings.provider);
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
 
   return (
     <form
       action={(formData) => startTransition(async () => {
         await updateCaptureSettings(formData);
+        // revalidatePath alone doesn't reliably refresh an already-mounted
+        // client page when the form action is this wrapping closure rather
+        // than the server action passed directly — confirmed by testing: a
+        // fresh page load always showed the correct saved value, only the
+        // current session's UI stayed stale. router.refresh() re-fetches
+        // this page's Server Component data explicitly instead of relying
+        // on that implicit tracking.
+        router.refresh();
         toast("Capture settings saved");
       })}
       className="mt-3 flex flex-col gap-3"

@@ -64,7 +64,16 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
 
       <section className="card mt-4 p-4">
         <h2 className="text-sm font-medium text-ink-faint">Capture AI</h2>
-        <CaptureSettingsForm settings={captureSettings} />
+        {/* Keyed on the saved values, not just mounted once: the provider
+            <select> is controlled by local state seeded from `settings` on
+            first mount only, and a real bug showed the select's DOM value
+            can desync from that state across a router.refresh()-driven
+            re-render even while sibling conditional rendering (same state)
+            updates correctly — a known class of React quirk for controlled
+            form elements. A key forces a full remount on an actual saved
+            change, which sidesteps the desync entirely instead of chasing
+            its exact mechanism. */}
+        <CaptureSettingsForm key={`${captureSettings.provider}:${captureSettings.model ?? ""}`} settings={captureSettings} />
       </section>
 
       <section className="card mt-4 p-4">
