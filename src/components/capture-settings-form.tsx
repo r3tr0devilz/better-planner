@@ -18,6 +18,12 @@ export function CaptureSettingsForm({ settings }: { settings: CaptureSettings })
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
+  // settings.model is whichever provider was saved last — only use it as the
+  // model field's default when the dropdown is still on that same provider.
+  // Otherwise it leaks the previous provider's model string into a field for
+  // an unrelated provider (e.g. an OpenRouter slug showing up under Gemini).
+  const savedModel = provider === settings.provider ? settings.model : null;
+
   return (
     <form
       action={(formData) => startTransition(async () => {
@@ -53,7 +59,7 @@ export function CaptureSettingsForm({ settings }: { settings: CaptureSettings })
       {provider === "anthropic" && (
         <label className="flex flex-col gap-1.5 text-xs text-ink-faint">
           Model
-          <select name="capture_model" defaultValue={settings.model ?? "claude-sonnet-5"} className="field">
+          <select name="capture_model" defaultValue={savedModel ?? "claude-sonnet-5"} className="field">
             {ANTHROPIC_MODELS.map((m) => (
               <option key={m.value} value={m.value}>
                 {m.label}
@@ -68,7 +74,7 @@ export function CaptureSettingsForm({ settings }: { settings: CaptureSettings })
           Model
           <input
             name="capture_model"
-            defaultValue={settings.model ?? ""}
+            defaultValue={savedModel ?? ""}
             placeholder="llama3.2:3b"
             className="field"
           />
@@ -81,7 +87,7 @@ export function CaptureSettingsForm({ settings }: { settings: CaptureSettings })
           Model
           <input
             name="capture_model"
-            defaultValue={settings.model ?? ""}
+            defaultValue={savedModel ?? ""}
             placeholder="meta-llama/llama-3.2-3b-instruct:free"
             required
             className="field"
@@ -97,7 +103,7 @@ export function CaptureSettingsForm({ settings }: { settings: CaptureSettings })
           Model
           <input
             name="capture_model"
-            defaultValue={settings.model ?? "llama-3.3-70b-versatile"}
+            defaultValue={savedModel ?? "llama-3.3-70b-versatile"}
             placeholder="llama-3.3-70b-versatile"
             className="field"
           />
@@ -112,7 +118,7 @@ export function CaptureSettingsForm({ settings }: { settings: CaptureSettings })
           Model
           <input
             name="capture_model"
-            defaultValue={settings.model ?? "gemini-2.5-flash"}
+            defaultValue={savedModel ?? "gemini-2.5-flash"}
             placeholder="gemini-2.5-flash"
             className="field"
           />
