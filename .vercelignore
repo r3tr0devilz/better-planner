@@ -1,0 +1,16 @@
+# Stray downloads that end up sitting in this folder (it's under Downloads/)
+# — never part of the app, but not gitignored either, so `vercel` CLI's
+# fallback-to-.gitignore behavior didn't catch them. This is what actually
+# caused a 4.8GB deploy attempt. Exact names for what's here now, plus
+# extensions that should never legitimately belong in a web app deploy as a
+# safety net against the next one.
+Celeste-SteamRIP.com.rar
+Celeste-SteamRIP.com/
+eduVPNClient_latest.exe
+WinSCP-6.5.6-Setup.exe
+WA-VISTA_progress_update_with_camera_positions.pptx
+burning-paper-realistic-flame-with-blank-design-space.jpg
+*.rar
+*.zip
+*.exe
+*.msi
