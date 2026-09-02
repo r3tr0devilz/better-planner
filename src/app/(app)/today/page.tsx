@@ -181,7 +181,7 @@ export default async function TodayPage() {
         </div>
 
         <section className="mt-8">
-          <h2 className="text-sm font-medium text-ink-faint">Top three today</h2>
+          <h2 data-snap="today-top3" className="text-sm font-medium text-ink-faint">Top three today</h2>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
             {topThree.map((task) => {
               const threadIndex = threadIndexFor(task.domain_id, domains);
@@ -202,7 +202,7 @@ export default async function TodayPage() {
         <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1.4fr_1fr]">
           <div className="flex flex-col gap-8">
             <section>
-              <h2 className="text-sm font-medium text-ink-faint">Open tasks ({open.length})</h2>
+              <h2 data-snap="today-open" className="text-sm font-medium text-ink-faint">Open tasks ({open.length})</h2>
               {open.length === 0 ? (
                 <div className="mt-3">
                   <EmptyState icon={ListTodo} message="Nothing open — nice." />
@@ -222,7 +222,7 @@ export default async function TodayPage() {
             </section>
 
             <section>
-              <h2 className="text-sm font-medium text-ink-faint">Routine checklist</h2>
+              <h2 data-snap="today-routines" className="text-sm font-medium text-ink-faint">Routine checklist</h2>
               {routines.length === 0 ? (
                 <div className="mt-3">
                   <EmptyState icon={Repeat} message="No routines set up yet." />
@@ -270,7 +270,7 @@ export default async function TodayPage() {
 
             {slipping.length > 0 && (
               <section>
-                <h2 className="text-sm font-medium text-ink-faint">Needs a look</h2>
+                <h2 data-snap="today-slipping" className="text-sm font-medium text-ink-faint">Needs a look</h2>
                 <div className="mt-3 flex flex-col gap-2">
                   {slipping.map((project) => (
                     <Link
@@ -287,7 +287,7 @@ export default async function TodayPage() {
             )}
 
             <section>
-              <h2 className="text-sm font-medium text-ink-faint">Recent activity</h2>
+              <h2 data-snap="today-activity" className="text-sm font-medium text-ink-faint">Recent activity</h2>
               <div className="mt-3 flex flex-col gap-2">
                 {burnEvents.slice(0, 5).map((e) => (
                   <div key={e.id} className="card flex items-baseline justify-between gap-3 px-4 py-2.5 text-xs">

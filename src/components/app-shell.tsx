@@ -7,6 +7,7 @@ import { NAV_GROUPS, NAV_NUMERALS, PRIMARY_NAV_ITEMS, SECONDARY_NAV_ITEMS } from
 import { CaptureBar } from "./capture-bar";
 import { AiCaptureButton } from "./ai-capture-button";
 import { AshCanvas } from "./ash-canvas";
+import { useBaselineSnap } from "@/lib/use-baseline-snap";
 import type { Domain } from "@/lib/supabase/types";
 
 export type NavCounts = Record<string, number>;
@@ -14,6 +15,7 @@ export type NavCounts = Record<string, number>;
 export function AppShell({ children, counts, domains }: { children: React.ReactNode; counts: NavCounts; domains: Domain[] }) {
   const pathname = usePathname();
   let numeral = 0;
+  useBaselineSnap();
 
   return (
     <div id="app-root" className="flex min-h-screen flex-col md:flex-row">

@@ -21,7 +21,7 @@ export default async function AshPage() {
     <div className="mx-auto max-w-2xl">
       <PageHeader title="Ash" context={dateline()} />
 
-      <h2 className="mt-8 text-sm font-medium text-ink-faint">Newest first — everything kept</h2>
+      <h2 data-snap="ash-log" className="mt-8 text-sm font-medium text-ink-faint">Newest first — everything kept</h2>
       <div className="mt-3 border-t border-line">
         {events.map((e) => (
           <div key={e.id} className="flex items-center gap-3.5 border-b border-line py-2.5">
@@ -46,7 +46,7 @@ export default async function AshPage() {
         through the week.
       </p>
 
-      <h2 className="mt-10 text-sm font-medium text-ink-faint">This week</h2>
+      <h2 data-snap="ash-week" className="mt-10 text-sm font-medium text-ink-faint">This week</h2>
       <div className="mt-4 flex flex-wrap gap-10 border-t border-line pt-4">
         <div>
           <div className="font-[family-name:var(--font-display)] text-4xl font-black leading-none text-ink">{burned}</div>

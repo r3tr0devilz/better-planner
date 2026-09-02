@@ -125,7 +125,7 @@ export function TaskList({ tasks, domains }: { tasks: Task[]; domains: Domain[] 
       </div>
 
       <section className="mt-4">
-        <h2 className="text-sm font-medium text-ink-faint">Open ({open.length})</h2>
+        <h2 data-snap="tasks-open" className="text-sm font-medium text-ink-faint">Open ({open.length})</h2>
         {open.length === 0 ? (
           <div className="mt-3">
             <EmptyState
