@@ -5,11 +5,13 @@ import { usePathname } from "next/navigation";
 import { MoreHorizontal } from "lucide-react";
 import { NAV_GROUPS, NAV_NUMERALS, PRIMARY_NAV_ITEMS, SECONDARY_NAV_ITEMS } from "./nav-items";
 import { CaptureBar } from "./capture-bar";
+import { AiCaptureButton } from "./ai-capture-button";
 import { AshCanvas } from "./ash-canvas";
+import type { Domain } from "@/lib/supabase/types";
 
 export type NavCounts = Record<string, number>;
 
-export function AppShell({ children, counts }: { children: React.ReactNode; counts: NavCounts }) {
+export function AppShell({ children, counts, domains }: { children: React.ReactNode; counts: NavCounts; domains: Domain[] }) {
   const pathname = usePathname();
   let numeral = 0;
 
@@ -54,7 +56,10 @@ export function AppShell({ children, counts }: { children: React.ReactNode; coun
             ))}
           </nav>
         </div>
-        <CaptureBar />
+        <div className="flex flex-col gap-2">
+          <CaptureBar variant="sidebar" />
+          <AiCaptureButton domains={domains} />
+        </div>
       </aside>
 
       <header className="card sticky top-0 z-40 flex items-center justify-between rounded-none border-x-0 border-t-0 px-4 py-3 md:hidden">

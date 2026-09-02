@@ -17,11 +17,18 @@ export function Modal({
   title,
   children,
   className = "w-full max-w-lg p-5",
+  // Overridable rather than always "card": the capture panels use the
+  // flatter, perforated .cap-panel treatment instead of the rounded/
+  // shadowed default, but still need every bit of the focus-trap/portal/
+  // Escape machinery below — forking that to reskin one panel would regress
+  // real accessibility work for a CSS difference.
+  panelClass = "card",
 }: {
   onClose: () => void;
   title: string;
   children: ReactNode;
   className?: string;
+  panelClass?: string;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -70,7 +77,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={`modal-panel card ${className}`}
+        className={`modal-panel ${panelClass} ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">

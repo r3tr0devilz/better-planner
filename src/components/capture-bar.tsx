@@ -1,19 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Mic, Plus, Square } from "lucide-react";
 import { Modal } from "./modal";
-
-function subscribeNoop() {
-  return () => {};
-}
-function getIsMac() {
-  return /Mac|iPhone|iPad/.test(navigator.userAgent);
-}
-function getIsMacServerSnapshot() {
-  return false;
-}
+import { CaptureShortcutKey } from "./capture-shortcut-key";
 
 type SpeechRecognitionLike = {
   continuous: boolean;
@@ -34,14 +25,19 @@ function getSpeechRecognition(): (new () => SpeechRecognitionLike) | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
-export function CaptureBar() {
+/** "sidebar" is the full-row .cap-btn treatment (icon + label + shortcut
+ * hint) used in the desktop nav; "compact" is the original pill button,
+ * kept unchanged for the mobile header — the AI batch capture flow this
+ * sits beside is desktop-only by design (see chat4's "mobile: Desktop only
+ * for now"), so mobile keeps the simple single-item capture it already had
+ * rather than adopting the new full-row look with nowhere to put its pair. */
+export function CaptureBar({ variant = "compact" }: { variant?: "sidebar" | "compact" }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
   const [status, setStatus] = useState<"idle" | "saving" | "done" | "error">("idle");
   const [resultLabel, setResultLabel] = useState<string | null>(null);
-  const isMac = useSyncExternalStore(subscribeNoop, getIsMac, getIsMacServerSnapshot);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const speechSupported = typeof window !== "undefined" && getSpeechRecognition() !== null;
 
@@ -120,30 +116,29 @@ export function CaptureBar() {
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="btn shrink-0"
-        aria-label="Capture a task or note"
-      >
-        <Plus size={18} />
-        <span className="hidden sm:inline">Capture</span>
-        <kbd
-          className="hidden items-center rounded-sm border border-panel/45 bg-panel/10 px-2 py-1 font-mono text-[0.68rem] font-semibold uppercase leading-none tracking-[0.04em] text-panel/85 sm:inline-flex"
-          title={isMac ? "Cmd+J" : "Ctrl+J"}
-        >
-          {isMac ? "Cmd+J" : "Ctrl+J"}
-        </kbd>
-      </button>
+      {variant === "sidebar" ? (
+        <button type="button" onClick={() => setOpen(true)} data-kind="quick" className="cap-btn" aria-label="Capture a task or note">
+          <span className="cap-mark">+</span>
+          <span>Capture</span>
+          <CaptureShortcutKey />
+        </button>
+      ) : (
+        <button onClick={() => setOpen(true)} className="btn shrink-0" aria-label="Capture a task or note">
+          <Plus size={18} />
+          <span className="hidden sm:inline">Capture</span>
+        </button>
+      )}
 
       {open && (
-        <Modal onClose={close} title="Capture">
+        <Modal onClose={close} title="Capture" className="w-full max-w-lg" panelClass="cap-panel">
+          <span className="cap-perf" aria-hidden />
           <textarea
             autoFocus
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Schedule a task, jot a note, log a quote…"
             rows={3}
-            className="field mt-3"
+            className="cap-field mt-3"
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit("text");
             }}
@@ -158,9 +153,9 @@ export function CaptureBar() {
             {status === "done" && resultLabel && <p className="mt-2 text-sm text-moss">Added: {resultLabel}</p>}
           </div>
 
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-4 flex items-center justify-between border-t border-line pt-3">
             {speechSupported ? (
-              <button onClick={toggleListening} className={listening ? "btn py-1.5" : "btn-outline py-1.5"}>
+              <button onClick={toggleListening} className={listening ? "btn-ink" : "btn-quiet"}>
                 {listening ? <Square size={14} /> : <Mic size={14} />}
                 {listening ? "Stop" : "Voice"}
               </button>
@@ -171,7 +166,7 @@ export function CaptureBar() {
             <button
               onClick={() => submit(listening ? "voice" : "text")}
               disabled={status === "saving" || !text.trim()}
-              className="btn py-2"
+              className="btn-ink"
             >
               {status === "saving" ? "Saving…" : "Add"}
             </button>

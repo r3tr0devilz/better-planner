@@ -1,13 +1,16 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-import { z } from "zod";
-import { CaptureSchema, type CaptureResult } from "./schema";
+import { z, type ZodType } from "zod";
+import { CaptureSchema, CaptureBatchSchema, type CaptureResult, type CaptureBatchResult } from "./schema";
 import type { Domain } from "@/lib/supabase/types";
 import type { CaptureSettings } from "@/lib/data/settings";
 
 const anthropic = new Anthropic();
 
-function systemPrompt(domains: Domain[]): string {
+const BATCH_INSTRUCTION =
+  "The text may describe several distinct actionable items — extract EVERY one you find (up to 8) as a separate entry in \"items\", not just the first.";
+
+function systemPrompt(domains: Domain[], extra?: string): string {
   return `You turn a captured voice/text note into a structured record for a personal planner.
 Current date/time: ${new Date().toISOString()}.
 Existing domains: ${domains.map((d) => d.name).join(", ") || "(none yet)"}.
@@ -21,40 +24,42 @@ Pick "kind" from:
 - "other": everything else.
 
 Resolve relative dates/times ("tomorrow at 2pm", "next Friday") against the current date/time above.
-Leave every field not relevant to the chosen kind as null.`;
+Leave every field not relevant to the chosen kind as null.${extra ? `\n\n${extra}` : ""}`;
 }
 
 /** Anthropic and Ollama get the actual schema attached to the request
  * (zodOutputFormat / Ollama's own `format`) and the model is constrained
- * server-side to match it, whatever the input says — including a request
- * that describes several items, which still yields one object. Providers
- * without schema-constrained output have nothing forcing that shape: a
- * prompt that only described the field semantics in prose (no field names,
- * no "single object" instruction) let a real response come back as
- * {"summary": ..., "tasks": [...]} for "create 4 random tasks" — a
- * plausible-sounding but unparseable structure the model invented because
- * it was never told what shape was actually expected. Spelling out the
- * exact JSON Schema plus an explicit single-object instruction removes that
- * ambiguity. */
-function jsonModeSystemPrompt(domains: Domain[]): string {
+ * server-side to match it. Providers without schema-constrained output have
+ * nothing forcing that shape: a prompt that only described the field
+ * semantics in prose (no field names, no "single object" instruction) let a
+ * real response come back as {"summary": ..., "tasks": [...]} for "create 4
+ * random tasks" — a plausible-sounding but unparseable structure the model
+ * invented because it was never told what shape was actually expected.
+ * Spelling out the exact JSON Schema removes that ambiguity. Single-mode
+ * also has to say "never an array" here for the same reason: nothing else
+ * stops a free-form provider from doing exactly what batch mode wants. */
+function jsonModeSystemPrompt<T>(domains: Domain[], schema: ZodType<T>, batch: boolean): string {
+  const shapeInstruction = batch
+    ? `${BATCH_INSTRUCTION} Respond with ONLY a single JSON object matching this exact JSON Schema. No other text, no markdown fences.`
+    : "Respond with ONLY a single JSON object matching this exact JSON Schema — never an array, even if the note describes multiple items (capture only the first/primary one then). No other text, no markdown fences.";
   return `${systemPrompt(domains)}
 
-Respond with ONLY a single JSON object matching this exact JSON Schema — never an array, even if the note describes multiple items (capture only the first/primary one then). No other text, no markdown fences.
-${JSON.stringify(z.toJSONSchema(CaptureSchema))}`;
+${shapeInstruction}
+${JSON.stringify(z.toJSONSchema(schema))}`;
 }
 
-async function parseWithAnthropic(text: string, domains: Domain[], model: string): Promise<CaptureResult | null> {
+async function parseWithAnthropic<T>(text: string, domains: Domain[], model: string, schema: ZodType<T>, batch: boolean): Promise<T | null> {
   const response = await anthropic.messages.parse({
     model,
-    max_tokens: 1024,
-    system: systemPrompt(domains),
+    max_tokens: 2048,
+    system: systemPrompt(domains, batch ? BATCH_INSTRUCTION : undefined),
     messages: [{ role: "user", content: text }],
-    output_config: { format: zodOutputFormat(CaptureSchema) },
+    output_config: { format: zodOutputFormat(schema) },
   });
   return response.parsed_output;
 }
 
-async function parseWithOllama(text: string, domains: Domain[], model: string): Promise<CaptureResult | null> {
+async function parseWithOllama<T>(text: string, domains: Domain[], model: string, schema: ZodType<T>, batch: boolean): Promise<T | null> {
   const baseUrl = process.env.OLLAMA_BASE_URL ?? "http://localhost:11434";
 
   const res = await fetch(`${baseUrl}/api/chat`, {
@@ -64,10 +69,10 @@ async function parseWithOllama(text: string, domains: Domain[], model: string): 
       model,
       stream: false,
       messages: [
-        { role: "system", content: systemPrompt(domains) },
+        { role: "system", content: systemPrompt(domains, batch ? BATCH_INSTRUCTION : undefined) },
         { role: "user", content: text },
       ],
-      format: z.toJSONSchema(CaptureSchema),
+      format: z.toJSONSchema(schema),
       // ponytail: fixed 4k context. Ollama sizes the KV cache to the model's
       // full context window (some of these run to 131k) unless capped, which
       // OOM'd on this machine during testing. 4k covers this prompt many
@@ -83,72 +88,46 @@ async function parseWithOllama(text: string, domains: Domain[], model: string): 
   const data = (await res.json()) as { message?: { content?: string } };
   if (!data.message?.content) return null;
 
-  const parsed = CaptureSchema.safeParse(JSON.parse(data.message.content));
+  const parsed = schema.safeParse(JSON.parse(data.message.content));
   return parsed.success ? parsed.data : null;
 }
 
-/** OpenRouter is OpenAI-compatible, so this is a plain fetch rather than a
- * dedicated SDK. json_object mode (not the stricter json_schema mode) on
- * purpose — schema mode isn't reliably supported across OpenRouter's full
- * model catalog, especially free ones, so this asks for JSON in the prompt
- * and parses forgivingly, same as the Ollama path. */
-async function parseWithOpenRouter(text: string, domains: Domain[], model: string): Promise<CaptureResult | null> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) throw new Error("OPENROUTER_API_KEY is not set");
-
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+/** Shared by OpenRouter and Groq — both plain OpenAI-compatible chat
+ * completions endpoints, so this is a plain fetch rather than a dedicated
+ * SDK. json_object mode (not the stricter json_schema mode) on purpose —
+ * schema mode isn't reliably supported across every model on either
+ * provider, especially OpenRouter's free ones, so this asks for JSON in the
+ * prompt (jsonModeSystemPrompt) and parses forgivingly. */
+async function parseOpenAiCompatible<T>(
+  url: string,
+  apiKey: string,
+  text: string,
+  domains: Domain[],
+  model: string,
+  schema: ZodType<T>,
+  batch: boolean,
+): Promise<T | null> {
+  const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
       model,
       messages: [
-        { role: "system", content: jsonModeSystemPrompt(domains) },
+        { role: "system", content: jsonModeSystemPrompt(domains, schema, batch) },
         { role: "user", content: text },
       ],
       response_format: { type: "json_object" },
     }),
   });
   if (!res.ok) {
-    throw new Error(`OpenRouter request failed (${res.status}): ${await res.text()}`);
+    throw new Error(`Request to ${new URL(url).host} failed (${res.status}): ${await res.text()}`);
   }
 
   const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
   const content = data.choices?.[0]?.message?.content;
   if (!content) return null;
 
-  const parsed = CaptureSchema.safeParse(JSON.parse(content));
-  return parsed.success ? parsed.data : null;
-}
-
-/** Groq is OpenAI-compatible like OpenRouter, but hosts its own fixed model
- * catalog on dedicated inference hardware rather than routing across a
- * shared pool of third-party providers — so unlike OpenRouter, a hardcoded
- * default model is safe here. */
-async function parseWithGroq(text: string, domains: Domain[], model: string): Promise<CaptureResult | null> {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) throw new Error("GROQ_API_KEY is not set");
-
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: "system", content: jsonModeSystemPrompt(domains) },
-        { role: "user", content: text },
-      ],
-      response_format: { type: "json_object" },
-    }),
-  });
-  if (!res.ok) {
-    throw new Error(`Groq request failed (${res.status}): ${await res.text()}`);
-  }
-
-  const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-  const content = data.choices?.[0]?.message?.content;
-  if (!content) return null;
-
-  const parsed = CaptureSchema.safeParse(JSON.parse(content));
+  const parsed = schema.safeParse(JSON.parse(content));
   return parsed.success ? parsed.data : null;
 }
 
@@ -156,8 +135,8 @@ async function parseWithGroq(text: string, domains: Domain[], model: string): Pr
  * Gemini's native schema-constrained output — z.toJSONSchema's nullable
  * unions and other JSON Schema shapes don't map cleanly onto Gemini's more
  * restrictive Schema object, so this asks for JSON in the prompt and parses
- * forgivingly, same as the OpenRouter/Groq paths. */
-async function parseWithGemini(text: string, domains: Domain[], model: string): Promise<CaptureResult | null> {
+ * forgivingly, same as the OpenRouter/Groq path. */
+async function parseWithGemini<T>(text: string, domains: Domain[], model: string, schema: ZodType<T>, batch: boolean): Promise<T | null> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
 
@@ -168,7 +147,7 @@ async function parseWithGemini(text: string, domains: Domain[], model: string): 
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         systemInstruction: {
-          parts: [{ text: jsonModeSystemPrompt(domains) }],
+          parts: [{ text: jsonModeSystemPrompt(domains, schema, batch) }],
         },
         contents: [{ role: "user", parts: [{ text }] }],
         generationConfig: { responseMimeType: "application/json" },
@@ -183,7 +162,7 @@ async function parseWithGemini(text: string, domains: Domain[], model: string): 
   const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!content) return null;
 
-  const parsed = CaptureSchema.safeParse(JSON.parse(content));
+  const parsed = schema.safeParse(JSON.parse(content));
   return parsed.success ? parsed.data : null;
 }
 
@@ -192,19 +171,47 @@ async function parseWithGemini(text: string, domains: Domain[], model: string): 
  * only exists on whichever machine has Ollama running. OpenRouter has no
  * hardcoded default model — its free-model catalog shifts over time, so a
  * guessed slug could silently be dead; the model field is required for it. */
-export async function parseCapture(text: string, domains: Domain[], settings: CaptureSettings): Promise<CaptureResult | null> {
+function dispatch<T>(text: string, domains: Domain[], settings: CaptureSettings, schema: ZodType<T>, batch: boolean): Promise<T | null> {
   if (settings.provider === "ollama") {
-    return parseWithOllama(text, domains, settings.model ?? process.env.OLLAMA_MODEL ?? "llama3.2:3b");
+    return parseWithOllama(text, domains, settings.model ?? process.env.OLLAMA_MODEL ?? "llama3.2:3b", schema, batch);
   }
   if (settings.provider === "openrouter") {
     if (!settings.model) throw new Error("Pick a model in Settings for OpenRouter (see openrouter.ai/models)");
-    return parseWithOpenRouter(text, domains, settings.model);
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) throw new Error("OPENROUTER_API_KEY is not set");
+    return parseOpenAiCompatible("https://openrouter.ai/api/v1/chat/completions", apiKey, text, domains, settings.model, schema, batch);
   }
   if (settings.provider === "groq") {
-    return parseWithGroq(text, domains, settings.model ?? "llama-3.3-70b-versatile");
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) throw new Error("GROQ_API_KEY is not set");
+    return parseOpenAiCompatible(
+      "https://api.groq.com/openai/v1/chat/completions",
+      apiKey,
+      text,
+      domains,
+      settings.model ?? "llama-3.3-70b-versatile",
+      schema,
+      batch,
+    );
   }
   if (settings.provider === "gemini") {
-    return parseWithGemini(text, domains, settings.model ?? "gemini-3.6-flash");
+    return parseWithGemini(text, domains, settings.model ?? "gemini-3.6-flash", schema, batch);
   }
-  return parseWithAnthropic(text, domains, settings.model ?? "claude-sonnet-5");
+  return parseWithAnthropic(text, domains, settings.model ?? "claude-sonnet-5", schema, batch);
 }
+
+/** Single-item capture — the quick text/voice bar. Always yields at most one
+ * record, even for input that describes several things (see the single-mode
+ * instruction in jsonModeSystemPrompt). */
+export function parseCapture(text: string, domains: Domain[], settings: CaptureSettings): Promise<CaptureResult | null> {
+  return dispatch(text, domains, settings, CaptureSchema, false);
+}
+
+/** AI capture — paste a paragraph, get back every distinct item it
+ * describes for review before anything is written. */
+export async function parseCaptureBatch(text: string, domains: Domain[], settings: CaptureSettings): Promise<CaptureResult[]> {
+  const result = await dispatch(text, domains, settings, CaptureBatchSchema, true);
+  return result?.items ?? [];
+}
+
+export type { CaptureBatchResult };

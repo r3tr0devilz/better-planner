@@ -42,3 +42,15 @@ export const CaptureSchema = z.object({
 });
 
 export type CaptureResult = z.infer<typeof CaptureSchema>;
+
+/** Wrapped in an object (not a bare top-level array) because Anthropic's
+ * schema-constrained output and most providers' JSON-object modes expect an
+ * object at the root — a bare array is the less broadly supported shape. */
+export const CaptureBatchSchema = z.object({
+  items: z
+    .array(CaptureSchema)
+    .max(8)
+    .describe("One entry per distinct actionable item found in the text, up to 8. Empty array if none."),
+});
+
+export type CaptureBatchResult = z.infer<typeof CaptureBatchSchema>;
