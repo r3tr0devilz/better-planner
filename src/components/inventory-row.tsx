@@ -9,15 +9,18 @@ export function InventoryRow({ item }: { item: InventoryItem }) {
   const removed = item.removed_at !== null;
 
   return (
-    <div className="ledger-row flex items-center justify-between gap-3 px-1 py-3 text-sm">
-      <div className="min-w-0">
-        <p className={`truncate transition-colors duration-150 ${removed ? "text-ink-faint line-through" : "text-ink"}`}>{item.name}</p>
-        {item.location && <p className="truncate text-xs text-ink-faint">{item.location}</p>}
+    <div className="group flex items-center gap-3.5 border-b border-line py-2.5 text-sm">
+      {removed && <span className="ash-stub" data-sit="1" data-cold="true" />}
+      <div className="min-w-0 flex-1">
+        <p className={removed ? "truncate text-ink-faint" : "truncate text-ink"}>{item.name}</p>
       </div>
+      {item.location && (
+        <span className="shrink-0 font-mono text-[10px] tracking-wide text-ink-faint">{item.location}</span>
+      )}
       <button
         onClick={() => startTransition(() => setRemoved(item.id, !removed))}
         disabled={pending}
-        className="btn-outline shrink-0 py-1 text-xs"
+        className="shrink-0 font-mono text-[10px] uppercase tracking-wide text-ink-faint opacity-0 transition-opacity duration-150 hover:text-ink group-hover:opacity-100"
       >
         {removed ? "Restore" : "Remove"}
       </button>

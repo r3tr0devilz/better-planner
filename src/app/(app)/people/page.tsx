@@ -11,6 +11,7 @@ export default async function PeoplePage() {
   return (
     <div className="mx-auto max-w-2xl">
       <PageHeader title="People" context={`${people.length} people`} />
+      <p className="mt-2 text-sm text-ink-faint">A lit candle marks a birthday inside the next thirty days.</p>
 
       <CollapsibleForm action={createPerson} triggerLabel="New person">
         <label className="field-wide">

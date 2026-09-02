@@ -13,6 +13,14 @@ const ANTHROPIC_MODELS = [
   { value: "claude-fable-5", label: "Fable 5" },
 ];
 
+const PROVIDERS: { value: CaptureSettings["provider"]; label: string }[] = [
+  { value: "anthropic", label: "Anthropic" },
+  { value: "ollama", label: "Ollama" },
+  { value: "openrouter", label: "OpenRouter" },
+  { value: "groq", label: "Groq" },
+  { value: "gemini", label: "Gemini" },
+];
+
 export function CaptureSettingsForm({ settings }: { settings: CaptureSettings }) {
   const [provider, setProvider] = useState(settings.provider);
   const [pending, startTransition] = useTransition();
@@ -40,21 +48,23 @@ export function CaptureSettingsForm({ settings }: { settings: CaptureSettings })
       })}
       className="mt-3 flex flex-col gap-3"
     >
-      <label className="flex flex-col gap-1.5 text-xs text-ink-faint">
+      <div className="flex flex-col gap-1.5 text-xs text-ink-faint">
         Provider
-        <select
-          name="capture_provider"
-          value={provider}
-          onChange={(e) => setProvider(e.target.value as CaptureSettings["provider"])}
-          className="field"
-        >
-          <option value="anthropic">Anthropic</option>
-          <option value="ollama">Ollama (local)</option>
-          <option value="openrouter">OpenRouter</option>
-          <option value="groq">Groq</option>
-          <option value="gemini">Google Gemini</option>
-        </select>
-      </label>
+        <input type="hidden" name="capture_provider" value={provider} />
+        <div className="flex flex-wrap gap-1.5">
+          {PROVIDERS.map((p) => (
+            <button
+              key={p.value}
+              type="button"
+              data-on={provider === p.value}
+              onClick={() => setProvider(p.value)}
+              className="chip"
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {provider === "anthropic" && (
         <label className="flex flex-col gap-1.5 text-xs text-ink-faint">

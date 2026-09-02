@@ -54,11 +54,18 @@ export async function updateJobApplication(id: string, formData: FormData) {
 
   const deadline = String(formData.get("deadline") ?? "") || null;
   const jobLink = String(formData.get("job_link") ?? "").trim() || null;
+  // Optional: the Kanban board's edit modal never had a status field (status
+  // only moved via drag between columns), but the row3 list replacing it
+  // needs one now that dragging is gone. Falls back to leaving status
+  // untouched so the Kanban-era modal (no status field in its FormData)
+  // still works unchanged.
+  const statusRaw = formData.get("status");
+  const status = typeof statusRaw === "string" && statusRaw ? (statusRaw as JobApplication["status"]) : undefined;
 
   const supabase = await createClient();
   const { error } = await supabase
     .from("job_applications")
-    .update({ company, role, deadline, job_link: jobLink })
+    .update({ company, role, deadline, job_link: jobLink, ...(status ? { status } : {}) })
     .eq("id", id);
   if (error) throw error;
 

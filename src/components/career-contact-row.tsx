@@ -26,23 +26,15 @@ export function CareerContactRow({ contact }: { contact: CareerContact }) {
   const nextFollowUp = formatDate(contact.next_follow_up);
 
   return (
-    <div className="ledger-row flex items-center gap-3 px-1 py-3">
-      <button
-        type="button"
-        onClick={() => setEditing(true)}
-        className="min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-left"
-      >
-        <div className="flex items-center gap-2">
-          <span className="truncate text-sm text-ink">{contact.name}</span>
-          <span className="shrink-0 border border-line px-1.5 py-0.5 font-mono text-[0.62rem] uppercase tracking-wide text-ink-faint">
-            {RELATIONSHIP_LABEL[contact.relationship_type]}
-          </span>
-        </div>
-        {contact.company && <p className="truncate text-xs text-ink-faint">{contact.company}</p>}
+    <div className="row3">
+      <button type="button" onClick={() => setEditing(true)} className="min-w-0 cursor-pointer border-0 bg-transparent p-0 text-left">
+        <span className="truncate text-sm text-ink">{contact.name}</span>
       </button>
-      {nextFollowUp && (
-        <span className="shrink-0 font-mono text-xs text-oxblood">Follow up {nextFollowUp}</span>
-      )}
+      <span className="font-mono text-[10px] tracking-wide text-ink-faint">{contact.company || "—"}</span>
+      <span className="flex shrink-0 items-center gap-2">
+        {nextFollowUp && <span className="font-mono text-[10px] tracking-wide text-oxblood">Follow up {nextFollowUp}</span>}
+        <span className="tag">{RELATIONSHIP_LABEL[contact.relationship_type]}</span>
+      </span>
 
       {editing && (
         <Modal onClose={close} title="Edit contact">

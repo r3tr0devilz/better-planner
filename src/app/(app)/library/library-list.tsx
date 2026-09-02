@@ -10,11 +10,11 @@ import { useUrlState } from "@/lib/use-url-state";
 import { deleteNote, deleteBookInPlace } from "./actions";
 import type { Book, LibraryNote } from "@/lib/supabase/types";
 
-const KINDS: { key: LibraryNote["kind"]; label: string }[] = [
-  { key: "note", label: "Notes" },
-  { key: "quote", label: "Quotes" },
-  { key: "journal", label: "Journal" },
-];
+const KIND_LABEL: Record<LibraryNote["kind"], string> = {
+  note: "Note",
+  quote: "Quote",
+  journal: "Journal",
+};
 
 export function LibraryList({ notes, books }: { notes: LibraryNote[]; books: Book[] }) {
   const [search, setSearch] = useUrlState("q");
@@ -40,47 +40,41 @@ export function LibraryList({ notes, books }: { notes: LibraryNote[]; books: Boo
         <FilterBar search={search} onSearchChange={setSearch} searchPlaceholder="Search notes and books…" />
       </div>
 
-      {KINDS.map(({ key, label }) => {
-        const items = filteredNotes.filter((n) => n.kind === key);
-        if (items.length === 0) return null;
-        return (
-          <section key={key} className="mt-8">
-            <h2 className="text-sm font-medium text-ink-faint">{label}</h2>
-            <div className="ledger mt-3">
-              {items.map((note) => (
-                <div key={note.id} className="ledger-row flex items-start gap-3 px-1 py-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm text-ink [overflow-wrap:anywhere]">{note.body}</p>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-[11px] text-ink-faint">
-                      {note.source && <span className="max-w-[12rem] truncate">{note.source}</span>}
-                      {note.tags.map((t) => (
-                        <span key={t} className="max-w-[10rem] truncate border border-line px-1.5 py-0.5">
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-3">
-                    <NoteFlagToggle id={note.id} flagged={note.flagged_for_review} />
-                    <DeleteButton
-                      confirmMessage="Delete this note? This can't be undone."
-                      label=""
-                      pendingLabel=""
-                      ariaLabel="Delete note"
-                      onDelete={() => {
-                        noteUndo.requestDelete(note.id, "note");
-                        return Promise.resolve();
-                      }}
-                      skipConfirm
-                      className="-m-2.5 flex h-11 w-11 shrink-0 items-center justify-center text-ink-faint transition-colors duration-150 hover:text-vermillion"
-                    />
-                  </div>
+      {filteredNotes.length > 0 && (
+        <section className="mt-8">
+          <h2 className="text-sm font-medium text-ink-faint">Notes, quotes, journal</h2>
+          <div className="mt-3 flex flex-col gap-2.5">
+            {filteredNotes.map((note) => (
+              <div key={note.id} className="card-cold relative">
+                <div className="flex flex-wrap items-center gap-2 pr-16">
+                  <span className="tag">{KIND_LABEL[note.kind]}</span>
+                  {note.source && <span className="max-w-[14rem] truncate font-mono text-[10px] tracking-wide text-ink-faint">{note.source}</span>}
                 </div>
-              ))}
-            </div>
-          </section>
-        );
-      })}
+                <p className="mt-2.5 text-sm leading-relaxed text-ink [overflow-wrap:anywhere]">{note.body}</p>
+                {note.tags.length > 0 && (
+                  <p className="mt-2.5 font-mono text-[10px] tracking-wide text-ink-faint">{note.tags.join(" · ")}</p>
+                )}
+                <div className="absolute right-3 top-3 flex items-center gap-1.5">
+                  <NoteFlagToggle id={note.id} flagged={note.flagged_for_review} />
+                  <DeleteButton
+                    confirmMessage="Delete this note? This can't be undone."
+                    label=""
+                    pendingLabel=""
+                    ariaLabel="Delete note"
+                    onDelete={() => {
+                      noteUndo.requestDelete(note.id, "note");
+                      return Promise.resolve();
+                    }}
+                    skipConfirm
+                    className="flex h-7 w-7 shrink-0 items-center justify-center text-ink-faint/60 transition-colors duration-150 hover:text-vermillion"
+                    iconSize={13}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="mt-10">
         <h2 className="text-sm font-medium text-ink-faint">Books</h2>
@@ -89,14 +83,14 @@ export function LibraryList({ notes, books }: { notes: LibraryNote[]; books: Boo
             {search.trim() === "" ? "No books yet — add one above." : "No books match this search."}
           </p>
         ) : (
-          <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="mt-3 border-t border-line">
             {filteredBooks.map((book) => (
-              <div key={book.id} className="card relative min-w-0 p-4">
-                <Link href={`/library/books/${book.id}`} className="hoverable block min-w-0 pr-7">
-                  <p className="truncate text-sm text-ink">{book.title}</p>
-                  {book.author && <p className="truncate text-xs text-ink-faint">{book.author}</p>}
-                  <p className="mt-1 font-mono text-[11px] uppercase tracking-wide text-ink-faint">{book.status}</p>
+              <div key={book.id} className="group flex items-center gap-3.5 border-b border-line py-2.5">
+                <Link href={`/library/books/${book.id}`} className="min-w-0 flex-1 truncate text-sm text-ink hover:underline">
+                  {book.title}
                 </Link>
+                {book.author && <span className="shrink-0 font-mono text-[10px] tracking-wide text-ink-faint">{book.author}</span>}
+                <span className="w-16 shrink-0 text-right font-mono text-[10px] uppercase tracking-wide text-ink-faint">{book.status}</span>
                 <DeleteButton
                   confirmMessage={`Delete "${book.title}"? This also removes its highlights. This can't be undone.`}
                   label=""
@@ -107,8 +101,8 @@ export function LibraryList({ notes, books }: { notes: LibraryNote[]; books: Boo
                     return Promise.resolve();
                   }}
                   skipConfirm
-                  className="absolute right-0 top-0 flex h-11 w-11 shrink-0 items-center justify-center text-ink-faint/60 transition-colors duration-150 hover:text-vermillion"
-                  iconSize={14}
+                  className="flex h-7 w-7 shrink-0 items-center justify-center text-ink-faint/60 opacity-0 transition-colors duration-150 hover:text-vermillion group-hover:opacity-100"
+                  iconSize={13}
                 />
               </div>
             ))}

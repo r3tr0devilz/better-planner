@@ -33,12 +33,12 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       <PageHeader title="Settings" context="Account & integrations" />
 
       {calendarMessage && (
-        <p className="card mt-6 px-4 py-3 text-sm text-ink" role="status">
+        <p className="card-cold mt-6 text-sm text-ink" role="status">
           {calendarMessage}
         </p>
       )}
 
-      <section className="card mt-6 p-4">
+      <section className="card-cold mt-6">
         <h2 className="text-sm font-medium text-ink-faint">Account</h2>
         <p className="mt-2 truncate text-sm text-ink">{user?.email}</p>
 
@@ -62,7 +62,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         </form>
       </section>
 
-      <section className="card mt-4 p-4">
+      <section className="card-cold mt-4">
         <h2 className="text-sm font-medium text-ink-faint">Capture AI</h2>
         {/* Keyed on the saved values, not just mounted once: the provider
             <select> is controlled by local state seeded from `settings` on
@@ -76,7 +76,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         <CaptureSettingsForm key={`${captureSettings.provider}:${captureSettings.model ?? ""}`} settings={captureSettings} />
       </section>
 
-      <section className="card mt-4 p-4">
+      <section className="card-cold mt-4">
         <h2 className="text-sm font-medium text-ink-faint">Integrations</h2>
         <div className="mt-3 flex items-center justify-between text-sm">
           <div>

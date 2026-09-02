@@ -518,7 +518,12 @@
 .ash-stub[data-sit="3"] {
   width: 52px;
 }
-.ash-stub[data-cold="1"] {
+/* "true"/"false" (not "1"/"0" as in the prototype source) to match how
+ * React actually serializes a boolean prop to a DOM attribute — the same
+ * convention already used by data-lit/data-soon/data-scorch elsewhere in
+ * this file. The Ash page has passed a JS boolean here since it shipped,
+ * so this rule never matched — "put out" traces never got their cold tint. */
+.ash-stub[data-cold="true"] {
   background: var(--color-ink-faint);
 }
 
