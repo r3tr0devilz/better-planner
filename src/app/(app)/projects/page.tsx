@@ -1,4 +1,5 @@
 import { getProjects, getChecklistTemplates } from "@/lib/data/projects";
+import { getTasks } from "@/lib/data/tasks";
 import { getDomains } from "@/lib/data/domains";
 import { PageHeader } from "@/components/page-header";
 import { CollapsibleForm } from "@/components/collapsible-form";
@@ -7,15 +8,19 @@ import { ProjectList } from "./project-list";
 import { createDomain, createProject, createChecklistTemplate } from "./actions";
 
 export default async function ProjectsPage() {
-  const [projects, domains, templates] = await Promise.all([
+  const [projects, domains, templates, tasks] = await Promise.all([
     getProjects(),
     getDomains(),
     getChecklistTemplates(),
+    getTasks(),
   ]);
 
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader title="Projects" context={`${projects.length} projects across ${domains.length} domains`} />
+      <p className="mt-2 text-sm text-ink-faint">
+        Each domain is a booklet tab. The line beside a project is the stick it has left.
+      </p>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <CollapsibleForm action={createDomain} triggerLabel="New domain" className="flex flex-col gap-2" topMargin="">
@@ -67,12 +72,12 @@ export default async function ProjectsPage() {
         </CollapsibleForm>
       </div>
 
-      <ProjectList projects={projects} domains={domains} />
+      <ProjectList projects={projects} domains={domains} tasks={tasks} />
 
       <section className="mt-10">
         <h2 className="text-sm font-medium text-ink-faint">Checklist templates</h2>
         <p className="mt-1 text-xs text-ink-faint">
-          Reusable checklists (e.g. &ldquo;New website&rdquo;) you can drop into any project.
+          Unlit stacks. Drop one into a project and its items become slips.
         </p>
         <CollapsibleForm
           action={createChecklistTemplate}
@@ -93,7 +98,7 @@ export default async function ProjectsPage() {
         {templates.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2">
             {templates.map((t) => (
-              <li key={t.id} className="max-w-full truncate border border-line px-3 py-1 font-mono text-xs text-ink-faint">
+              <li key={t.id} className="tmpl-chip">
                 {t.name}
               </li>
             ))}

@@ -443,6 +443,42 @@
 .day-burn[data-fill="0"] .stick-tip {
   display: none;
 }
+/* Width steps for the 0–10 fill scale — ported over from the prototype's
+ * literal-CSS bucket (see chat5: "the day-stick fill is now a literal-CSS
+ * bucket (10% steps, animated) instead of a style hole"). This bucket
+ * itself never made it into this port, so .day-burn sat at its base width:0
+ * forever — both Today's day stick and any reused stick-track (Projects'
+ * print run, Calendar's day cells) silently never filled. */
+.day-burn[data-fill="1"] {
+  width: 10%;
+}
+.day-burn[data-fill="2"] {
+  width: 20%;
+}
+.day-burn[data-fill="3"] {
+  width: 30%;
+}
+.day-burn[data-fill="4"] {
+  width: 40%;
+}
+.day-burn[data-fill="5"] {
+  width: 50%;
+}
+.day-burn[data-fill="6"] {
+  width: 60%;
+}
+.day-burn[data-fill="7"] {
+  width: 70%;
+}
+.day-burn[data-fill="8"] {
+  width: 80%;
+}
+.day-burn[data-fill="9"] {
+  width: 90%;
+}
+.day-burn[data-fill="10"] {
+  width: 100%;
+}
 @keyframes bp-tip {
   0%,
   100% {

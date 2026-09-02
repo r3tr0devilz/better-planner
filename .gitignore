@@ -46,6 +46,11 @@ supabase/.temp
 # agent session-local state (not project content)
 .claude/scheduled_tasks.lock
 
+# Claude Design handoff bundle — source material for this branch's UI work,
+# not app content. Unzipped locally for reference; never committed.
+/design-bundle/
+*designbundle*.zip
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

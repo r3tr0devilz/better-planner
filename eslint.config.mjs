@@ -20,6 +20,8 @@ const eslintConfig = defineConfig([
     ".codex/**",
     ".impeccable/**",
     ".lavish/**",
+    // Claude Design handoff bundle — throwaway prototype JSX/JS, not app source.
+    "design-bundle/**",
   ]),
 ]);
 
