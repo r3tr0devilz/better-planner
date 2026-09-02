@@ -1,0 +1,44 @@
+import { createClient } from "@/lib/supabase/server";
+import type { BurnEvent } from "@/lib/supabase/types";
+
+/** Everything ever burned or put out, newest first — the Ash page keeps
+ * these forever rather than pruning them. */
+export async function getBurnEvents(): Promise<BurnEvent[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("burn_events")
+    .select("*")
+    .order("occurred_at", { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+function startOfWeek(): Date {
+  const d = new Date();
+  const day = (d.getDay() + 6) % 7; // Monday = 0
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - day);
+  return d;
+}
+
+export function weekStats(events: BurnEvent[]): { burned: number; quenched: number; longestSitMinutes: number } {
+  const since = startOfWeek();
+  const inWeek = events.filter((e) => new Date(e.occurred_at) >= since);
+  const burned = inWeek.filter((e) => e.outcome === "burned").length;
+  const quenched = inWeek.filter((e) => e.outcome === "put_out").length;
+  const longestSitMinutes = inWeek.reduce((max, e) => Math.max(max, e.sat_minutes), 0);
+  return { burned, quenched, longestSitMinutes };
+}
+
+/** "Stub length" bucket for the ash-stub visual — how long a slip sat before it burned. */
+export function sitBucket(sitMinutes: number): 1 | 2 | 3 {
+  if (sitMinutes < 60) return 1;
+  if (sitMinutes < 60 * 24) return 2;
+  return 3;
+}
+
+export function formatSitDuration(sitMinutes: number): string {
+  if (sitMinutes < 60) return `${Math.max(1, Math.round(sitMinutes))}m`;
+  if (sitMinutes < 60 * 24) return `${Math.round(sitMinutes / 60)}h`;
+  return `${Math.round(sitMinutes / (60 * 24))}d`;
+}

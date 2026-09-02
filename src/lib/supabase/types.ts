@@ -115,6 +115,22 @@ export type RoutineCompletion = {
   completed: boolean;
 };
 
+/** Incense Ledger: a permanent record of a slip lit (completed) or put out
+ * (lit, then undone during the char hold) — see 0009_burn_events.sql. Backs
+ * the Ash page and Today's "recent activity" panel, independent of the
+ * source row's own current state. */
+export type BurnEvent = {
+  id: string;
+  user_id: string;
+  item_type: "task" | "routine" | "checklist_item";
+  item_id: string;
+  title: string;
+  domain_id: string | null;
+  outcome: "burned" | "put_out";
+  sat_minutes: number;
+  occurred_at: string;
+};
+
 export type CaptureInbox = Timestamped & {
   id: string;
   user_id: string;
@@ -307,6 +323,7 @@ export type Database = {
       tasks: TableDef<Task, Omit<Task, "id" | "user_id" | "created_at"> & { user_id?: string }>;
       routines: TableDef<Routine, Omit<Routine, "id" | "user_id" | "created_at"> & { user_id?: string }>;
       routine_completions: TableDef<RoutineCompletion, Omit<RoutineCompletion, "id" | "user_id"> & { user_id?: string }>;
+      burn_events: TableDef<BurnEvent, Omit<BurnEvent, "id" | "user_id" | "occurred_at"> & { user_id?: string; occurred_at?: string }>;
       capture_inbox: TableDef<CaptureInbox, Omit<CaptureInbox, "id" | "user_id" | "created_at"> & { user_id?: string }>;
       notifications: TableDef<NotificationRow, Omit<NotificationRow, "id" | "user_id" | "created_at"> & { user_id?: string }>;
       integration_status: TableDef<IntegrationStatus, Omit<IntegrationStatus, "id" | "user_id"> & { user_id?: string }>;

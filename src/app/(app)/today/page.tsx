@@ -2,9 +2,9 @@ import Link from "next/link";
 import { ListTodo, Repeat } from "lucide-react";
 import { getTopThree, getTasks } from "@/lib/data/tasks";
 import { getDomains, threadIndexFor } from "@/lib/data/domains";
-import { getRoutines, getRecentCompletions, todayStr } from "@/lib/data/routines";
+import { getRoutines, getRecentCompletions, currentStreak, todayStr, HISTORY_DAYS } from "@/lib/data/routines";
 import { getSlippingProjects } from "@/lib/data/projects";
-import { getRecentNotifications } from "@/lib/data/notifications";
+import { getBurnEvents } from "@/lib/data/burn";
 import { getDisplayName } from "@/lib/data/settings";
 import { getGoogleCalendarStatus } from "@/lib/google-calendar";
 import { TaskRow } from "@/components/task-row";
@@ -12,6 +12,26 @@ import { RoutineRow } from "@/components/routine-row";
 import { DomainTabs } from "@/components/domain-tabs";
 import { OpenCaptureButton } from "@/components/open-capture-button";
 import { EmptyState } from "@/components/empty-state";
+
+function historyFor(routineId: string, completions: Awaited<ReturnType<typeof getRecentCompletions>>) {
+  const byDate = new Map(completions.filter((c) => c.routine_id === routineId).map((c) => [c.date, c.completed]));
+  const days: (boolean | undefined)[] = [];
+  for (let i = HISTORY_DAYS - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(byDate.get(d.toISOString().slice(0, 10)));
+  }
+  return days;
+}
+
+function relativeTime(iso: string): string {
+  const mins = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (mins < 1) return "JUST NOW";
+  if (mins < 60) return `${mins}M AGO`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours}H AGO`;
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase();
+}
 
 function greeting(name: string | null): string {
   const hour = new Date().getHours();
@@ -54,14 +74,14 @@ function dailyLine(): string {
 const TONE_CLASS = { moss: "text-moss", vermillion: "text-vermillion", faint: "text-ink-faint" } as const;
 
 export default async function TodayPage() {
-  const [topThree, tasks, domains, routines, completions, slipping, notifications, displayName, calendarStatus] = await Promise.all([
+  const [topThree, tasks, domains, routines, completions, slipping, burnEvents, displayName, calendarStatus] = await Promise.all([
     getTopThree(),
     getTasks(),
     getDomains(),
     getRoutines(),
     getRecentCompletions(),
     getSlippingProjects(),
-    getRecentNotifications(),
+    getBurnEvents(),
     getDisplayName(),
     getGoogleCalendarStatus(),
   ]);
@@ -76,6 +96,22 @@ export default async function TodayPage() {
   const overdueCount = open.filter((t) => t.due_at && new Date(t.due_at) < now).length;
   const topThreeRemaining = topThree.filter((t) => t.status !== "done").length;
   const routinesRemaining = routines.length - routinesDoneToday;
+
+  const weekAgo = new Date(now);
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const burnedThisWeek: Record<string, number> = {};
+  for (const e of burnEvents) {
+    if (e.outcome !== "burned" || !e.domain_id || new Date(e.occurred_at) < weekAgo) continue;
+    burnedThisWeek[e.domain_id] = (burnedThisWeek[e.domain_id] ?? 0) + 1;
+  }
+
+  // The day stick is full at the start of the day and retreats leftward
+  // toward the wood as slips burn — so its fill is remaining, not burned.
+  const dueTodayOrOverdue = open.filter((t) => t.due_at && (new Date(t.due_at) < now || new Date(t.due_at).toDateString() === now.toDateString()));
+  const burnedToday = burnEvents.filter((e) => e.outcome === "burned" && new Date(e.occurred_at).toDateString() === now.toDateString());
+  const dayTotal = dueTodayOrOverdue.length + burnedToday.length;
+  const dayPct = dayTotal > 0 ? Math.round((burnedToday.length / dayTotal) * 100) : 100;
+  const dayFill = 10 - Math.round(dayPct / 10);
 
   const stats: { label: string; value: string; status: string | null; tone: keyof typeof TONE_CLASS }[] = [
     {
@@ -100,7 +136,7 @@ export default async function TodayPage() {
 
   return (
     <div className="flex gap-6 md:-ml-8">
-      <DomainTabs domains={domains} tasks={tasks} />
+      <DomainTabs domains={domains} tasks={tasks} burnedThisWeek={burnedThisWeek} />
 
       <div className="mx-auto w-full min-w-0 max-w-5xl flex-1">
         <div className="border-b-[3px] border-ink pb-4">
@@ -131,6 +167,17 @@ export default async function TodayPage() {
               )}
             </div>
           ))}
+        </div>
+
+        <div className="mt-4 flex items-center gap-4">
+          <span className="stick-track">
+            <span className="day-burn" data-fill={dayFill}>
+              <span className="stick-tip" />
+            </span>
+          </span>
+          <span className="shrink-0 font-mono text-[10px] uppercase tracking-wide text-ink-faint">
+            {burnedToday.length} burned · {dueTodayOrOverdue.length} left
+          </span>
         </div>
 
         <section className="mt-8">
@@ -190,8 +237,8 @@ export default async function TodayPage() {
                       doneToday={
                         completions.find((c) => c.routine_id === routine.id && c.date === today)?.completed ?? false
                       }
-                      streak={0}
-                      history={[]}
+                      streak={currentStreak(routine.id, completions)}
+                      history={historyFor(routine.id, completions)}
                     />
                   ))}
                 </div>
@@ -242,14 +289,18 @@ export default async function TodayPage() {
             <section>
               <h2 className="text-sm font-medium text-ink-faint">Recent activity</h2>
               <div className="mt-3 flex flex-col gap-2">
-                {notifications.map((n) => (
-                  <div key={n.id} className="card px-4 py-2.5 text-xs text-ink-faint">
-                    {n.message}
+                {burnEvents.slice(0, 5).map((e) => (
+                  <div key={e.id} className="card flex items-baseline justify-between gap-3 px-4 py-2.5 text-xs">
+                    <span className="min-w-0 truncate text-ink-faint">
+                      {e.title}
+                      {e.outcome === "put_out" && " — put out"}
+                    </span>
+                    <span className="shrink-0 font-mono text-[10px] tracking-wide text-ink-faint">{relativeTime(e.occurred_at)}</span>
                   </div>
                 ))}
-                {notifications.length === 0 && (
+                {burnEvents.length === 0 && (
                   <div className="card p-4">
-                    <p className="text-sm text-ink-faint">Nothing captured yet.</p>
+                    <p className="text-sm text-ink-faint">Nothing burned yet today.</p>
                     <OpenCaptureButton />
                   </div>
                 )}

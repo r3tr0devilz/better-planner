@@ -26,7 +26,17 @@ function shortDomainLabel(name: string): string {
  * Clicking a tab opens a modal listing that domain's tasks, filtered from
  * the same task list the page already fetched for its own lists.
  */
-export function DomainTabs({ domains, tasks }: { domains: Domain[]; tasks: Task[] }) {
+export function DomainTabs({
+  domains,
+  tasks,
+  burnedThisWeek = {},
+}: {
+  domains: Domain[];
+  tasks: Task[];
+  /** Burned-task count per domain id over the last 7 days — scorches the
+   * tab in proportion, so a domain you've been clearing shows it. */
+  burnedThisWeek?: Record<string, number>;
+}) {
   const [openId, setOpenId] = useState<string | null>(null);
 
   const close = useCallback(() => setOpenId(null), []);
@@ -40,14 +50,19 @@ export function DomainTabs({ domains, tasks }: { domains: Domain[]; tasks: Task[
   return (
     <>
       <nav aria-label="Jump to a domain" className="hidden shrink-0 flex-col md:flex">
-        {domains.map((domain, i) => (
+        {domains.map((domain, i) => {
+          const burned = burnedThisWeek[domain.id] ?? 0;
+          const scorch = burned <= 0 ? 0 : burned === 1 ? 1 : burned === 2 ? 2 : 3;
+          return (
           <div key={domain.id} className="group relative">
             <button
               type="button"
               onClick={() => setOpenId(domain.id)}
               className="tab"
               data-thread={i % THREAD_COUNT}
-              aria-label={domain.name}
+              data-scorch={scorch}
+              aria-label={`${domain.name} — ${burned} burned this week`}
+              title={`${domain.name} — ${burned} burned this week`}
             >
               {shortDomainLabel(domain.name)}
             </button>
@@ -60,7 +75,8 @@ export function DomainTabs({ domains, tasks }: { domains: Domain[]; tasks: Task[
               </span>
             )}
           </div>
-        ))}
+          );
+        })}
       </nav>
 
       {openDomain && (

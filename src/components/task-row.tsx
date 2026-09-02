@@ -3,8 +3,12 @@
 import { useCallback, useState, useTransition } from "react";
 import { Sparkle } from "lucide-react";
 import { deleteTask, toggleTaskDone, toggleTopThree, updateTask } from "@/app/(app)/tasks/actions";
+import { burnTask, quenchTask } from "@/lib/burn-actions";
 import { Modal } from "@/components/modal";
 import { DeleteButton } from "@/components/delete-button";
+import { Slip } from "@/components/slip";
+import { useBurn } from "@/lib/use-burn";
+import { scentForThread } from "@/lib/scent";
 import type { Domain, Task } from "@/lib/supabase/types";
 
 const SPARKLE_PATH =
@@ -47,7 +51,9 @@ export function TaskRow({
   domains?: Domain[];
   /** Bulk-select mode (Tasks list "Select" toggle) — adds a selection
    * checkbox ahead of the usual done-checkbox instead of replacing it, so
-   * marking things done and selecting them for a bulk action stay separate. */
+   * marking things done and selecting them for a bulk action stay separate.
+   * Also skips the burn animation: a slip catching fire under a bulk
+   * selection reads as noise, not ritual. */
   selectable?: boolean;
   selected?: boolean;
   onToggleSelect?: () => void;
@@ -63,6 +69,7 @@ export function TaskRow({
   const due = formatDue(task.due_at);
   const done = task.status === "done";
   const domainName = domains.find((d) => d.id === task.domain_id)?.name;
+  const scent = scentForThread(threadIndex);
 
   const close = useCallback(() => setEditing(false), []);
 
@@ -74,14 +81,122 @@ export function TaskRow({
     return deleteTask(task.id);
   }
 
-  return (
-    <div className="ledger-row flex items-center gap-3 px-1 py-3">
-      {selectable ? (
-        // Select mode swaps the done-checkbox out for a selection checkbox
-        // in the same slot — two checkboxes side by side (one for "select",
-        // one for "done") read as an unlabeled pair with no way to tell
-        // them apart. Bulk actions are the point of select mode; per-row
-        // done-toggling can wait until you're out of it.
+  // Always called (hook rules) — only actually driven when the row is an
+  // open, non-bulk-select slip; see the branch below.
+  const burn = useBurn(
+    task.id,
+    useCallback(() => startTransition(() => burnTask(task.id)), [task.id]),
+    useCallback(() => startTransition(() => quenchTask(task.id)), [task.id]),
+  );
+
+  const threadDot = threadIndex >= 0 && domainName && (
+    <span className="thread-mark" data-thread={threadIndex} title={domainName} role="img" aria-label={domainName} />
+  );
+  const priorityDot = <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_COLOR[task.priority]}`} aria-hidden />;
+
+  const sparkleButton = (
+    <button
+      onClick={() => startTransition(() => toggleTopThree(task.id, !task.is_top_three))}
+      disabled={pending}
+      aria-label={task.is_top_three ? "Remove from top three" : "Add to top three"}
+      aria-pressed={task.is_top_three}
+      className={`-m-3 flex h-11 w-11 shrink-0 items-center justify-center transition-transform duration-150 active:scale-90 ${task.is_top_three ? "" : "text-ink-faint hover:text-ink"}`}
+    >
+      {task.is_top_three ? (
+        <svg width={19} height={19} viewBox="0 0 24 24" aria-hidden>
+          <path d={SPARKLE_PATH} className="fill-oxblood" />
+          <g transform="translate(12 12) scale(0.42) translate(-12 -12)">
+            <path d={SPARKLE_PATH} className="fill-mustard" />
+          </g>
+        </svg>
+      ) : (
+        <Sparkle size={19} fill="none" />
+      )}
+    </button>
+  );
+
+  const deleteButton = (
+    <DeleteButton
+      confirmMessage={`Delete "${task.title}"? This can't be undone.`}
+      label=""
+      pendingLabel=""
+      ariaLabel={`Delete "${task.title}"`}
+      onDelete={handleDelete}
+      skipConfirm={!!onDelete}
+      className="-m-3 flex h-11 w-11 shrink-0 items-center justify-center text-ink-faint/60 transition-colors duration-150 hover:text-vermillion"
+      iconSize={14}
+    />
+  );
+
+  const editModal = editing && (
+    <Modal onClose={close} title="Edit task">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const formData = new FormData(e.currentTarget);
+          startTransition(() => {
+            updateTask(task.id, formData);
+          });
+          close();
+        }}
+        className="mt-4 flex flex-col gap-3"
+      >
+        <label className="flex flex-col gap-1.5 text-sm text-ink-faint">
+          Title
+          <input name="title" defaultValue={task.title} required className="field" />
+        </label>
+        <label className="flex flex-col gap-1.5 text-sm text-ink-faint">
+          Notes
+          <textarea name="notes" defaultValue={task.notes ?? ""} rows={3} className="field" />
+        </label>
+        <div className="field-row">
+          <label className="field-wide">
+            Domain
+            <select name="domain_id" defaultValue={task.domain_id ?? ""} className="field">
+              <option value="">None</option>
+              {domains.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Due
+            <input type="datetime-local" name="due_at" defaultValue={toDatetimeLocal(task.due_at)} className="field" />
+          </label>
+          <label className="field-narrow">
+            Priority
+            <select name="priority" defaultValue={task.priority} className="field">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </label>
+        </div>
+        <div className="mt-1 flex items-center justify-between gap-3">
+          <DeleteButton
+            confirmMessage={`Delete "${task.title}"? This can't be undone.`}
+            skipConfirm={!!onDelete}
+            onDelete={() => {
+              close();
+              return handleDelete();
+            }}
+          />
+          <button type="submit" className="btn">
+            Save
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+
+  if (selectable) {
+    return (
+      <div className="ledger-row flex items-center gap-3 px-1 py-3">
+        {/* Select mode swaps the done-checkbox out for a selection checkbox
+            in the same slot — two checkboxes side by side read as an
+            unlabeled pair with no way to tell them apart. */}
         <label className="-m-3.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center">
           <input
             type="checkbox"
@@ -91,128 +206,88 @@ export function TaskRow({
             aria-label={`Select "${task.title}"`}
           />
         </label>
-      ) : (
+        {threadDot}
+        {priorityDot}
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-left"
+        >
+          <p className={`truncate text-sm transition-colors duration-150 ${done ? "text-ink-faint line-through" : "text-ink"}`}>
+            {task.title}
+          </p>
+          {due && <p className="truncate font-mono text-xs text-ink-faint">{due}</p>}
+        </button>
+        {sparkleButton}
+        {deleteButton}
+        {editModal}
+      </div>
+    );
+  }
+
+  if (done) {
+    // Already burned — a plain cold row, not a slip to re-animate.
+    return (
+      <div className="ledger-row flex items-center gap-3 px-1 py-3">
         <label className="-m-3.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center">
           <input
             type="checkbox"
-            checked={done}
+            checked
             disabled={pending}
-            onChange={(e) => startTransition(() => toggleTaskDone(task.id, e.target.checked))}
+            onChange={() => startTransition(() => toggleTaskDone(task.id, false))}
             className="h-4 w-4 accent-moss"
-            aria-label={`Mark "${task.title}" ${done ? "open" : "done"}`}
+            aria-label={`Mark "${task.title}" open`}
           />
         </label>
-      )}
+        {threadDot}
+        {priorityDot}
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-left"
+        >
+          <p className="truncate text-sm text-ink-faint line-through">{task.title}</p>
+          {due && <p className="truncate font-mono text-xs text-ink-faint">{due}</p>}
+        </button>
+        {sparkleButton}
+        {deleteButton}
+        {editModal}
+      </div>
+    );
+  }
 
-      {threadIndex >= 0 && domainName && (
-        <span className="thread-mark" data-thread={threadIndex} title={domainName} role="img" aria-label={domainName} />
-      )}
-
-      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_COLOR[task.priority]}`} aria-hidden />
-
+  return (
+    <Slip phase={burn.phase} slipRef={burn.elRef} threadIndex={threadIndex}>
       <button
         type="button"
-        onClick={() => setEditing(true)}
-        className="min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-left"
-      >
-        <p className={`truncate text-sm transition-colors duration-150 ${done ? "text-ink-faint line-through" : "text-ink"}`}>
-          {task.title}
-        </p>
-        {due && <p className="truncate font-mono text-xs text-ink-faint">{due}</p>}
-      </button>
-
-      <button
-        onClick={() => startTransition(() => toggleTopThree(task.id, !task.is_top_three))}
-        disabled={pending}
-        aria-label={task.is_top_three ? "Remove from top three" : "Add to top three"}
-        aria-pressed={task.is_top_three}
-        className={`-m-3 flex h-11 w-11 shrink-0 items-center justify-center transition-transform duration-150 active:scale-90 ${task.is_top_three ? "" : "text-ink-faint hover:text-ink"}`}
-      >
-        {task.is_top_three ? (
-          <svg width={19} height={19} viewBox="0 0 24 24" aria-hidden>
-            <path d={SPARKLE_PATH} className="fill-oxblood" />
-            <g transform="translate(12 12) scale(0.42) translate(-12 -12)">
-              <path d={SPARKLE_PATH} className="fill-mustard" />
-            </g>
-          </svg>
-        ) : (
-          <Sparkle size={19} fill="none" />
-        )}
-      </button>
-
-      <DeleteButton
-        confirmMessage={`Delete "${task.title}"? This can't be undone.`}
-        label=""
-        pendingLabel=""
-        ariaLabel={`Delete "${task.title}"`}
-        onDelete={handleDelete}
-        skipConfirm={!!onDelete}
-        className="-m-3 flex h-11 w-11 shrink-0 items-center justify-center text-ink-faint/60 transition-colors duration-150 hover:text-vermillion"
-        iconSize={14}
+        onClick={burn.onPrimary}
+        disabled={burn.disabled}
+        aria-label={burn.phase === "char" ? `Put out "${task.title}" — keeps the task open` : `Complete "${task.title}" — burns the slip`}
+        title={burn.phase === "char" ? "Put it out" : "Mark done"}
+        className="slip-check"
       />
-
-      {editing && (
-        <Modal onClose={close} title="Edit task">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              startTransition(() => {
-                updateTask(task.id, formData);
-              });
-              close();
-            }}
-            className="mt-4 flex flex-col gap-3"
-          >
-            <label className="flex flex-col gap-1.5 text-sm text-ink-faint">
-              Title
-              <input name="title" defaultValue={task.title} required className="field" />
-            </label>
-            <label className="flex flex-col gap-1.5 text-sm text-ink-faint">
-              Notes
-              <textarea name="notes" defaultValue={task.notes ?? ""} rows={3} className="field" />
-            </label>
-            <div className="field-row">
-              <label className="field-wide">
-                Domain
-                <select name="domain_id" defaultValue={task.domain_id ?? ""} className="field">
-                  <option value="">None</option>
-                  {domains.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Due
-                <input type="datetime-local" name="due_at" defaultValue={toDatetimeLocal(task.due_at)} className="field" />
-              </label>
-              <label className="field-narrow">
-                Priority
-                <select name="priority" defaultValue={task.priority} className="field">
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
-              </label>
-            </div>
-            <div className="mt-1 flex items-center justify-between gap-3">
-              <DeleteButton
-                confirmMessage={`Delete "${task.title}"? This can't be undone.`}
-                skipConfirm={!!onDelete}
-                onDelete={() => {
-                  close();
-                  return handleDelete();
-                }}
-              />
-              <button type="submit" className="btn">
-                Save
-              </button>
-            </div>
-          </form>
-        </Modal>
-      )}
-    </div>
+      {threadDot}
+      {priorityDot}
+      <div className="relative min-w-0 flex-1">
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="min-w-0 cursor-pointer border-0 bg-transparent p-0 text-left"
+        >
+          <p className="slip-text truncate text-sm text-ink">{task.title}</p>
+          <div className="slip-meta mt-0.5 flex items-center gap-2">
+            {due && <span className="truncate font-mono text-xs text-ink-faint">{due}</span>}
+            <span className="scent-tag" data-desc={scent.desc}>
+              <span>{scent.mark}</span>
+              {scent.name}
+            </span>
+          </div>
+        </button>
+        <span className="slip-hint">Press to put it out</span>
+      </div>
+      {sparkleButton}
+      {deleteButton}
+      {editModal}
+    </Slip>
   );
 }
