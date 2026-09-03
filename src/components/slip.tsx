@@ -10,8 +10,8 @@ import type { BurnPhase } from "@/lib/use-burn";
  *
  * `threadIndex` sets `data-thread`, which the app's existing thread-color
  * custom properties (globals.css `[data-thread="n"] { --dot }`) cascade
- * down through — the same variable both the proj-edge spine here and any
- * `.thread-mark` dot inside children pick up, so a slip stays one color.
+ * down through to the proj-edge spine below — the slip's one and only
+ * domain-color indicator.
  */
 export function Slip({
   phase,

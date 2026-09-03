@@ -79,7 +79,6 @@ export function TaskRow({
   const [editing, setEditing] = useState(false);
   const due = formatDue(task.due_at);
   const done = task.status === "done";
-  const domainName = domains.find((d) => d.id === task.domain_id)?.name;
   const scent = scentForThread(threadIndex);
 
   const close = useCallback(() => setEditing(false), []);
@@ -98,10 +97,6 @@ export function TaskRow({
     task.id,
     useCallback(() => startTransition(() => burnTask(task.id)), [task.id]),
     useCallback(() => startTransition(() => quenchTask(task.id)), [task.id]),
-  );
-
-  const threadDot = threadIndex >= 0 && domainName && (
-    <span className="thread-mark" data-thread={threadIndex} title={domainName} role="img" aria-label={domainName} />
   );
 
   const currentState = states.find((s) => s.id === task.state_id);
@@ -230,7 +225,6 @@ export function TaskRow({
             aria-label={`Select "${task.title}"`}
           />
         </label>
-        {threadDot}
         {priorityDot}
         <button
           type="button"
@@ -263,7 +257,6 @@ export function TaskRow({
             aria-label={`Mark "${task.title}" open`}
           />
         </label>
-        {threadDot}
         {priorityDot}
         <button
           type="button"
@@ -290,7 +283,6 @@ export function TaskRow({
         title={burn.phase === "char" ? "Put it out" : "Mark done"}
         className="slip-check"
       />
-      {threadDot}
       {!topThree && priorityDot}
       <div className="relative min-w-0 flex-1">
         <button

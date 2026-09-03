@@ -10,8 +10,8 @@
   --color-ink-faint: #625f59;
 
   /* domain thread palette — six colors cycling per domain (tabs, card
-     flags, thread-marks). cobalt lives here as thread 0 only; it no
-     longer doubles as the interactive accent below. */
+     flags, the proj-edge spine on slips). cobalt lives here as thread 0
+     only; it no longer doubles as the interactive accent below. */
   --color-cobalt: #1e3ae0;
   /* Darkened from the original #e0431e — that value was only 3.97:1 on
      panel (fails WCAG AA 4.5:1) despite being this app's danger/overdue/
@@ -86,7 +86,7 @@ body {
 }
 
 /* Signature: every domain gets a color, cycling through the accent set —
-   carried by the DomainTabs rail and the thread-mark on dense rows. */
+   carried by the DomainTabs rail and the proj-edge spine on slips. */
 [data-thread="0"] { --dot: var(--color-cobalt); }
 [data-thread="1"] { --dot: var(--color-vermillion); }
 [data-thread="2"] { --dot: var(--color-moss); }
@@ -100,16 +100,6 @@ body {
    plain CSS rule outranks any `@layer`-wrapped rule, regardless of source
    order — that's the layer, not the cascade, doing the sorting). */
 @layer components {
-
-.thread-mark {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
-  flex-shrink: 0;
-  background: var(--dot, var(--color-ink-faint));
-  border: 1px solid color-mix(in srgb, var(--dot, var(--color-ink-faint)) 70%, black);
-}
 
 .card {
   position: relative;

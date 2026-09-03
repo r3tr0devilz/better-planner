@@ -16,7 +16,7 @@ function shortDomainLabel(name: string): string {
 
 /**
  * Physical binder-tab navigation, one per domain, cycling the same accent
- * set as thread-mark. Desktop only — a fixed vertical strip has
+ * set as a slip's proj-edge. Desktop only — a fixed vertical strip has
  * nowhere sensible to go on a narrow viewport, so it just hides on mobile
  * rather than trying to collapse into something else. Domains already come
  * in from `getDomains()` sorted by name, so tab order — and the index each
