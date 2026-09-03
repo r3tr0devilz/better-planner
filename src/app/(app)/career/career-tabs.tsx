@@ -2,6 +2,7 @@
 
 import { type KeyboardEvent, type ReactNode, useState } from "react";
 import { ApplicationRow } from "@/components/application-row";
+import { KanbanBoard } from "@/components/kanban-board";
 import { CourseCard } from "@/components/course-card";
 import { CertificateCard } from "@/components/certificate-card";
 import { CareerContactRow } from "@/components/career-contact-row";
@@ -39,7 +40,7 @@ function TabPanel({ id, labelledBy, active, children }: { id: string; labelledBy
       role="tabpanel"
       aria-labelledby={labelledBy}
       inert={!active}
-      className={active ? "" : "invisible absolute inset-0 pointer-events-none"}
+      className={active ? "relative" : "invisible absolute inset-0 pointer-events-none"}
     >
       {children}
     </div>
@@ -70,6 +71,7 @@ export function CareerTabs({
 }) {
   const [active, setActive] = useState<TabId>("applications");
   const activeIndex = TABS.findIndex((t) => t.id === active);
+  const [appsView, setAppsView] = useState<"board" | "table">("board");
 
   function onTabKeyDown(e: KeyboardEvent, index: number) {
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
@@ -102,36 +104,57 @@ export function CareerTabs({
         ))}
       </div>
 
-      <div className="relative mt-3 border border-ink bg-panel/90">
-        <TabPanel id="career-panel-applications" labelledBy="career-tab-applications" active={active === "applications"}>
-          <div className="p-4">
-            <CollapsibleForm action={createJobApplication} triggerLabel="New application">
-              <label className="field-wide">
-                Company
-                <input name="company" required placeholder="Stripe" className="field" />
-              </label>
-              <label className="field-wide">
-                Role
-                <input name="role" required placeholder="Frontend Engineer" className="field" />
-              </label>
-              <label>
-                Deadline
-                <input type="date" name="deadline" className="field" />
-              </label>
-              <label className="field-wide">
-                Job link
-                <input type="url" name="job_link" placeholder="https://…" className="field" />
-              </label>
-              <SubmitButton>Add</SubmitButton>
-            </CollapsibleForm>
+      <TabPanel id="career-panel-applications" labelledBy="career-tab-applications" active={active === "applications"}>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <CollapsibleForm action={createJobApplication} triggerLabel="New application" topMargin="">
+            <label className="field-wide">
+              Company
+              <input name="company" required placeholder="Stripe" className="field" />
+            </label>
+            <label className="field-wide">
+              Role
+              <input name="role" required placeholder="Frontend Engineer" className="field" />
+            </label>
+            <label>
+              Deadline
+              <input type="date" name="deadline" className="field" />
+            </label>
+            <label className="field-wide">
+              Job link
+              <input type="url" name="job_link" placeholder="https://…" className="field" />
+            </label>
+            <SubmitButton>Add</SubmitButton>
+          </CollapsibleForm>
+          <div className="flex gap-1.5">
+            <button type="button" data-on={appsView === "board"} onClick={() => setAppsView("board")} className="ctab">
+              Board
+            </button>
+            <button type="button" data-on={appsView === "table"} onClick={() => setAppsView("table")} className="ctab">
+              Table
+            </button>
           </div>
-          {applications.length > 0 && <Row3Header tab="applications" />}
-          {applications.map((a) => (
-            <ApplicationRow key={a.id} app={a} />
-          ))}
-          {applications.length === 0 && <p className="p-4 pt-0 text-sm text-ink-faint">No applications yet — add one above.</p>}
-        </TabPanel>
+        </div>
 
+        {appsView === "board" ? (
+          applications.filter((a) => a.status !== "archived").length > 0 || applications.length === 0 ? (
+            <div className="mt-4">
+              <KanbanBoard applications={applications} />
+            </div>
+          ) : (
+            <p className="mt-4 text-sm text-ink-faint">Every application here is archived — switch to Table to see it.</p>
+          )
+        ) : (
+          <div className="relative mt-4 border border-ink bg-panel/90">
+            {applications.length > 0 && <Row3Header tab="applications" />}
+            {applications.map((a) => (
+              <ApplicationRow key={a.id} app={a} />
+            ))}
+            {applications.length === 0 && <p className="p-4 text-sm text-ink-faint">No applications yet — add one above.</p>}
+          </div>
+        )}
+      </TabPanel>
+
+      <div className="relative mt-3 border border-ink bg-panel/90">
         <TabPanel id="career-panel-courses" labelledBy="career-tab-courses" active={active === "courses"}>
           <div className="p-4">
             <CollapsibleForm action={createCourse} triggerLabel="New course">
