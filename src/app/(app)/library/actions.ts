@@ -30,6 +30,24 @@ export async function createNote(formData: FormData) {
   revalidatePath("/library");
 }
 
+export async function updateNote(id: string, formData: FormData) {
+  const body = String(formData.get("body") ?? "").trim();
+  if (!body) return;
+
+  const kind = String(formData.get("kind") ?? "note") as LibraryNote["kind"];
+  const source = String(formData.get("source") ?? "").trim() || null;
+  const tags = String(formData.get("tags") ?? "")
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("library_notes").update({ kind, source, body, tags }).eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/library");
+}
+
 export async function toggleNoteFlag(id: string, flagged: boolean) {
   const supabase = await createClient();
   const { error } = await supabase.from("library_notes").update({ flagged_for_review: flagged }).eq("id", id);

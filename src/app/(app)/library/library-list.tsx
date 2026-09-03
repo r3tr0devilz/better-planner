@@ -3,18 +3,12 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { FilterBar } from "@/components/filter-bar";
-import { NoteFlagToggle } from "@/components/note-flag-toggle";
+import { LibraryNoteCard } from "@/components/library-note-card";
 import { DeleteButton } from "@/components/delete-button";
 import { useUndoableDelete } from "@/lib/use-undoable-delete";
 import { useUrlState } from "@/lib/use-url-state";
 import { deleteNote, deleteBookInPlace } from "./actions";
 import type { Book, LibraryNote } from "@/lib/supabase/types";
-
-const KIND_LABEL: Record<LibraryNote["kind"], string> = {
-  note: "Note",
-  quote: "Quote",
-  journal: "Journal",
-};
 
 export function LibraryList({ notes, books }: { notes: LibraryNote[]; books: Book[] }) {
   const [search, setSearch] = useUrlState("q");
@@ -45,32 +39,7 @@ export function LibraryList({ notes, books }: { notes: LibraryNote[]; books: Boo
           <h2 className="text-sm font-medium text-ink-faint">Notes, quotes, journal</h2>
           <div className="mt-3 flex flex-col gap-2.5">
             {filteredNotes.map((note) => (
-              <div key={note.id} className="card-cold relative">
-                <div className="flex flex-wrap items-center gap-2 pr-16">
-                  <span className="tag">{KIND_LABEL[note.kind]}</span>
-                  {note.source && <span className="max-w-[14rem] truncate font-mono text-[10px] tracking-wide text-ink-faint">{note.source}</span>}
-                </div>
-                <p className="mt-2.5 text-sm leading-relaxed text-ink [overflow-wrap:anywhere]">{note.body}</p>
-                {note.tags.length > 0 && (
-                  <p className="mt-2.5 font-mono text-[10px] tracking-wide text-ink-faint">{note.tags.join(" · ")}</p>
-                )}
-                <div className="absolute right-3 top-3 flex items-center gap-1.5">
-                  <NoteFlagToggle id={note.id} flagged={note.flagged_for_review} />
-                  <DeleteButton
-                    confirmMessage="Delete this note? This can't be undone."
-                    label=""
-                    pendingLabel=""
-                    ariaLabel="Delete note"
-                    onDelete={() => {
-                      noteUndo.requestDelete(note.id, "note");
-                      return Promise.resolve();
-                    }}
-                    skipConfirm
-                    className="flex h-7 w-7 shrink-0 items-center justify-center text-ink-faint/60 transition-colors duration-150 hover:text-vermillion"
-                    iconSize={13}
-                  />
-                </div>
-              </div>
+              <LibraryNoteCard key={note.id} note={note} onDelete={() => noteUndo.requestDelete(note.id, "note")} />
             ))}
           </div>
         </section>

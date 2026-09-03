@@ -23,12 +23,21 @@ export function Modal({
   // Escape machinery below — forking that to reskin one panel would regress
   // real accessibility work for a CSS difference.
   panelClass = "card",
+  // The docket detail panel (a "case file" with its own spine-tab heading
+  // and close button baked into its content) has nowhere for Modal's
+  // title+X row to go — headerless skips it so a caller can supply its own,
+  // still getting the exact same focus-trap/portal/Escape machinery.
+  // aria-label substitutes for the title/aria-labelledby pairing in that case.
+  headerless = false,
+  centered = false,
 }: {
   onClose: () => void;
   title: string;
   children: ReactNode;
   className?: string;
   panelClass?: string;
+  headerless?: boolean;
+  centered?: boolean;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -69,29 +78,36 @@ export function Modal({
 
   return createPortal(
     <div
-      className="modal-backdrop fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/40 px-4 pt-24 pb-24"
+      className={`modal-backdrop fixed inset-0 z-50 flex justify-center overflow-y-auto bg-ink/40 px-4 ${centered ? "items-center py-8" : "items-start pt-24 pb-24"}`}
       onClick={onClose}
     >
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={titleId}
+        aria-labelledby={headerless ? undefined : titleId}
+        aria-label={headerless ? title : undefined}
         className={`modal-panel ${panelClass} ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between">
-          <h2
-            id={titleId}
-            className="font-[family-name:var(--font-display)] text-lg font-bold uppercase tracking-tight text-ink"
-          >
-            {title}
-          </h2>
-          <button onClick={onClose} aria-label="Close" className="text-ink-faint transition-colors duration-150 hover:text-ink">
-            <X size={18} />
-          </button>
-        </div>
-        {children}
+        {headerless ? (
+          children
+        ) : (
+          <>
+            <div className="flex items-center justify-between">
+              <h2
+                id={titleId}
+                className="font-[family-name:var(--font-display)] text-lg font-bold uppercase tracking-tight text-ink"
+              >
+                {title}
+              </h2>
+              <button onClick={onClose} aria-label="Close" className="text-ink-faint transition-colors duration-150 hover:text-ink">
+                <X size={18} />
+              </button>
+            </div>
+            {children}
+          </>
+        )}
       </div>
     </div>,
     document.body,

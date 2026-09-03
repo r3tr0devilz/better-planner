@@ -27,3 +27,24 @@ export async function setRemoved(id: string, removed: boolean) {
 
   revalidatePath("/inventory");
 }
+
+export async function updateItem(id: string, formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return;
+
+  const location = String(formData.get("location") ?? "").trim() || null;
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("inventory_items").update({ name, location }).eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/inventory");
+}
+
+export async function deleteItem(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("inventory_items").delete().eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/inventory");
+}
