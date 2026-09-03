@@ -272,7 +272,7 @@ export function TaskRow({
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className="min-w-0 cursor-pointer border-0 bg-transparent p-0 text-left"
+          className="block w-full min-w-0 cursor-pointer border-0 bg-transparent p-0 text-left"
         >
           <p className="slip-text truncate text-sm text-ink">{task.title}</p>
           <div className="slip-meta mt-0.5 flex items-center gap-2">
