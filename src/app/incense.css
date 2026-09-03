@@ -735,6 +735,60 @@
   background-position: 0 29px;
 }
 
+/* ── quick-capture kind picker (Projects: project/domain; Library: note/
+   book; Career: course/certificate/contact) — same sharp-edged, ink-bordered
+   register as .cap-btn/.cap-field, not the soft-radius default DESIGN.md
+   gives ordinary fields: this whole panel already reads as a torn scrap of
+   paper, not app chrome, and a picker living on it should read the same
+   way. Selected state is the One Accent Rule (oxblood = active/CTA). */
+.cap-kind {
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--color-ink);
+  border-radius: 0;
+  background: rgba(253, 248, 236, 0.86);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-ink);
+  transition: background-color 150ms, border-color 150ms, color 150ms, transform 150ms var(--ease-out);
+}
+.cap-kind:hover {
+  background: var(--color-panel);
+}
+.cap-kind:active {
+  transform: scale(0.97);
+}
+.cap-kind-active,
+.cap-kind-active:hover {
+  border-color: var(--color-oxblood);
+  background: var(--color-oxblood);
+  color: var(--color-panel);
+}
+
+/* Same warm dashed "AI" register .cap-btn[data-kind="ai"] already marks its
+   own AI-capture entry point with, reused here so the escape hatch back to
+   the LLM-parsed flow reads as the same path, not a new one. */
+.cap-ai-toggle {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding-bottom: 1px;
+  border-bottom: 1px dashed #8a6b4a;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8a6b4a;
+  transition: color 150ms, border-color 150ms;
+}
+.cap-ai-toggle:hover {
+  color: #e2591b;
+  border-color: #e2591b;
+}
+
 @keyframes bp-read {
   0% {
     left: -22%;

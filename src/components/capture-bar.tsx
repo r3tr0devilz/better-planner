@@ -35,20 +35,36 @@ function getSpeechRecognition(): (new () => SpeechRecognitionLike) | null {
 export function CaptureBar({ variant = "compact" }: { variant?: "sidebar" | "compact" }) {
   const router = useRouter();
   const pathname = usePathname();
-  const quickTarget = quickCaptureFor(pathname);
+  const targets = quickCaptureFor(pathname);
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
   const [status, setStatus] = useState<"idle" | "saving" | "done" | "error">("idle");
   const [resultLabel, setResultLabel] = useState<string | null>(null);
-  // Defaults to quick mode whenever this page has an obvious target
-  // (createTask on Tasks, createNote on Library, ...); "Use AI capture
-  // instead" below can drop into the free-text/voice/LLM-routed flow for a
-  // single open of the modal, without changing what the page itself is.
+  // Which target is picked when the page offers more than one (Projects:
+  // project or domain; Library: note or book; Career: course, certificate,
+  // or contact) — null means "default to the first," reset on every open
+  // below so a stale pick from a different page can't carry over.
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  // Defaults to quick mode whenever this page has a target; "Use AI capture
+  // instead" drops into the free-text/voice/LLM-routed flow for this one
+  // open of the modal, without changing what the page itself defaults to.
   const [useAi, setUseAi] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const speechSupported = typeof window !== "undefined" && getSpeechRecognition() !== null;
-  const quickMode = !!quickTarget && !useAi;
+
+  const activeTarget = targets.find((t) => t.key === selectedKey) ?? targets[0] ?? null;
+  const quickMode = !!activeTarget && !useAi;
+
+  // Fresh defaults on every open — reopening via the keyboard shortcut
+  // skips close()'s own reset, and a pick made on a previous page (or in a
+  // previous open on this one) shouldn't silently carry over.
+  useEffect(() => {
+    if (open) {
+      setUseAi(false);
+      setSelectedKey(null);
+    }
+  }, [open]);
 
   function stopListening() {
     recognitionRef.current?.stop();
@@ -60,7 +76,6 @@ export function CaptureBar({ variant = "compact" }: { variant?: "sidebar" | "com
     setText("");
     setStatus("idle");
     setResultLabel(null);
-    setUseAi(false);
     recognitionRef.current?.stop();
     setListening(false);
   }, []);
@@ -118,13 +133,16 @@ export function CaptureBar({ variant = "compact" }: { variant?: "sidebar" | "com
    * domain out of the text the way AI capture can, which is exactly what
    * "Use AI capture instead" is there for. */
   async function submitQuick() {
-    if (!quickTarget || !text.trim()) return;
+    if (!activeTarget || !text.trim()) return;
     stopListening();
     setStatus("saving");
     try {
       const formData = new FormData();
-      formData.set(quickTarget.field, text);
-      await quickTarget.action(formData);
+      formData.set(activeTarget.field, text);
+      for (const [key, value] of Object.entries(activeTarget.extra?.() ?? {})) {
+        formData.set(key, value);
+      }
+      await activeTarget.action(formData);
       setResultLabel(text.trim());
       setStatus("done");
       router.refresh();
@@ -156,7 +174,12 @@ export function CaptureBar({ variant = "compact" }: { variant?: "sidebar" | "com
     return () => window.removeEventListener("keydown", onKey);
   }, [close, variant]);
 
-  const captureLabel = quickTarget ? `Capture — add a ${quickTarget.kind} here` : "Capture a task or note";
+  const captureLabel =
+    targets.length === 1
+      ? `Capture — add a ${targets[0].label.toLowerCase()} here`
+      : targets.length > 1
+        ? "Capture — choose what to add here"
+        : "Capture a task or note";
 
   return (
     <>
@@ -176,13 +199,32 @@ export function CaptureBar({ variant = "compact" }: { variant?: "sidebar" | "com
       {open && (
         <Modal onClose={close} title="Capture" className="w-full max-w-lg" panelClass="cap-panel">
           <span className="cap-perf" aria-hidden />
+
+          {quickMode && targets.length > 1 && (
+            <div className="mt-3 flex flex-wrap gap-1.5" role="radiogroup" aria-label="What to add">
+              {targets.map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  role="radio"
+                  aria-checked={t.key === activeTarget!.key}
+                  onClick={() => setSelectedKey(t.key)}
+                  className={`cap-kind ${t.key === activeTarget!.key ? "cap-kind-active" : ""}`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
+
           {quickMode ? (
             <input
+              key={activeTarget!.key}
               autoFocus
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder={quickTarget!.placeholder}
-              className="cap-field mt-3"
+              placeholder={activeTarget!.placeholder}
+              className={`cap-field ${targets.length > 1 ? "mt-2" : "mt-3"}`}
               onKeyDown={(e) => {
                 if (e.key === "Enter") submitQuick();
               }}
@@ -201,13 +243,9 @@ export function CaptureBar({ variant = "compact" }: { variant?: "sidebar" | "com
             />
           )}
 
-          {quickTarget && (
-            <button
-              type="button"
-              onClick={() => setUseAi((v) => !v)}
-              className="mt-2 text-xs font-medium text-ink-faint underline decoration-line underline-offset-2 hover:text-ink"
-            >
-              {quickMode ? "Use AI capture instead" : `Back to quick-add a ${quickTarget.kind}`}
+          {targets.length > 0 && (
+            <button type="button" onClick={() => setUseAi((v) => !v)} className="cap-ai-toggle">
+              {quickMode ? "Use AI capture instead" : `Back to quick-add`}
             </button>
           )}
 
