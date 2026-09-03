@@ -38,7 +38,7 @@ function ProjectRow({
   const meta = `${project.kind === "area" ? "AREA" : "PROJECT"} · ${project.engagement === "retainer" ? "RETAINER" : "ONE-TIME"}`;
 
   return (
-    <div className="proj-row group relative" data-thread={threadIndex >= 0 ? threadIndex : undefined}>
+    <div className="proj-row relative" data-thread={threadIndex >= 0 ? threadIndex : undefined}>
       <Link href={`/projects/${project.id}`} className="min-w-0">
         <p className="truncate text-sm text-ink">{project.name}</p>
         <p className="mt-0.5 font-mono text-[10px] tracking-wide text-ink-faint">{meta}</p>
@@ -60,7 +60,7 @@ function ProjectRow({
             return Promise.resolve();
           }}
           skipConfirm
-          className="flex h-7 w-7 shrink-0 items-center justify-center text-ink-faint/60 opacity-0 transition-colors duration-150 hover:text-vermillion group-hover:opacity-100"
+          className="flex h-7 w-7 shrink-0 items-center justify-center text-ink-faint/60 transition-colors duration-150 hover:text-vermillion"
           iconSize={13}
         />
       </span>
