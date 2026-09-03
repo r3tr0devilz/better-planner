@@ -47,6 +47,7 @@ export function TaskRow({
   selected = false,
   onToggleSelect,
   onDelete,
+  topThree = false,
 }: {
   task: Task;
   threadIndex: number;
@@ -54,6 +55,11 @@ export function TaskRow({
   /** User-defined task states — only the open, non-selectable slip shows a
    * cycling chip, and only once at least one state exists to cycle into. */
   states?: TaskState[];
+  /** The Today page's "Top three" grid — per the design spec, that slip is
+   * the checkbox, thread dot, title and due/scent meta only: no priority
+   * dot, state chip, star toggle, or trash icon crowding the small card.
+   * Un-starring and deleting stay reachable from the Tasks list. */
+  topThree?: boolean;
   /** Bulk-select mode (Tasks list "Select" toggle) — adds a selection
    * checkbox ahead of the usual done-checkbox instead of replacing it, so
    * marking things done and selecting them for a bulk action stay separate.
@@ -285,7 +291,7 @@ export function TaskRow({
         className="slip-check"
       />
       {threadDot}
-      {priorityDot}
+      {!topThree && priorityDot}
       <div className="relative min-w-0 flex-1">
         <button
           type="button"
@@ -303,9 +309,9 @@ export function TaskRow({
         </button>
         <span className="slip-hint">Press to put it out</span>
       </div>
-      {stateChip}
-      {sparkleButton}
-      {deleteButton}
+      {!topThree && stateChip}
+      {!topThree && sparkleButton}
+      {!topThree && deleteButton}
       {editModal}
     </Slip>
   );

@@ -183,13 +183,11 @@ export default async function TodayPage() {
 
         <section className="mt-8">
           <h2 data-snap="today-top3" className="text-sm font-medium text-ink-faint">Top three today</h2>
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
             {topThree.map((task) => {
               const threadIndex = threadIndexFor(task.domain_id, domains);
               return (
-                <div key={task.id} className="card p-4">
-                  <TaskRow task={task} threadIndex={threadIndex} domains={domains} states={states} />
-                </div>
+                <TaskRow key={task.id} task={task} threadIndex={threadIndex} domains={domains} states={states} topThree />
               );
             })}
             {topThree.length === 0 && (

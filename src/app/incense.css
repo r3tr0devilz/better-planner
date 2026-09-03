@@ -266,6 +266,19 @@
   display: none;
 }
 
+/* Today's "Top three" row — matches the design spec's .top-grid exactly:
+   the slip stretches to fill its grid cell so three cards of differing
+   title length still line up edge to edge, and its meta row wraps instead
+   of forcing width on a narrow one-third-page column. */
+.top-grid .slip-clip,
+.top-grid .slip-body {
+  height: 100%;
+}
+.top-grid .slip-meta {
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
 .slip-text,
 .slip-meta {
   transition: opacity 260ms ease-out;
