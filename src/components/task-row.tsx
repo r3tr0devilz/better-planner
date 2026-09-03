@@ -15,10 +15,15 @@ import type { Domain, Task, TaskState } from "@/lib/supabase/types";
 const SPARKLE_PATH =
   "M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z";
 
+// A single hue (vermillion — this app's existing danger/high-priority
+// color) fading by opacity, not three separate hues: mustard and the other
+// thread colors already mean "domain" via proj-edge, so a medium-priority
+// task in that domain would otherwise show a mustard dot next to a mustard
+// spine for two unrelated reasons.
 const PRIORITY_COLOR: Record<Task["priority"], string> = {
   high: "bg-vermillion",
-  medium: "bg-mustard",
-  low: "bg-ink-faint",
+  medium: "bg-vermillion/55",
+  low: "bg-ink-faint/50",
 };
 
 function formatDue(dueAt: string | null): string | null {
