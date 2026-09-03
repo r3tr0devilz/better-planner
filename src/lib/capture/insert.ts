@@ -95,5 +95,22 @@ export async function insertCaptureResult(supabase: Supabase, domains: Domain[],
     return `Contact saved: ${parsed.title}`;
   }
 
-  return `Captured: ${parsed.title}`;
+  // kind="other" — the schema's own catch-all for anything that isn't a
+  // task or one of the four career records (a note, a quote, a stray
+  // thought). This used to fall all the way through to the label below
+  // with no insert at all: the capture bar would show "Captured: ..." and
+  // nothing was ever actually written anywhere. Land it as a library note
+  // instead — the same table/shape createNote() writes — so "other" means
+  // "saved somewhere sensible," not "silently dropped."
+  const { error } = await supabase.from("library_notes").insert({
+    kind: "note",
+    source: null,
+    body: parsed.title,
+    tags: [],
+    image_url: null,
+    flagged_for_review: false,
+    book_id: null,
+  });
+  if (error) throw error;
+  return `Note saved: ${parsed.title}`;
 }

@@ -104,7 +104,17 @@ export function CaptureBar({ variant = "compact" }: { variant?: "sidebar" | "com
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "j") {
+      // CaptureBar mounts twice at once — "sidebar" for desktop, "compact"
+      // for the mobile header — each swapped in/out purely by a CSS
+      // breakpoint, so both are always in the tree and both used to run
+      // this same listener. Gate the shortcut to one instance (sidebar's,
+      // since it's the one that's always mounted) so Cmd/Ctrl+J opens a
+      // single Capture modal instead of one from each. Modal portals to
+      // document.body, so sidebar's own modal still displays correctly
+      // even while its CSS-hidden on a narrow viewport. Escape stays
+      // unscoped — it only ever closes this instance's own (already-open)
+      // modal, so there's nothing to duplicate there.
+      if (variant === "sidebar" && (e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === "j") {
         e.preventDefault();
         setOpen(true);
       }
@@ -112,7 +122,7 @@ export function CaptureBar({ variant = "compact" }: { variant?: "sidebar" | "com
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [close]);
+  }, [close, variant]);
 
   return (
     <>
