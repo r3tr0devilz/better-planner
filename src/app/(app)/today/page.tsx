@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { ListTodo, Repeat } from "lucide-react";
-import { getTopThree, getTasks } from "@/lib/data/tasks";
+import { getTopThree, getTasks, getTaskStates } from "@/lib/data/tasks";
 import { getDomains, threadIndexFor } from "@/lib/data/domains";
 import { getRoutines, getRecentCompletions, currentStreak, todayStr, HISTORY_DAYS } from "@/lib/data/routines";
-import { getSlippingProjects } from "@/lib/data/projects";
 import { getBurnEvents } from "@/lib/data/burn";
 import { getDisplayName } from "@/lib/data/settings";
 import { getGoogleCalendarStatus } from "@/lib/google-calendar";
@@ -12,6 +11,8 @@ import { RoutineRow } from "@/components/routine-row";
 import { DomainTabs } from "@/components/domain-tabs";
 import { OpenCaptureButton } from "@/components/open-capture-button";
 import { EmptyState } from "@/components/empty-state";
+import { groupByState } from "@/lib/task-sections";
+import { deleteTaskState } from "@/app/(app)/tasks/actions";
 
 function historyFor(routineId: string, completions: Awaited<ReturnType<typeof getRecentCompletions>>) {
   const byDate = new Map(completions.filter((c) => c.routine_id === routineId).map((c) => [c.date, c.completed]));
@@ -74,13 +75,13 @@ function dailyLine(): string {
 const TONE_CLASS = { moss: "text-moss", vermillion: "text-vermillion", faint: "text-ink-faint" } as const;
 
 export default async function TodayPage() {
-  const [topThree, tasks, domains, routines, completions, slipping, burnEvents, displayName, calendarStatus] = await Promise.all([
+  const [topThree, tasks, domains, states, routines, completions, burnEvents, displayName, calendarStatus] = await Promise.all([
     getTopThree(),
     getTasks(),
     getDomains(),
+    getTaskStates(),
     getRoutines(),
     getRecentCompletions(),
-    getSlippingProjects(),
     getBurnEvents(),
     getDisplayName(),
     getGoogleCalendarStatus(),
@@ -187,7 +188,7 @@ export default async function TodayPage() {
               const threadIndex = threadIndexFor(task.domain_id, domains);
               return (
                 <div key={task.id} className="card p-4">
-                  <TaskRow task={task} threadIndex={threadIndex} domains={domains} />
+                  <TaskRow task={task} threadIndex={threadIndex} domains={domains} states={states} />
                 </div>
               );
             })}
@@ -202,17 +203,37 @@ export default async function TodayPage() {
         <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1.4fr_1fr]">
           <div className="flex flex-col gap-8">
             <section>
-              <h2 data-snap="today-open" className="text-sm font-medium text-ink-faint">Open tasks ({open.length})</h2>
               {open.length === 0 ? (
-                <div className="mt-3">
-                  <EmptyState icon={ListTodo} message="Nothing open — nice." />
-                </div>
+                <>
+                  <h2 data-snap="today-open" className="text-sm font-medium text-ink-faint">Open tasks (0)</h2>
+                  <div className="mt-3">
+                    <EmptyState icon={ListTodo} message="Nothing open — nice." />
+                  </div>
+                </>
               ) : (
-                <div className="ledger mt-3">
-                  {open.slice(0, 8).map((task) => (
-                    <TaskRow key={task.id} task={task} threadIndex={threadIndexFor(task.domain_id, domains)} domains={domains} />
-                  ))}
-                </div>
+                groupByState(open.slice(0, 8), states).map((sec, i) => (
+                  <div key={sec.id ?? "open"} className={i > 0 ? "mt-6" : ""}>
+                    <div className="flex items-baseline gap-1.5">
+                      <h2 data-snap={i === 0 ? "today-open" : undefined} className="text-sm font-medium text-ink-faint">
+                        {i === 0 ? `Open tasks (${open.length})` : `${sec.label} (${sec.items.length})`}
+                      </h2>
+                      {sec.canDrop && (
+                        <form action={deleteTaskState.bind(null, sec.id!)}>
+                          <button type="submit" className="st-drop" title="Remove this state">
+                            ×
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                    {sec.items.length > 0 && (
+                      <div className="ledger mt-3">
+                        {sec.items.map((task) => (
+                          <TaskRow key={task.id} task={task} threadIndex={threadIndexFor(task.domain_id, domains)} domains={domains} states={states} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
               )}
               {open.length > 8 && (
                 <Link href="/tasks" className="mt-2 inline-block text-xs font-semibold text-oxblood hover:underline">
@@ -267,24 +288,6 @@ export default async function TodayPage() {
                 </Link>
               </div>
             </section>
-
-            {slipping.length > 0 && (
-              <section>
-                <h2 data-snap="today-slipping" className="text-sm font-medium text-ink-faint">Needs a look</h2>
-                <div className="mt-3 flex flex-col gap-2">
-                  {slipping.map((project) => (
-                    <Link
-                      key={project.id}
-                      href={`/projects/${project.id}`}
-                      className="hoverable card block px-4 py-3 text-sm text-ink hover:bg-stone"
-                    >
-                      <span className="[overflow-wrap:anywhere]">{project.name}</span>
-                      <span className="ml-2 text-xs font-semibold text-vermillion">no activity in 7+ days</span>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            )}
 
             <section>
               <h2 data-snap="today-activity" className="text-sm font-medium text-ink-faint">Recent activity</h2>

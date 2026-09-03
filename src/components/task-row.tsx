@@ -2,14 +2,15 @@
 
 import { useCallback, useState, useTransition } from "react";
 import { Sparkle } from "lucide-react";
-import { deleteTask, toggleTaskDone, toggleTopThree, updateTask } from "@/app/(app)/tasks/actions";
+import { deleteTask, toggleTaskDone, toggleTopThree, updateTask, setTaskState } from "@/app/(app)/tasks/actions";
 import { burnTask, quenchTask } from "@/lib/burn-actions";
 import { Modal } from "@/components/modal";
 import { DeleteButton } from "@/components/delete-button";
 import { Slip } from "@/components/slip";
 import { useBurn } from "@/lib/use-burn";
 import { scentForThread } from "@/lib/scent";
-import type { Domain, Task } from "@/lib/supabase/types";
+import { nextState } from "@/lib/task-sections";
+import type { Domain, Task, TaskState } from "@/lib/supabase/types";
 
 const SPARKLE_PATH =
   "M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z";
@@ -41,6 +42,7 @@ export function TaskRow({
   task,
   threadIndex,
   domains = [],
+  states = [],
   selectable = false,
   selected = false,
   onToggleSelect,
@@ -49,6 +51,9 @@ export function TaskRow({
   task: Task;
   threadIndex: number;
   domains?: Domain[];
+  /** User-defined task states — only the open, non-selectable slip shows a
+   * cycling chip, and only once at least one state exists to cycle into. */
+  states?: TaskState[];
   /** Bulk-select mode (Tasks list "Select" toggle) — adds a selection
    * checkbox ahead of the usual done-checkbox instead of replacing it, so
    * marking things done and selecting them for a bulk action stay separate.
@@ -91,6 +96,19 @@ export function TaskRow({
 
   const threadDot = threadIndex >= 0 && domainName && (
     <span className="thread-mark" data-thread={threadIndex} title={domainName} role="img" aria-label={domainName} />
+  );
+
+  const currentState = states.find((s) => s.id === task.state_id);
+  const stateChip = states.length > 0 && (
+    <button
+      type="button"
+      onClick={() => startTransition(() => setTaskState(task.id, nextState(task.state_id, states)))}
+      disabled={pending}
+      className="st-chip"
+      title={currentState ? `In "${currentState.name}" — press to move on` : "Press to set a state"}
+    >
+      {currentState?.name ?? "···"}
+    </button>
   );
   const priorityDot = <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_COLOR[task.priority]}`} aria-hidden />;
 
@@ -285,6 +303,7 @@ export function TaskRow({
         </button>
         <span className="slip-hint">Press to put it out</span>
       </div>
+      {stateChip}
       {sparkleButton}
       {deleteButton}
       {editModal}

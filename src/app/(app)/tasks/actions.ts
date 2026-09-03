@@ -25,6 +25,7 @@ export async function createTask(formData: FormData) {
     is_top_three: false,
     recurring_rule: null,
     duration_minutes: null,
+    state_id: null,
   });
   if (error) throw error;
 
@@ -122,4 +123,48 @@ export async function bulkSetStatus(ids: string[], status: "open" | "done") {
   revalidatePath("/tasks");
   revalidatePath("/today");
   revalidatePath("/calendar");
+}
+
+/** Sets which section a slip lives in — null returns it to the plain "Open"
+ * section. Distinct from status: a stated task is still open, just grouped
+ * under its own heading instead of "Open". */
+export async function setTaskState(id: string, stateId: string | null) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("tasks").update({ state_id: stateId }).eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/tasks");
+  revalidatePath("/today");
+}
+
+export async function createTaskState(formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: existing } = await supabase.from("task_states").select("sort_order").order("sort_order", { ascending: false }).limit(1);
+  const sortOrder = (existing?.[0]?.sort_order ?? -10) + 10;
+
+  const { error } = await supabase.from("task_states").insert({ name, sort_order: sortOrder });
+  if (error) throw error;
+
+  revalidatePath("/tasks");
+  revalidatePath("/today");
+}
+
+/** "Drop" a state — the state itself goes away; every task that was in it
+ * falls back to null (plain "Open") via the column's own ON DELETE SET
+ * NULL, not a separate update here. */
+export async function deleteTaskState(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("task_states").delete().eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/tasks");
+  revalidatePath("/today");
 }

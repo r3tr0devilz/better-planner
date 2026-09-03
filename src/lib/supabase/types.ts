@@ -91,6 +91,17 @@ export type Task = Timestamped & {
   is_top_three: boolean;
   recurring_rule: string | null;
   duration_minutes: number | null;
+  /** A user-defined state beyond open/done (e.g. "waiting on someone"),
+   * null for a plain open task. See 0010_task_states.sql. */
+  state_id: string | null;
+};
+
+/** A user-defined task state — see 0010_task_states.sql. */
+export type TaskState = Timestamped & {
+  id: string;
+  user_id: string;
+  name: string;
+  sort_order: number;
 };
 
 export type Routine = Timestamped & {
@@ -321,6 +332,7 @@ export type Database = {
       checklist_items: TableDef<ChecklistItem, Omit<ChecklistItem, "id" | "user_id"> & { user_id?: string }>;
       activity_logs: TableDef<ActivityLog, Omit<ActivityLog, "id" | "user_id" | "logged_at"> & { user_id?: string; logged_at?: string }>;
       tasks: TableDef<Task, Omit<Task, "id" | "user_id" | "created_at"> & { user_id?: string }>;
+      task_states: TableDef<TaskState, Omit<TaskState, "id" | "user_id" | "created_at"> & { user_id?: string }>;
       routines: TableDef<Routine, Omit<Routine, "id" | "user_id" | "created_at"> & { user_id?: string }>;
       routine_completions: TableDef<RoutineCompletion, Omit<RoutineCompletion, "id" | "user_id"> & { user_id?: string }>;
       burn_events: TableDef<BurnEvent, Omit<BurnEvent, "id" | "user_id" | "occurred_at"> & { user_id?: string; occurred_at?: string }>;

@@ -1,4 +1,4 @@
-import { getTasks } from "@/lib/data/tasks";
+import { getTasks, getTaskStates } from "@/lib/data/tasks";
 import { getDomains } from "@/lib/data/domains";
 import { PageHeader } from "@/components/page-header";
 import { CollapsibleForm } from "@/components/collapsible-form";
@@ -7,7 +7,7 @@ import { TaskList } from "./task-list";
 import { createTask } from "./actions";
 
 export default async function TasksPage() {
-  const [tasks, domains] = await Promise.all([getTasks(), getDomains()]);
+  const [tasks, domains, states] = await Promise.all([getTasks(), getDomains(), getTaskStates()]);
   const open = tasks.filter((t) => t.status === "open");
   const done = tasks.filter((t) => t.status === "done");
 
@@ -46,7 +46,7 @@ export default async function TasksPage() {
         <SubmitButton>Add</SubmitButton>
       </CollapsibleForm>
 
-      <TaskList tasks={tasks} domains={domains} />
+      <TaskList tasks={tasks} domains={domains} states={states} />
     </div>
   );
 }

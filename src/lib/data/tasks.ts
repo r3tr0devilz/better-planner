@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Task } from "@/lib/supabase/types";
+import type { Task, TaskState } from "@/lib/supabase/types";
 
 export async function getTasks(): Promise<Task[]> {
   const supabase = await createClient();
@@ -19,6 +19,13 @@ export async function getTopThree(): Promise<Task[]> {
     .eq("is_top_three", true)
     .eq("status", "open")
     .order("due_at", { ascending: true, nullsFirst: false });
+  if (error) throw error;
+  return data;
+}
+
+export async function getTaskStates(): Promise<TaskState[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("task_states").select("*").order("sort_order");
   if (error) throw error;
   return data;
 }

@@ -1149,4 +1149,37 @@
   text-align: center;
 }
 
+/* ── custom task states (Today + Tasks) ──────────────────────────────── */
+
+.st-chip {
+  flex: none;
+  padding: 0.16rem 0.42rem;
+  border: 1px dashed var(--color-line);
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #625f59;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.st-chip:hover {
+  border-style: solid;
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+}
+.st-drop {
+  padding: 0 0.3rem;
+  border: 0;
+  background: none;
+  font-size: 12px;
+  line-height: 1;
+  color: #b0aa9c;
+  cursor: pointer;
+}
+.st-drop:hover {
+  color: #8a2f12;
+}
+
 } /* @layer components */

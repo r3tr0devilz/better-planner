@@ -31,6 +31,7 @@ export async function insertCaptureResult(supabase: Supabase, domains: Domain[],
       is_top_three: false,
       recurring_rule: null,
       duration_minutes: null,
+      state_id: null,
     });
     if (error) throw error;
     return `Task created: ${parsed.title}`;
