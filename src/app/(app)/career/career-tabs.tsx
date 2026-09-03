@@ -1,6 +1,6 @@
 "use client";
 
-import { type KeyboardEvent, type ReactNode, useState } from "react";
+import { type KeyboardEvent, type ReactNode, useEffect, useState } from "react";
 import { ApplicationRow } from "@/components/application-row";
 import { KanbanBoard } from "@/components/kanban-board";
 import { CourseCard } from "@/components/course-card";
@@ -19,6 +19,19 @@ const TABS = [
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
+
+/** Course/Certificate/Contact each live behind a different tab (Applications
+ * excluded — createJobApplication needs two required fields, so it's not a
+ * quick-capture target). CollapsibleForm's own captureId listener opens and
+ * scrolls to the right form regardless of which tab is active — panels stay
+ * mounted, just hidden — but "hidden" is exactly the problem: this map lets
+ * the tab itself switch to match before that happens, so the form Capture
+ * opens is actually visible, not just present in the DOM. */
+const CAPTURE_ID_TAB: Record<string, TabId> = {
+  course: "courses",
+  certificate: "certificates",
+  contact: "contacts",
+};
 
 const ROW3_HEAD: Record<TabId, [string, string, string]> = {
   applications: ["Company / role", "Deadline", "Status"],
@@ -70,8 +83,17 @@ export function CareerTabs({
   contacts: CareerContact[];
 }) {
   const [active, setActive] = useState<TabId>("applications");
-  const activeIndex = TABS.findIndex((t) => t.id === active);
   const [appsView, setAppsView] = useState<"board" | "table">("board");
+
+  useEffect(() => {
+    function onQuickCapture(e: Event) {
+      const id = (e as CustomEvent<{ id: string }>).detail?.id;
+      const tab = id ? CAPTURE_ID_TAB[id] : undefined;
+      if (tab) setActive(tab);
+    }
+    window.addEventListener("bp:quick-capture", onQuickCapture);
+    return () => window.removeEventListener("bp:quick-capture", onQuickCapture);
+  }, []);
 
   function onTabKeyDown(e: KeyboardEvent, index: number) {
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
@@ -157,7 +179,7 @@ export function CareerTabs({
       <div className="relative mt-3 border border-ink bg-panel/90">
         <TabPanel id="career-panel-courses" labelledBy="career-tab-courses" active={active === "courses"}>
           <div className="p-4">
-            <CollapsibleForm action={createCourse} triggerLabel="New course">
+            <CollapsibleForm action={createCourse} triggerLabel="New course" captureId="course">
               <label className="field-wide">
                 Course name
                 <input name="name" required placeholder="Full-Stack React, AWS Solutions Architect…" className="field" />
@@ -186,7 +208,7 @@ export function CareerTabs({
 
         <TabPanel id="career-panel-certificates" labelledBy="career-tab-certificates" active={active === "certificates"}>
           <div className="p-4">
-            <CollapsibleForm action={createCertificate} triggerLabel="New certificate">
+            <CollapsibleForm action={createCertificate} triggerLabel="New certificate" captureId="certificate">
               <label className="field-wide">
                 Title
                 <input name="title" required placeholder="AWS Certified Developer" className="field" />
@@ -219,7 +241,7 @@ export function CareerTabs({
 
         <TabPanel id="career-panel-contacts" labelledBy="career-tab-contacts" active={active === "contacts"}>
           <div className="p-4">
-            <CollapsibleForm action={createCareerContact} triggerLabel="New contact">
+            <CollapsibleForm action={createCareerContact} triggerLabel="New contact" captureId="contact">
               <label className="field-wide">
                 Name
                 <input name="name" required placeholder="Name" className="field" />

@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { Mic, Plus, Square } from "lucide-react";
 import { Modal } from "./modal";
 import { CaptureShortcutKey } from "./capture-shortcut-key";
-import { quickCaptureFor } from "@/lib/quick-capture";
+import { quickCaptureFor, openQuickCapture } from "@/lib/quick-capture";
 
 type SpeechRecognitionLike = {
   continuous: boolean;
@@ -36,35 +36,19 @@ export function CaptureBar({ variant = "compact" }: { variant?: "sidebar" | "com
   const router = useRouter();
   const pathname = usePathname();
   const targets = quickCaptureFor(pathname);
-  const [open, setOpen] = useState(false);
+  // "ai" is the original free-text/voice/LLM-parsed modal, unchanged, shown
+  // only on pages with no quick-capture target of their own. "picker" is a
+  // bare "which one" chip list for pages with more than one target — no
+  // text field, no LLM, just opening the real form once you've said which.
+  // A single-target page never shows either: one click opens straight
+  // through to that page's own form (see handleClick).
+  const [modalMode, setModalMode] = useState<"ai" | "picker" | null>(null);
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
   const [status, setStatus] = useState<"idle" | "saving" | "done" | "error">("idle");
   const [resultLabel, setResultLabel] = useState<string | null>(null);
-  // Which target is picked when the page offers more than one (Projects:
-  // project or domain; Library: note or book; Career: course, certificate,
-  // or contact) — null means "default to the first," reset on every open
-  // below so a stale pick from a different page can't carry over.
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
-  // Defaults to quick mode whenever this page has a target; "Use AI capture
-  // instead" drops into the free-text/voice/LLM-routed flow for this one
-  // open of the modal, without changing what the page itself defaults to.
-  const [useAi, setUseAi] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const speechSupported = typeof window !== "undefined" && getSpeechRecognition() !== null;
-
-  const activeTarget = targets.find((t) => t.key === selectedKey) ?? targets[0] ?? null;
-  const quickMode = !!activeTarget && !useAi;
-
-  // Fresh defaults on every open — reopening via the keyboard shortcut
-  // skips close()'s own reset, and a pick made on a previous page (or in a
-  // previous open on this one) shouldn't silently carry over.
-  useEffect(() => {
-    if (open) {
-      setUseAi(false);
-      setSelectedKey(null);
-    }
-  }, [open]);
 
   function stopListening() {
     recognitionRef.current?.stop();
@@ -72,13 +56,28 @@ export function CaptureBar({ variant = "compact" }: { variant?: "sidebar" | "com
   }
 
   const close = useCallback(() => {
-    setOpen(false);
+    setModalMode(null);
     setText("");
     setStatus("idle");
     setResultLabel(null);
     recognitionRef.current?.stop();
     setListening(false);
   }, []);
+
+  function handleClick() {
+    if (targets.length === 0) {
+      setModalMode("ai");
+    } else if (targets.length === 1) {
+      openQuickCapture(targets[0].key);
+    } else {
+      setModalMode("picker");
+    }
+  }
+
+  function pick(key: string) {
+    openQuickCapture(key);
+    setModalMode(null);
+  }
 
   function toggleListening() {
     const Recognition = getSpeechRecognition();
@@ -127,52 +126,26 @@ export function CaptureBar({ variant = "compact" }: { variant?: "sidebar" | "com
     }
   }
 
-  /** No LLM round trip — just the current page's own createX action with
-   * this one field, the same call its native "+ New X" form already makes.
-   * Deterministic and fast; the trade-off is it can't pull a due date or
-   * domain out of the text the way AI capture can, which is exactly what
-   * "Use AI capture instead" is there for. */
-  async function submitQuick() {
-    if (!activeTarget || !text.trim()) return;
-    stopListening();
-    setStatus("saving");
-    try {
-      const formData = new FormData();
-      formData.set(activeTarget.field, text);
-      for (const [key, value] of Object.entries(activeTarget.extra?.() ?? {})) {
-        formData.set(key, value);
-      }
-      await activeTarget.action(formData);
-      setResultLabel(text.trim());
-      setStatus("done");
-      router.refresh();
-      setTimeout(close, 1400);
-    } catch {
-      setStatus("error");
-    }
-  }
-
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       // CaptureBar mounts twice at once — "sidebar" for desktop, "compact"
       // for the mobile header — each swapped in/out purely by a CSS
       // breakpoint, so both are always in the tree and both used to run
       // this same listener. Gate the shortcut to one instance (sidebar's,
-      // since it's the one that's always mounted) so Cmd/Ctrl+J opens a
-      // single Capture modal instead of one from each. Modal portals to
-      // document.body, so sidebar's own modal still displays correctly
-      // even while its CSS-hidden on a narrow viewport. Escape stays
+      // since it's the one that's always mounted) so Cmd/Ctrl+J triggers
+      // Capture exactly once instead of once per instance. Escape stays
       // unscoped — it only ever closes this instance's own (already-open)
       // modal, so there's nothing to duplicate there.
       if (variant === "sidebar" && (e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === "j") {
         e.preventDefault();
-        setOpen(true);
+        handleClick();
       }
       if (e.key === "Escape") close();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [close, variant]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [close, variant, targets.length]);
 
   const captureLabel =
     targets.length === 1
@@ -184,70 +157,46 @@ export function CaptureBar({ variant = "compact" }: { variant?: "sidebar" | "com
   return (
     <>
       {variant === "sidebar" ? (
-        <button type="button" onClick={() => setOpen(true)} data-kind="quick" className="cap-btn" aria-label={captureLabel}>
+        <button type="button" onClick={handleClick} data-kind="quick" className="cap-btn" aria-label={captureLabel}>
           <span className="cap-mark">+</span>
           <span>Capture</span>
           <CaptureShortcutKey />
         </button>
       ) : (
-        <button onClick={() => setOpen(true)} className="btn shrink-0" aria-label={captureLabel}>
+        <button onClick={handleClick} className="btn shrink-0" aria-label={captureLabel}>
           <Plus size={18} />
           <span className="hidden sm:inline">Capture</span>
         </button>
       )}
 
-      {open && (
+      {modalMode === "picker" && (
+        <Modal onClose={close} title="Capture" className="w-full max-w-sm" panelClass="cap-panel">
+          <span className="cap-perf" aria-hidden />
+          <p className="mt-3 text-xs text-ink-faint">What would you like to add?</p>
+          <div className="mt-2 flex flex-wrap gap-1.5" role="group" aria-label="What to add">
+            {targets.map((t) => (
+              <button key={t.key} type="button" onClick={() => pick(t.key)} className="cap-kind">
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </Modal>
+      )}
+
+      {modalMode === "ai" && (
         <Modal onClose={close} title="Capture" className="w-full max-w-lg" panelClass="cap-panel">
           <span className="cap-perf" aria-hidden />
-
-          {quickMode && targets.length > 1 && (
-            <div className="mt-3 flex flex-wrap gap-1.5" role="radiogroup" aria-label="What to add">
-              {targets.map((t) => (
-                <button
-                  key={t.key}
-                  type="button"
-                  role="radio"
-                  aria-checked={t.key === activeTarget!.key}
-                  onClick={() => setSelectedKey(t.key)}
-                  className={`cap-kind ${t.key === activeTarget!.key ? "cap-kind-active" : ""}`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {quickMode ? (
-            <input
-              key={activeTarget!.key}
-              autoFocus
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder={activeTarget!.placeholder}
-              className={`cap-field ${targets.length > 1 ? "mt-2" : "mt-3"}`}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") submitQuick();
-              }}
-            />
-          ) : (
-            <textarea
-              autoFocus
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Schedule a task, jot a note, log a quote…"
-              rows={3}
-              className="cap-field mt-3"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit("text");
-              }}
-            />
-          )}
-
-          {targets.length > 0 && (
-            <button type="button" onClick={() => setUseAi((v) => !v)} className="cap-ai-toggle">
-              {quickMode ? "Use AI capture instead" : `Back to quick-add`}
-            </button>
-          )}
+          <textarea
+            autoFocus
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Schedule a task, jot a note, log a quote…"
+            rows={3}
+            className="cap-field mt-3"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit("text");
+            }}
+          />
 
           <div role="status" aria-live="polite">
             {status === "error" && (
@@ -259,7 +208,7 @@ export function CaptureBar({ variant = "compact" }: { variant?: "sidebar" | "com
           </div>
 
           <div className="mt-4 flex items-center justify-between border-t border-line pt-3">
-            {!quickMode && speechSupported ? (
+            {speechSupported ? (
               <button onClick={toggleListening} className={listening ? "btn-ink" : "btn-quiet"}>
                 {listening ? <Square size={14} /> : <Mic size={14} />}
                 {listening ? "Stop" : "Voice"}
@@ -269,7 +218,7 @@ export function CaptureBar({ variant = "compact" }: { variant?: "sidebar" | "com
             )}
 
             <button
-              onClick={() => (quickMode ? submitQuick() : submit(listening ? "voice" : "text"))}
+              onClick={() => submit(listening ? "voice" : "text")}
               disabled={status === "saving" || !text.trim()}
               className="btn-ink"
             >

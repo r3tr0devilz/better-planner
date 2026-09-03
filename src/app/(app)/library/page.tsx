@@ -12,7 +12,7 @@ export default async function LibraryPage() {
     <div className="mx-auto max-w-3xl">
       <PageHeader title="Library" context={`${notes.length} notes, ${books.length} books`} />
 
-      <CollapsibleForm action={createNote} triggerLabel="New note" className="flex flex-col gap-3">
+      <CollapsibleForm action={createNote} triggerLabel="New note" className="flex flex-col gap-3" captureId="note">
         <div className="field-row">
           <label className="field-narrow">
             Kind
@@ -38,7 +38,7 @@ export default async function LibraryPage() {
         <SubmitButton className="btn self-start">Save</SubmitButton>
       </CollapsibleForm>
 
-      <CollapsibleForm action={createBook} triggerLabel="New book">
+      <CollapsibleForm action={createBook} triggerLabel="New book" captureId="book">
         <label className="field-wide">
           Title
           <input name="title" required className="field" />

@@ -13,7 +13,7 @@ export default async function PeoplePage() {
       <PageHeader title="People" context={`${people.length} people`} />
       <p className="mt-2 text-sm text-ink-faint">A lit candle marks a birthday inside the next thirty days.</p>
 
-      <CollapsibleForm action={createPerson} triggerLabel="New person">
+      <CollapsibleForm action={createPerson} triggerLabel="New person" captureId="person">
         <label className="field-wide">
           New person
           <input name="name" required placeholder="Name" className="field" />

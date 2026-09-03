@@ -14,12 +14,18 @@ export function CollapsibleForm({
   triggerLabel,
   className = "field-row",
   topMargin = "mt-6",
+  captureId,
   children,
 }: {
   action: (formData: FormData) => void;
   triggerLabel: string;
   className?: string;
   topMargin?: string;
+  /** Registers this exact form with the global Capture button (see
+   * quick-capture.ts) — Capture opens the real per-page form instead of a
+   * separate quick-add UI, so the id must match the key that page lists
+   * there. Omit on a form Capture shouldn't be able to open directly. */
+  captureId?: string;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -36,6 +42,20 @@ export function CollapsibleForm({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, close]);
+
+  useEffect(() => {
+    if (!captureId) return;
+    function onQuickCapture(e: Event) {
+      const id = (e as CustomEvent<{ id: string }>).detail?.id;
+      if (id !== captureId) return;
+      setOpen(true);
+      // Runs a frame after setOpen so the form has actually mounted —
+      // formRef.current is still the pre-open null/undefined synchronously.
+      requestAnimationFrame(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
+    }
+    window.addEventListener("bp:quick-capture", onQuickCapture);
+    return () => window.removeEventListener("bp:quick-capture", onQuickCapture);
+  }, [captureId]);
 
   if (!open) {
     return (

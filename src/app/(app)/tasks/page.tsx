@@ -15,7 +15,7 @@ export default async function TasksPage() {
     <div className="mx-auto max-w-2xl">
       <PageHeader title="Tasks" context={`${open.length} open, ${done.length} done`} />
 
-      <CollapsibleForm action={createTask} triggerLabel="New task">
+      <CollapsibleForm action={createTask} triggerLabel="New task" captureId="task">
         <label className="field-wide">
           New task
           <input name="title" required placeholder="What needs doing?" className="field" />

@@ -43,7 +43,7 @@ export default async function RoutinesPage() {
     <div className="mx-auto max-w-2xl">
       <PageHeader title="Routines" context={`${doneToday}/${routines.length} done today`} />
 
-      <CollapsibleForm action={createRoutine} triggerLabel="New routine">
+      <CollapsibleForm action={createRoutine} triggerLabel="New routine" captureId="routine">
         <label className="field-wide">
           New routine
           <input name="name" required placeholder="Take vitamins, check email…" className="field" />

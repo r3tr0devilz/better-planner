@@ -23,7 +23,7 @@ export default async function ProjectsPage() {
       </p>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <CollapsibleForm action={createDomain} triggerLabel="New domain" className="flex flex-col gap-2" topMargin="">
+        <CollapsibleForm action={createDomain} triggerLabel="New domain" className="flex flex-col gap-2" topMargin="" captureId="domain">
           <span className="text-xs text-ink-faint">New domain</span>
           <div className="field-row">
             <label className="field-wide">
@@ -38,7 +38,7 @@ export default async function ProjectsPage() {
           </div>
         </CollapsibleForm>
 
-        <CollapsibleForm action={createProject} triggerLabel="New project or area" className="flex flex-col gap-2" topMargin="">
+        <CollapsibleForm action={createProject} triggerLabel="New project or area" className="flex flex-col gap-2" topMargin="" captureId="project">
           <span className="text-xs text-ink-faint">New project or area</span>
           <input name="name" required placeholder="Client website, Family…" className="field" />
           <div className="field-row">

@@ -16,7 +16,7 @@ export default async function InventoryPage() {
     <div className="mx-auto max-w-2xl">
       <PageHeader title="Inventory" context={`${active.length} active item${active.length === 1 ? "" : "s"}`} />
 
-      <CollapsibleForm action={createItem} triggerLabel="New item">
+      <CollapsibleForm action={createItem} triggerLabel="New item" captureId="item">
         <label className="field-wide">
           Item
           <input name="name" required placeholder="What are you keeping tabs on?" className="field" />
