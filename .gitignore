@@ -48,8 +48,9 @@ supabase/.temp
 
 # Claude Design handoff bundle — source material for this branch's UI work,
 # not app content. Unzipped locally for reference; never committed.
-/design-bundle/
+/design-bundle*/
 *designbundle*.zip
+/Better Planner Design System.zip
 
 # typescript
 *.tsbuildinfo
