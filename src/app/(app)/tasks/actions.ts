@@ -96,6 +96,22 @@ export async function toggleTaskDone(id: string, done: boolean) {
 
 export async function toggleTopThree(id: string, isTopThree: boolean) {
   const supabase = await createClient();
+
+  // Top three is a hard cap of three, not a suggestion — refuse a 4th star
+  // outright rather than letting the list grow unbounded. Whichever three
+  // got there first simply stay put until one is removed.
+  if (isTopThree) {
+    const { count, error: countError } = await supabase
+      .from("tasks")
+      .select("id", { count: "exact", head: true })
+      .eq("is_top_three", true)
+      .eq("status", "open");
+    if (countError) throw countError;
+    if ((count ?? 0) >= 3) {
+      throw new Error("Top three is full — remove one before adding another.");
+    }
+  }
+
   const { error } = await supabase.from("tasks").update({ is_top_three: isTopThree }).eq("id", id);
   if (error) throw error;
 

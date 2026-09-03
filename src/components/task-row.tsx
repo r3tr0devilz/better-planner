@@ -2,6 +2,7 @@
 
 import { useCallback, useState, useTransition } from "react";
 import { Sparkle } from "lucide-react";
+import { toast } from "sonner";
 import { deleteTask, toggleTaskDone, toggleTopThree, updateTask, setTaskState } from "@/app/(app)/tasks/actions";
 import { burnTask, quenchTask } from "@/lib/burn-actions";
 import { Modal } from "@/components/modal";
@@ -120,7 +121,13 @@ export function TaskRow({
 
   const sparkleButton = (
     <button
-      onClick={() => startTransition(() => toggleTopThree(task.id, !task.is_top_three))}
+      onClick={() =>
+        startTransition(() => {
+          toggleTopThree(task.id, !task.is_top_three).catch((err) => {
+            toast.error(err instanceof Error ? err.message : "Couldn't update top three.");
+          });
+        })
+      }
       disabled={pending}
       aria-label={task.is_top_three ? "Remove from top three" : "Add to top three"}
       aria-pressed={task.is_top_three}

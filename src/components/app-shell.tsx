@@ -7,12 +7,28 @@ import { NAV_GROUPS, NAV_NUMERALS, PRIMARY_NAV_ITEMS, SECONDARY_NAV_ITEMS } from
 import { CaptureBar } from "./capture-bar";
 import { AiCaptureButton } from "./ai-capture-button";
 import { AshCanvas } from "./ash-canvas";
+import { DomainTabs } from "./domain-tabs";
 import { useBaselineSnap } from "@/lib/use-baseline-snap";
-import type { Domain } from "@/lib/supabase/types";
+import type { Domain, Task } from "@/lib/supabase/types";
 
 export type NavCounts = Record<string, number>;
 
-export function AppShell({ children, counts, domains }: { children: React.ReactNode; counts: NavCounts; domains: Domain[] }) {
+export function AppShell({
+  children,
+  counts,
+  domains,
+  tasks,
+  burnedThisWeek,
+}: {
+  children: React.ReactNode;
+  counts: NavCounts;
+  domains: Domain[];
+  /** Feeds the DomainTabs rail's "jump to a domain" modal — every page gets
+   * the same binder-tab navigation now, not just Today, so it lives here
+   * instead of being fetched and rendered per-page. */
+  tasks: Task[];
+  burnedThisWeek: Record<string, number>;
+}) {
   const pathname = usePathname();
   let numeral = 0;
   useBaselineSnap();
@@ -72,7 +88,10 @@ export function AppShell({ children, counts, domains }: { children: React.ReactN
       </header>
 
       <main id="main-content" tabIndex={-1} className="sheet min-w-0 flex-1 px-4 py-6 pb-24 focus:outline-none md:px-8 md:py-8 md:pb-8">
-        {children}
+        <div className="flex gap-6 md:-ml-8">
+          <DomainTabs domains={domains} tasks={tasks} burnedThisWeek={burnedThisWeek} />
+          <div className="min-w-0 flex-1">{children}</div>
+        </div>
       </main>
 
       <nav

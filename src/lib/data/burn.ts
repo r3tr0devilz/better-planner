@@ -13,6 +13,30 @@ export async function getBurnEvents(): Promise<BurnEvent[]> {
   return data;
 }
 
+/** Burned-task count per domain over the last 7 days, queried server-side
+ * rather than filtered from getBurnEvents()'s full unpruned history — this
+ * runs on every page (AppShell's DomainTabs rail), not just Ash/Today, so it
+ * stays a narrow, indexed-by-time query instead of pulling everything ever
+ * burned on each navigation. */
+export async function getBurnedThisWeek(): Promise<Record<string, number>> {
+  const supabase = await createClient();
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const { data, error } = await supabase
+    .from("burn_events")
+    .select("domain_id")
+    .eq("outcome", "burned")
+    .gte("occurred_at", weekAgo.toISOString());
+  if (error) throw error;
+
+  const result: Record<string, number> = {};
+  for (const e of data) {
+    if (!e.domain_id) continue;
+    result[e.domain_id] = (result[e.domain_id] ?? 0) + 1;
+  }
+  return result;
+}
+
 function startOfWeek(): Date {
   const d = new Date();
   const day = (d.getDay() + 6) % 7; // Monday = 0

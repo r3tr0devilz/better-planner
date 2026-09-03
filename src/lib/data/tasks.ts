@@ -18,7 +18,11 @@ export async function getTopThree(): Promise<Task[]> {
     .select("*")
     .eq("is_top_three", true)
     .eq("status", "open")
-    .order("due_at", { ascending: true, nullsFirst: false });
+    .order("due_at", { ascending: true, nullsFirst: false })
+    // toggleTopThree already refuses a 4th star, but this is the display's
+    // own backstop — Top three never renders more than three no matter what
+    // the data looks like.
+    .limit(3);
   if (error) throw error;
   return data;
 }

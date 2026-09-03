@@ -76,6 +76,12 @@
   );
   animation: bp-tear 430ms var(--ease-out) forwards;
   box-shadow: 0 6px 16px rgba(20, 19, 15, 0.16);
+  /* The page-dim scrim (.burn-dim, z-index 40) is a flat full-viewport
+     layer with no idea which row is burning — without this, it darkens
+     the burning slip along with everything else instead of leaving it lit.
+     41 clears the scrim but stays under modals (50) and the ash canvas
+     (60), so an edit modal or drifting embers still layer correctly. */
+  z-index: 41;
 }
 
 @property --burn {
